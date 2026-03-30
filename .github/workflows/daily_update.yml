@@ -1,0 +1,65 @@
+name: Daily Breadth Update
+
+on:
+  schedule:
+    # UTC 06:30 (미국 장 마감 후) + UTC 08:00 (일본 장 마감 후)
+    - cron: '30 6 * * 1-5'
+    - cron: '0 8 * * 1-5'
+  workflow_dispatch:   # 수동 실행 허용
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: pytest tests/ -v --tb=short
+        continue-on-error: true
+
+      - name: Run breadth pipeline
+        run: python scripts/generate_json.py
+        env:
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+
+      - name: Validate JSON outputs
+        run: |
+          python -c "
+          import json, sys, pathlib
+          api_dir = pathlib.Path('docs/api')
+          files = list(api_dir.glob('*.json'))
+          print(f'Found {len(files)} JSON files')
+          assert len(files) >= 3, f'Expected >=3 files, got {len(files)}'
+          for f in files:
+              d = json.loads(f.read_text())
+              assert isinstance(d, (dict, list)), f'{f.name} invalid JSON'
+          # latest.json 필수 키 확인
+          latest = json.loads((api_dir / 'latest.json').read_text())
+          assert 'date' in latest, 'latest.json missing date'
+          print('✅ JSON validation passed')
+          "
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/api/
+          git diff --staged --quiet || \
+            git commit -m "data: $(date -u +%Y-%m-%d) breadth update"
+          git push

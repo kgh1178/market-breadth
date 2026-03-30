@@ -1,0 +1,66 @@
+{
+  "date": "2026-03-30",
+  "signals": {
+    "asia_us_lead": {
+      "strategy": "asia_us_lead",
+      "direction": "NEUTRAL",
+      "trigger_value": 50.0,
+      "filter_passed": true,
+      "hit_rate_252d": {
+        "hit_rate": 0,
+        "ci_lower": 0,
+        "ci_upper": 0,
+        "n_trials": 0,
+        "insufficient": true
+      }
+    },
+    "tri_market_deviation": {
+      "strategy": "tri_market_deviation",
+      "outlier_market": null,
+      "z_deviation": 0.0,
+      "direction": "NEUTRAL",
+      "hit_rate_252d": {
+        "hit_rate": 0,
+        "ci_lower": 0,
+        "ci_upper": 0,
+        "n_trials": 0,
+        "insufficient": true
+      }
+    },
+    "regime_overlay": {
+      "strategy": "regime_overlay",
+      "grs_raw": 50.0,
+      "regime": "SELECTIVE",
+      "equity_weight_pct": 60,
+      "hit_rate_252d": {
+        "hit_rate": 0,
+        "ci_lower": 0,
+        "ci_upper": 0,
+        "n_trials": 0,
+        "insufficient": true
+      }
+    }
+  },
+  "etf_map": {
+    "sp500": {
+      "long": "SPY",
+      "short": "SH",
+      "hedge": null
+    },
+    "nikkei225": {
+      "long": "EWJ",
+      "short": null,
+      "hedge": "DXJ"
+    },
+    "kospi200": {
+      "long": "EWY",
+      "short": null,
+      "hedge": "HEWY"
+    }
+  },
+  "reference": {
+    "hlz_threshold": 3.0,
+    "hlz_citation": "Harvey, Liu, Zhu (2016). '...and the Cross-Section of Expected Returns.' Review of Financial Studies 29(1):5-68.",
+    "note": "hit_rate_252d requires historical time-series backtest; placeholder values shown for daily snapshot mode."
+  }
+}
