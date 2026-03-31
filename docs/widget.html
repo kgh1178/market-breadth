@@ -101,7 +101,9 @@ function init(){
 
 async function load(mid){
   if (!s50 || !chart) {
-    document.getElementById('dt').textContent = 'Error: Chart not initialized';
+    if (!document.getElementById('dt').textContent.includes('Init Error')) {
+      document.getElementById('dt').textContent = 'Error: Chart not initialized';
+    }
     return;
   }
   cur=mid;
