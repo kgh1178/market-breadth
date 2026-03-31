@@ -71,9 +71,9 @@ import{createChart}from'https://unpkg.com/lightweight-charts@4.1.1/dist/lightwei
 const B='https://kgh1178.github.io/market-breadth/api'; 
 
 const M=[
-  {id:'sp500',    lb:'S&P 500',    c:'#1a73e8'},
-  {id:'nikkei225',lb:'Nikkei 225', c:'#ea4335'},
-  {id:'kospi200', lb:'KOSPI 200',  c:'#34a853'},
+  {id:'sp500',    lb:'S&P 500',    c:'#34a853'}, /* 미국: 초록색(에버그린) */
+  {id:'nikkei225',lb:'Nikkei 225', c:'#1a73e8'}, /* 일본: 파란색 */
+  {id:'kospi200', lb:'KOSPI 200',  c:'#ea4335'}, /* 한국: 빨간색 */
   {id:'global50', lb:'Global 50d', c:'#555'},
   {id:'global200',lb:'Global 200d',c:'#555'}
 ];
@@ -138,7 +138,8 @@ async function load(mid){
       });
     } else {
       const ts = tss[0];
-      const s50 = chart.addLineSeries({color:'#1a73e8', lineWidth:2, title:'50-Day'});
+      const mcol = M.find(x => x.id === mid).c || '#1a73e8';
+      const s50 = chart.addLineSeries({color: mcol, lineWidth:2, title:'50-Day'});
       const s200 = chart.addLineSeries({color:'#ff6d00', lineWidth:2, lineStyle:2, title:'200-Day'});
       activeSeries.push(s50, s200);
       s50.setData((ts.breadth_50||[]).map(x=>({time:x.date,value:x.value})));
