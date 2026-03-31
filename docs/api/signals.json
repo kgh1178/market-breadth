@@ -1,51 +1,69 @@
 {
   "date": "2026-03-31",
-  "partial_data": true,
+  "partial_data": false,
   "signals": {
     "asia_us_lead": {
       "strategy": "asia_us_lead",
-      "valid": false,
+      "direction": "SHORT",
+      "trigger_value": 23.09,
+      "filter_passed": true,
+      "hit_rate_252d": {
+        "hit_rate": 0,
+        "ci_lower": 0,
+        "ci_upper": 0,
+        "n_trials": 0,
+        "insufficient": true
+      },
+      "valid": true,
       "required_markets": [
         "sp500",
         "nikkei225",
         "kospi200"
       ],
-      "missing_markets": [
-        "nikkei225"
-      ],
-      "invalid_reason": "missing_market_data",
-      "direction": "UNAVAILABLE",
-      "hit_rate_252d": null
+      "missing_markets": [],
+      "invalid_reason": null
     },
     "tri_market_deviation": {
       "strategy": "tri_market_deviation",
-      "valid": false,
+      "outlier_market": null,
+      "z_deviation": 0.0,
+      "direction": "NEUTRAL",
+      "hit_rate_252d": {
+        "hit_rate": 0,
+        "ci_lower": 0,
+        "ci_upper": 0,
+        "n_trials": 0,
+        "insufficient": true
+      },
+      "valid": true,
       "required_markets": [
         "sp500",
         "nikkei225",
         "kospi200"
       ],
-      "missing_markets": [
-        "nikkei225"
-      ],
-      "invalid_reason": "missing_market_data",
-      "direction": "UNAVAILABLE",
-      "hit_rate_252d": null
+      "missing_markets": [],
+      "invalid_reason": null
     },
     "regime_overlay": {
       "strategy": "regime_overlay",
-      "valid": false,
+      "grs_raw": 56.26,
+      "regime": "SELECTIVE",
+      "equity_weight_pct": 60,
+      "hit_rate_252d": {
+        "hit_rate": 0,
+        "ci_lower": 0,
+        "ci_upper": 0,
+        "n_trials": 0,
+        "insufficient": true
+      },
+      "valid": true,
       "required_markets": [
         "sp500",
         "nikkei225",
         "kospi200"
       ],
-      "missing_markets": [
-        "nikkei225"
-      ],
-      "invalid_reason": "missing_market_data",
-      "direction": "UNAVAILABLE",
-      "hit_rate_252d": null
+      "missing_markets": [],
+      "invalid_reason": null
     }
   },
   "etf_map": {

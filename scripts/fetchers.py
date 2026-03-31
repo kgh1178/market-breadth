@@ -13,6 +13,7 @@ v3.1  2026-03-31  Fix: YFINANCE_PARAMS 참조, 구성종목 수 검증
 """
 
 import logging
+import re
 import time
 from io import StringIO
 
@@ -82,7 +83,15 @@ def fetch_nikkei225_official() -> list[str]:
 
 
 def fetch_nikkei225_wikipedia() -> list[str]:
-    tables = _read_html_from_url(WIKIPEDIA_NIKKEI)
+    resp = requests.get(
+        WIKIPEDIA_NIKKEI,
+        headers={"User-Agent": "Mozilla/5.0"},
+        timeout=15,
+        verify=False,
+    )
+    resp.raise_for_status()
+    html = resp.text
+    tables = pd.read_html(StringIO(html), header=0)
     for tbl in tables:
         cols_lower = [str(c).lower() for c in tbl.columns]
         if any("ticker" in c or "code" in c or "symbol" in c for c in cols_lower):
@@ -100,6 +109,15 @@ def fetch_nikkei225_wikipedia() -> list[str]:
             values = tbl[col].astype(str).str.extract(r"(\d{4})")[0].dropna()
             if len(values) >= 200:
                 return sorted(set(f"{code}.T" for code in values))
+
+    link_codes = set(re.findall(r"www2\.jpx\.co\.jp[^\"'>]*?([0-9]{4})", html))
+    if len(link_codes) >= 200:
+        return sorted(f"{code}.T" for code in link_codes)
+
+    tyo_codes = set(re.findall(r"TYO[^0-9]*([0-9]{4})", html))
+    if len(tyo_codes) >= 200:
+        return sorted(f"{code}.T" for code in tyo_codes)
+
     raise ValueError("Nikkei 225 구성종목 테이블을 찾을 수 없음")
 
 
