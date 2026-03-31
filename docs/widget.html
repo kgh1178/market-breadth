@@ -68,7 +68,7 @@
 <script type="module">
 import{createChart}from'https://unpkg.com/lightweight-charts@5.0.4/dist/lightweight-charts.standalone.production.mjs';
 
-const B='./api'; 
+const B='https://kgh1178.github.io/market-breadth/api'; 
 
 const M=[
   {id:'sp500',    lb:'S&P 500',   c:'#1a73e8'},
@@ -96,10 +96,11 @@ function init(){
 
 async function load(mid){
   cur=mid;
+  const cb = '?t=' + new Date().getTime(); // 캐시 버스터
   try {
     const[tsR,ltR,sgR]=await Promise.all([
-      fetch(`${B}/${mid}.json`),fetch(`${B}/latest.json`),
-      fetch(`${B}/signals.json`)]);
+      fetch(`${B}/${mid}.json${cb}`),fetch(`${B}/latest.json${cb}`),
+      fetch(`${B}/signals.json${cb}`)]);
     const ts=await tsR.json(),lt=await ltR.json(),sg=await sgR.json();
     const d=lt[mid]||{};
 
