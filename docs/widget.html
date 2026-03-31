@@ -127,7 +127,7 @@ function renderLegend(mid){
   const items=isGlobal?M.slice(0,3):[M.find(x=>x.id===mid)];
   const extra=isGlobal
     ? `<span class="legend-note">Colors and line thickness together identify markets.</span>`
-    : `<span class="legend-note">50-day uses the market color and thickness; 200-day stays orange dashed.</span>`;
+    : `<span class="legend-note">50-day uses the market color and thickness; 200-day uses an orange solid line.</span>`;
   document.getElementById('legend').innerHTML=items.map(item=>`
     <div class="legend-item">
       <span class="legend-line ${item.legendClass}" style="border-top-color:${item.c};border-top-width:${item.lineWidth}px"></span>
@@ -303,7 +303,7 @@ async function load(mid){
           lineStyle:marketMeta.lineStyle,
           title:'50-Day'
         });
-        const s200=chart.addLineSeries({color:'#ff6d00',lineWidth:2,lineStyle:2,title:'200-Day'});
+        const s200=chart.addLineSeries({color:'#ff8a1f',lineWidth:2,lineStyle:0,title:'200-Day'});
         activeSeries.push(s50,s200);
         s50.setData((ts.breadth_50||[]).map(x=>({time:x.date,value:x.value})));
         s200.setData((ts.breadth_200||[]).map(x=>({time:x.date,value:x.value})));
