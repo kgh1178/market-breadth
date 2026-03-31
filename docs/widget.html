@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -63,7 +63,7 @@
 </head>
 <body>
   <div class="hdr">
-    <h2>Global Market Breadth</h2>
+    <h2 id="hdrTitle">Global Market Breadth</h2>
     <div><span class="dt" id="dt">Loading...</span>
          <span class="warn" id="warn"></span></div>
   </div>
@@ -75,12 +75,195 @@
   <div class="chart" id="chart"></div>
   <div class="sig" id="sig"></div>
   <div class="ftr">
-    Data: yfinance+pykrx | Engine: market_breadth v3.1 |
-    <a href="./">Full Dashboard</a>
+    <span id="footerMeta">Data: yfinance+pykrx | Engine: market_breadth v3.1 |</span>
+    <a id="footerLink" href="./">Full Dashboard</a>
   </div>
 
 <script type="module">
 import{createChart}from'https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.mjs';
+
+const TRANSLATIONS={
+  en:{
+    page_title:'Global Market Breadth',
+    header_title:'Global Market Breadth',
+    loading:'Loading...',
+    footer_meta:'Data: yfinance+pykrx | Engine: market_breadth v3.1 |',
+    footer_link:'Full Dashboard',
+    market_sp500:'S&P 500',
+    market_nikkei225:'Nikkei 225',
+    market_kospi200:'KOSPI 200',
+    market_global50:'Global 50d',
+    market_global200:'Global 200d',
+    note_us:'U.S. thick',
+    note_jp:'Japan medium',
+    note_kr:'Korea thin',
+    note_global50:'50-day mix',
+    note_global200:'200-day mix',
+    legend_global_extra:'Colors and line thickness together identify markets.',
+    legend_single_extra:'50-day uses the stronger market tone; 200-day uses the lighter tone of the same market color.',
+    init_error:'Init Error: {message}',
+    chart_not_initialized:'Error: Chart not initialized',
+    updated:'Updated: {date}',
+    ex_div_window:'Ex-Div Window',
+    unavailable:'Unavailable',
+    market_status:'Market Status',
+    error_code:'Error Code',
+    as_of:'As Of',
+    label_50_day:'50-Day',
+    label_200_day:'200-Day',
+    label_logit_z:'Logit-Z',
+    symbols_excluded:'{count} symbols excluded',
+    price_basis_short:'split-adj, div-unadj',
+    unavailable_list:'Unavailable: {markets}',
+    no_market_series:'No market series available for the selected global view.',
+    latest_update_failed_market:'Latest update failed for this market.',
+    missing_market_data:'Unavailable due to missing market data',
+    pwds:'PWDS(50d)',
+    ex_top5:'Ex-Top5(50d)',
+    status_ok:'OK',
+    status_partial:'PARTIAL',
+    status_error:'ERROR',
+    signal_asia_us_lead:'Asia U.S. Lead',
+    signal_tri_market_deviation:'Tri-Market Deviation',
+    signal_regime_overlay:'Regime Overlay',
+    direction_LONG:'LONG',
+    direction_SHORT:'SHORT',
+    direction_NEUTRAL:'NEUTRAL'
+  },
+  ko:{
+    page_title:'글로벌 마켓 브레드스',
+    header_title:'글로벌 마켓 브레드스',
+    loading:'불러오는 중...',
+    footer_meta:'데이터: yfinance+pykrx | 엔진: market_breadth v3.1 |',
+    footer_link:'전체 대시보드',
+    market_sp500:'S&P 500',
+    market_nikkei225:'니케이 225',
+    market_kospi200:'코스피 200',
+    market_global50:'글로벌 50일',
+    market_global200:'글로벌 200일',
+    note_us:'미국 굵은 선',
+    note_jp:'일본 중간 선',
+    note_kr:'한국 얇은 선',
+    note_global50:'50일 종합',
+    note_global200:'200일 종합',
+    legend_global_extra:'색상과 선 두께를 함께 사용해 시장을 구분합니다.',
+    legend_single_extra:'50일선은 진한 시장색, 200일선은 같은 시장의 밝은 보조색을 사용합니다.',
+    init_error:'초기화 오류: {message}',
+    chart_not_initialized:'오류: 차트가 초기화되지 않았습니다',
+    updated:'업데이트: {date}',
+    ex_div_window:'배당락 구간',
+    unavailable:'이용 불가',
+    market_status:'시장 상태',
+    error_code:'오류 코드',
+    as_of:'기준일',
+    label_50_day:'50일',
+    label_200_day:'200일',
+    label_logit_z:'로짓-Z',
+    symbols_excluded:'{count}개 종목 제외',
+    price_basis_short:'분할조정, 배당비조정',
+    unavailable_list:'이용 불가: {markets}',
+    no_market_series:'선택한 글로벌 보기에서 사용할 시장 시계열이 없습니다.',
+    latest_update_failed_market:'이 시장의 최신 업데이트에 실패했습니다.',
+    missing_market_data:'시장 데이터 누락으로 일부 표시를 생략했습니다',
+    pwds:'PWDS(50일)',
+    ex_top5:'상위5 제외(50일)',
+    status_ok:'정상',
+    status_partial:'부분',
+    status_error:'오류',
+    signal_asia_us_lead:'아시아-미국 리드',
+    signal_tri_market_deviation:'3시장 괴리',
+    signal_regime_overlay:'레짐 오버레이',
+    direction_LONG:'매수',
+    direction_SHORT:'매도',
+    direction_NEUTRAL:'중립'
+  },
+  ja:{
+    page_title:'グローバル市場ブレッドス',
+    header_title:'グローバル市場ブレッドス',
+    loading:'読み込み中...',
+    footer_meta:'データ: yfinance+pykrx | エンジン: market_breadth v3.1 |',
+    footer_link:'フルダッシュボード',
+    market_sp500:'S&P 500',
+    market_nikkei225:'日経225',
+    market_kospi200:'KOSPI 200',
+    market_global50:'グローバル50日',
+    market_global200:'グローバル200日',
+    note_us:'米国 太線',
+    note_jp:'日本 中線',
+    note_kr:'韓国 細線',
+    note_global50:'50日ミックス',
+    note_global200:'200日ミックス',
+    legend_global_extra:'色と線の太さを組み合わせて市場を見分けます。',
+    legend_single_extra:'50日線は市場の濃い色、200日線は同じ市場の明るい補助色を使います。',
+    init_error:'初期化エラー: {message}',
+    chart_not_initialized:'エラー: チャートが初期化されていません',
+    updated:'更新: {date}',
+    ex_div_window:'権利落ちウィンドウ',
+    unavailable:'利用不可',
+    market_status:'市場ステータス',
+    error_code:'エラーコード',
+    as_of:'基準日',
+    label_50_day:'50日',
+    label_200_day:'200日',
+    label_logit_z:'ロジットZ',
+    symbols_excluded:'{count}銘柄を除外',
+    price_basis_short:'分割調整・配当未調整',
+    unavailable_list:'利用不可: {markets}',
+    no_market_series:'選択したグローバル表示で利用できる市場系列がありません。',
+    latest_update_failed_market:'この市場の最新更新に失敗しました。',
+    missing_market_data:'市場データ不足のため一部表示を省略しています',
+    pwds:'PWDS(50日)',
+    ex_top5:'上位5除外(50日)',
+    status_ok:'正常',
+    status_partial:'一部',
+    status_error:'エラー',
+    signal_asia_us_lead:'アジア・米国リード',
+    signal_tri_market_deviation:'3市場乖離',
+    signal_regime_overlay:'レジームオーバーレイ',
+    direction_LONG:'ロング',
+    direction_SHORT:'ショート',
+    direction_NEUTRAL:'中立'
+  }
+};
+
+function detectLocale(){
+  const param=new URLSearchParams(window.location.search).get('lang');
+  if(param && ['ko','ja','en'].includes(param)) return param;
+  const langs=[...(navigator.languages||[]), navigator.language].filter(Boolean).map(x=>String(x).toLowerCase());
+  if(langs.some(x=>x.startsWith('ko'))) return 'ko';
+  if(langs.some(x=>x.startsWith('ja'))) return 'ja';
+  return 'en';
+}
+
+const LOCALE=detectLocale();
+
+function t(key, vars={}){
+  const dict=TRANSLATIONS[LOCALE] || TRANSLATIONS.en;
+  let text=dict[key] ?? TRANSLATIONS.en[key] ?? key;
+  Object.entries(vars).forEach(([name,val])=>{
+    text=text.replaceAll(`{${name}}`, String(val));
+  });
+  return text;
+}
+
+function statusText(status){
+  return t(`status_${status || 'error'}`);
+}
+
+function marketLabel(item){
+  return t(item.labelKey);
+}
+
+function signalLabel(key){
+  return t(`signal_${key}`);
+}
+
+function directionLabel(direction){
+  return t(`direction_${direction || 'NEUTRAL'}`);
+}
+
+document.documentElement.lang=LOCALE;
+document.title=t('page_title');
 
 const API_DEFAULT='https://kgh1178.github.io/market-breadth/api';
 const API_LOCAL=`${window.location.origin}/api`;
@@ -90,13 +273,20 @@ const B=API_PARAM||(window.location.hostname==='127.0.0.1'||window.location.host
   :API_DEFAULT);
 
 const M=[
-  {id:'sp500',lb:'S&P 500',c:'#0f766e',c200:'#67b8b1',lineStyle:0,lineWidth:4,legendClass:'us',note:'US teal thick'},
-  {id:'nikkei225',lb:'Nikkei 225',c:'#1a73e8',c200:'#7baaf7',lineStyle:0,lineWidth:3,legendClass:'jp',note:'Japan blue medium'},
-  {id:'kospi200',lb:'KOSPI 200',c:'#ea4335',c200:'#f28b82',lineStyle:0,lineWidth:2,legendClass:'kr',note:'Korea red thin'},
-  {id:'global50',lb:'Global 50d',c:'#555',lineStyle:0,lineWidth:2,legendClass:'gl',note:'50-day mix'},
-  {id:'global200',lb:'Global 200d',c:'#555',lineStyle:0,lineWidth:2,legendClass:'gl',note:'200-day mix'}
+  {id:'sp500',labelKey:'market_sp500',c:'#0f766e',c200:'#67b8b1',lineStyle:0,lineWidth:4,legendClass:'us',noteKey:'note_us'},
+  {id:'nikkei225',labelKey:'market_nikkei225',c:'#1a73e8',c200:'#7baaf7',lineStyle:0,lineWidth:3,legendClass:'jp',noteKey:'note_jp'},
+  {id:'kospi200',labelKey:'market_kospi200',c:'#ea4335',c200:'#f28b82',lineStyle:0,lineWidth:2,legendClass:'kr',noteKey:'note_kr'},
+  {id:'global50',labelKey:'market_global50',c:'#555',lineStyle:0,lineWidth:2,legendClass:'gl',noteKey:'note_global50'},
+  {id:'global200',labelKey:'market_global200',c:'#555',lineStyle:0,lineWidth:2,legendClass:'gl',noteKey:'note_global200'}
 ];
 let chart,activeSeries=[],cur='sp500';
+
+function applyStaticText(){
+  document.getElementById('hdrTitle').textContent=t('header_title');
+  document.getElementById('dt').textContent=t('loading');
+  document.getElementById('footerMeta').textContent=t('footer_meta');
+  document.getElementById('footerLink').textContent=t('footer_link');
+}
 
 function marketMeta(latest, marketId){
   return latest[marketId] || {};
@@ -125,13 +315,13 @@ function renderLegend(mid){
   const isGlobal=mid.startsWith('global');
   const items=isGlobal?M.slice(0,3):[M.find(x=>x.id===mid)];
   const extra=isGlobal
-    ? `<span class="legend-note">Colors and line thickness together identify markets.</span>`
-    : `<span class="legend-note">50-day uses the stronger market tone; 200-day uses the lighter tone of the same market color.</span>`;
+    ? `<span class="legend-note">${t('legend_global_extra')}</span>`
+    : `<span class="legend-note">${t('legend_single_extra')}</span>`;
   document.getElementById('legend').innerHTML=items.map(item=>`
     <div class="legend-item">
       <span class="legend-line ${item.legendClass}" style="border-top-color:${item.c};border-top-width:${item.lineWidth}px"></span>
-      <span>${item.lb}</span>
-      <span class="legend-note">${item.note}</span>
+      <span>${marketLabel(item)}</span>
+      <span class="legend-note">${t(item.noteKey)}</span>
     </div>
   `).join('')+extra;
 }
@@ -163,8 +353,8 @@ function mkCard(label,val,unit,lo,hi,deff,neff,icc,above,valid,excluded=0,accent
     tipText=tipText?`(${above}/${valid}) | `+tipText:`(${above}/${valid})`;
   }
   const detail=(above!=null && valid!=null)?`<div class="detail">(${above}/${valid})</div>`:'';
-  const note=excluded>0?`<div class="note">${excluded} symbols excluded</div>`:'';
-  const basis=unit==='%'?`<div class="basis">split-adj, div-unadj</div>`:'';
+  const note=excluded>0?`<div class="note">${t('symbols_excluded',{count:excluded})}</div>`:'';
+  const basis=unit==='%'?`<div class="basis">${t('price_basis_short')}</div>`:'';
   return`<div class="card">
     ${tipText?`<div class="tip">${tipText}</div>`:''}
     <div class="v ${cls}"${valueStyle}>${val}${unit}</div>
@@ -194,15 +384,15 @@ function init(){
     const r10=chart.addLineSeries({color:'#ef4444',lineWidth:1,lineStyle:2,priceLineVisible:false,lastValueVisible:false});
     r10.setData([{time:'2023-01-01',value:10},{time:'2028-01-01',value:10}]);
   }catch(err){
-    document.getElementById('dt').textContent=`Init Error: ${err.message || err}`;
+    document.getElementById('dt').textContent=t('init_error',{message:err.message || err});
     console.error('Init Error:', err);
   }
 }
 
 async function load(mid){
   if(!chart){
-    if(!document.getElementById('dt').textContent.includes('Init Error')){
-      document.getElementById('dt').textContent='Error: Chart not initialized';
+    if(!document.getElementById('dt').textContent.includes(t('init_error',{message:''}).split('{message}')[0])){
+      document.getElementById('dt').textContent=t('chart_not_initialized');
     }
     return;
   }
@@ -220,12 +410,12 @@ async function load(mid){
     setMessage('');
     setChartVisible(true);
 
-    document.getElementById('dt').textContent=`Updated: ${lt.date}`;
+    document.getElementById('dt').textContent=t('updated',{date:lt.date});
     document.getElementById('warn').textContent='';
     if(!isGlobal){
       const d=lt[mid]||{};
       document.getElementById('warn').textContent=
-        (d.status==='ok'&&d.ex_div_flag)?'⚠ Ex-Div Window':'';
+        (d.status==='ok'&&d.ex_div_flag)?`⚠ ${t('ex_div_window')}`:'';
     }
 
     const cards=document.getElementById('cards');
@@ -235,20 +425,20 @@ async function load(mid){
         const d=lt[M[idx].id]||{};
         const above=d[`n_above_${w}`] ?? d[`count_above_${w}`];
         return d.status==='ok'
-          ? mkCard(M[idx].lb,d[`breadth_${w}`],'%',null,null,null,null,null,above,d[`n_valid_${w}`],d.n_excluded_50||0,M[idx].c)
-          : mkStatusCard(M[idx].lb,d.error_message||'Unavailable');
+          ? mkCard(marketLabel(M[idx]),d[`breadth_${w}`],'%',null,null,null,null,null,above,d[`n_valid_${w}`],d.n_excluded_50||0,M[idx].c)
+          : mkStatusCard(marketLabel(M[idx]),d.error_message||t('unavailable'));
       }).join('');
     }else{
       const d=lt[mid]||{};
       const marketMeta=M.find(x=>x.id===mid)||M[0];
       cards.innerHTML=d.status==='ok' ? [
-        mkCard('50-Day',d.breadth_50,'%',d.ci_lower_50,d.ci_upper_50,d.deff_50,d.n_eff_50,d.icc_estimate||d.estimated_icc,d.n_above_50??d.count_above_50,d.n_valid_50,d.n_excluded_50||0,marketMeta.c),
-        mkCard('200-Day',d.breadth_200,'%',d.ci_lower_200,d.ci_upper_200,d.deff_200,d.n_eff_200,d.icc_estimate||d.estimated_icc,d.n_above_200??d.count_above_200,d.n_valid_200,d.n_excluded_200||0,marketMeta.c),
-        mkCard('Logit-Z',d.logit_z_50,'σ',null,null)
+        mkCard(t('label_50_day'),d.breadth_50,'%',d.ci_lower_50,d.ci_upper_50,d.deff_50,d.n_eff_50,d.icc_estimate||d.estimated_icc,d.n_above_50??d.count_above_50,d.n_valid_50,d.n_excluded_50||0,marketMeta.c),
+        mkCard(t('label_200_day'),d.breadth_200,'%',d.ci_lower_200,d.ci_upper_200,d.deff_200,d.n_eff_200,d.icc_estimate||d.estimated_icc,d.n_above_200??d.count_above_200,d.n_valid_200,d.n_excluded_200||0,marketMeta.c),
+        mkCard(t('label_logit_z'),d.logit_z_50,'σ',null,null)
       ].join('') : [
-        mkStatusCard('Market Status',(d.status||'unavailable').toUpperCase()),
-        mkStatusCard('Error Code',d.error_code||'-'),
-        mkStatusCard('As Of',d.as_of_date||'-'),
+        mkStatusCard(t('market_status'),statusText(d.status||'error')),
+        mkStatusCard(t('error_code'),d.error_code||'-'),
+        mkStatusCard(t('as_of'),d.as_of_date||'-'),
       ].join('');
     }
 
@@ -257,9 +447,9 @@ async function load(mid){
     if(!isGlobal){
       const d=lt[mid]||{};
       if(d.status==='ok'&&mid==='nikkei225'&&d.pwds_50!=null)
-        exH+=`PWDS(50d): <b>${d.pwds_50>0?'+':''}${d.pwds_50}</b>%p `;
+        exH+=`${t('pwds')}: <b>${d.pwds_50>0?'+':''}${d.pwds_50}</b>%p `;
       if(d.status==='ok'&&mid==='kospi200'&&d.ex_top5_spread_50!=null)
-        exH+=`Ex-Top5(50d): <b>${d.ex_top5_spread_50>0?'+':''}${d.ex_top5_spread_50}</b>%p `;
+        exH+=`${t('ex_top5')}: <b>${d.ex_top5_spread_50>0?'+':''}${d.ex_top5_spread_50}</b>%p `;
     }
     ex.innerHTML=exH;
 
@@ -268,11 +458,11 @@ async function load(mid){
       const available=marketIds.filter(id=>marketAvailable(lt,id));
       const unavailable=marketIds.filter(id=>!marketAvailable(lt,id));
       if(unavailable.length){
-        setMessage(`Unavailable: ${unavailable.map(id=>M.find(x=>x.id===id).lb).join(', ')}`,'warn');
+        setMessage(t('unavailable_list',{markets:unavailable.map(id=>marketLabel(M.find(x=>x.id===id))).join(', ')}),'warn');
       }
       if(!available.length){
         setChartVisible(false);
-        setMessage('No market series available for the selected global view.','err');
+        setMessage(t('no_market_series'),'err');
       }else{
         const w=mid==='global50'?'breadth_50':'breadth_200';
         const resps=await Promise.all(available.map(id=>fetch(`${B}/${id}.json${cb}`)));
@@ -285,7 +475,7 @@ async function load(mid){
             color:is200?meta.c200:meta.c,
             lineWidth:is200?Math.max(2, meta.lineWidth-1):meta.lineWidth,
             lineStyle:meta.lineStyle,
-            title:meta.lb
+            title:marketLabel(meta)
           });
           activeSeries.push(s);
           s.setData((ts[w]||[]).map(x=>({time:x.date,value:x.value})));
@@ -301,16 +491,16 @@ async function load(mid){
           color:marketMeta.c,
           lineWidth:marketMeta.lineWidth,
           lineStyle:marketMeta.lineStyle,
-          title:'50-Day'
+          title:t('label_50_day')
         });
-        const s200=chart.addLineSeries({color:marketMeta.c200,lineWidth:Math.max(2, marketMeta.lineWidth-1),lineStyle:0,title:'200-Day'});
+        const s200=chart.addLineSeries({color:marketMeta.c200,lineWidth:Math.max(2, marketMeta.lineWidth-1),lineStyle:0,title:t('label_200_day')});
         activeSeries.push(s50,s200);
         s50.setData((ts.breadth_50||[]).map(x=>({time:x.date,value:x.value})));
         s200.setData((ts.breadth_200||[]).map(x=>({time:x.date,value:x.value})));
         chart.timeScale().fitContent();
       }else{
         setChartVisible(false);
-        setMessage(d.error_message||'Latest update failed for this market.','err');
+        setMessage(d.error_message||t('latest_update_failed_market'),'err');
       }
     }
 
@@ -321,18 +511,17 @@ async function load(mid){
         if(!v.valid) continue;
         const dir=v.direction||'NEUTRAL';
         const cls=dir==='LONG'?'b-long':dir==='SHORT'?'b-short':'b-neut';
-        const label=k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-        sH+=`<span class="badge ${cls}">${label}: ${dir}</span>`;
+        sH+=`<span class="badge ${cls}">${signalLabel(k)}: ${directionLabel(dir)}</span>`;
       }
     }
     if(sg.partial_data){
-      sH+=`<span class="badge b-off">Unavailable due to missing market data</span>`;
+      sH+=`<span class="badge b-off">${t('missing_market_data')}</span>`;
     }
     sigEl.innerHTML=sH;
 
     updateActiveTabs(mid);
   }catch(err){
-    document.getElementById('dt').textContent=`Error: ${err.message || err}`;
+    document.getElementById('dt').textContent=t('init_error',{message:err.message || err});
     console.error(err);
   }
 }
@@ -340,10 +529,11 @@ async function load(mid){
 const tb=document.getElementById('tabs');
 M.forEach(m=>{
   const t=document.createElement('div');
-  t.className='tab';t.dataset.m=m.id;t.textContent=m.lb;
+  t.className='tab';t.dataset.m=m.id;t.textContent=marketLabel(m);
   t.onclick=()=>load(m.id);tb.appendChild(t);
 });
 
+applyStaticText();
 init();load('sp500');
 
 new ResizeObserver(()=>{

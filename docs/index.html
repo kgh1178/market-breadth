@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -92,7 +92,7 @@
       font-weight:600;
     }
     .chip strong{color:var(--ink)}
-    .hero-side h2,.chart-head h2,.side h2,.market-section h2{
+    .hero-side h2,.chart-head h2,.side h2,.market-panel h2{
       margin:0;
       font-size:17px;
       letter-spacing:-.01em;
@@ -485,32 +485,32 @@
   <div class="wrap">
     <section class="hero">
       <article class="hero-main">
-        <div class="eyebrow">Cross-Market Monitor</div>
-        <h1>Market Breadth Dashboard</h1>
-        <p class="hero-copy">
+        <div class="eyebrow" id="eyebrow">Cross-Market Monitor</div>
+        <h1 id="heroTitle">Market Breadth Dashboard</h1>
+        <p class="hero-copy" id="heroCopy">
           Global breadth monitor with market-level status, live breadth series,
           and strategy overlays. The dashboard respects structured market status
           metadata, so stale or invalid markets are shown explicitly instead of
           being rendered as fresh.
         </p>
         <div class="hero-meta">
-          <span class="chip"><strong>United States</strong> teal, thick line</span>
-          <span class="chip"><strong>Japan</strong> blue, medium line</span>
-          <span class="chip"><strong>Korea</strong> red, thin line</span>
-          <span class="chip"><strong>Price Basis</strong> split-adj, div-unadj</span>
+          <span class="chip" id="chipUs"><strong>United States</strong> teal, thick line</span>
+          <span class="chip" id="chipJp"><strong>Japan</strong> blue, medium line</span>
+          <span class="chip" id="chipKr"><strong>Korea</strong> red, thin line</span>
+          <span class="chip" id="chipPrice"><strong>Price Basis</strong> split-adj, div-unadj</span>
         </div>
       </article>
 
       <aside class="hero-side panel">
         <div class="stamp">
-          <strong>Overview</strong>
+          <strong id="overviewTitle">Overview</strong>
           <span id="stamp">Loading...</span>
         </div>
         <div class="overview-grid" id="overviewGrid">
           <div class="overview-card">
-            <div class="k">Markets Online</div>
+            <div class="k" id="overviewKey">Markets Online</div>
             <div class="v">-</div>
-            <div class="s">Waiting for latest snapshot.</div>
+            <div class="s" id="overviewWaiting">Waiting for latest snapshot.</div>
           </div>
         </div>
       </aside>
@@ -522,8 +522,8 @@
       <article class="panel chart-panel">
         <div class="chart-head">
           <div>
-            <h2>Global Breadth</h2>
-            <div class="chart-sub">
+            <h2 id="globalTitle">Global Breadth</h2>
+            <div class="chart-sub" id="globalSub">
               Compare 50-day and 200-day breadth across the three markets with
               market-specific color and line thickness cues.
             </div>
@@ -534,20 +534,20 @@
           </div>
         </div>
         <div class="legend">
-          <span><i class="us"></i>S&amp;P 500</span>
-          <span><i class="jp"></i>Nikkei 225</span>
-          <span><i class="kr"></i>KOSPI 200</span>
+          <span id="legendUs"><i class="us"></i>S&amp;P 500</span>
+          <span id="legendJp"><i class="jp"></i>Nikkei 225</span>
+          <span id="legendKr"><i class="kr"></i>KOSPI 200</span>
         </div>
         <div class="chart" id="globalChart"></div>
       </article>
 
       <aside class="side">
         <section class="panel">
-          <h2>Market Status</h2>
+          <h2 id="statusHeading">Market Status</h2>
           <div class="status-list" id="statusList"></div>
         </section>
         <section class="panel">
-          <h2>Signals</h2>
+          <h2 id="signalsHeading">Signals</h2>
           <div class="signals" id="signals"></div>
         </section>
       </aside>
@@ -556,15 +556,239 @@
     <section class="market-grid" id="marketGrid"></section>
 
     <footer class="foot">
-      <span>Data: yfinance+pykrx | Engine: market_breadth v3.1</span>
+      <span id="footerMeta">Data: yfinance+pykrx | Engine: market_breadth v3.1</span>
       <span>
-        <a href="./widget.html">Widget View</a> |
-        <a href="./api/latest.json">Latest API</a>
+        <a id="footerWidgetLink" href="./widget.html">Widget View</a> |
+        <a id="footerApiLink" href="./api/latest.json">Latest API</a>
       </span>
     </footer>
   </div>
 
 <script type="module">
+const TRANSLATIONS={
+  en:{
+    page_title:'Market Breadth Dashboard',
+    eyebrow:'Cross-Market Monitor',
+    hero_title:'Market Breadth Dashboard',
+    hero_copy:'Global breadth monitor with market-level status, live breadth series, and strategy overlays. The dashboard respects structured market status metadata, so stale or invalid markets are shown explicitly instead of being rendered as fresh.',
+    chip_us:'<strong>United States</strong> teal, thick line',
+    chip_jp:'<strong>Japan</strong> blue, medium line',
+    chip_kr:'<strong>Korea</strong> red, thin line',
+    chip_price:'<strong>Price Basis</strong> split-adj, div-unadj',
+    overview_title:'Overview',
+    loading:'Loading...',
+    overview_key:'Markets Online',
+    overview_waiting:'Waiting for latest snapshot.',
+    global_title:'Global Breadth',
+    global_sub:'Compare 50-day and 200-day breadth across the three markets with market-specific color and line thickness cues.',
+    button_50:'50-Day',
+    button_200:'200-Day',
+    footer_meta:'Data: yfinance+pykrx | Engine: market_breadth v3.1',
+    footer_widget:'Widget View',
+    footer_api:'Latest API',
+    market_sp500:'S&P 500',
+    market_nikkei225:'Nikkei 225',
+    market_kospi200:'KOSPI 200',
+    status_heading:'Market Status',
+    signals_heading:'Signals',
+    markets_online:'Markets Online',
+    all_markets_loaded:'All available markets loaded from the latest snapshot.',
+    partial_markets:'{count} market flagged partial.',
+    signal_mode:'Signal Mode',
+    signal_mode_complete:'Complete',
+    signal_mode_partial:'Partial',
+    signal_inputs_missing:'Some signal inputs are unavailable.',
+    signal_inputs_complete:'All required markets are available for current signals.',
+    pipeline_date:'Pipeline Date',
+    structured_metadata_note:'Rendered from structured market metadata.',
+    price_basis:'Price Basis',
+    close_price:'Close',
+    price_basis_desc:'Split-adjusted, dividend-unadjusted series.',
+    unavailable:'Unavailable',
+    latest_update_failed:'Latest update failed.',
+    label_50_day:'50-Day',
+    label_200_day:'200-Day',
+    as_of:'as of',
+    no_data:'No data',
+    no_active_signals:'No active signals',
+    partial_data:'Partial data',
+    global_chart_fallback:'Global chart unavailable because the chart library could not be loaded. Summary panels and market status remain live.',
+    market_chart_fallback:'{market} chart unavailable because the chart library could not be loaded.',
+    section_unavailable_sub:'Structured status blocks stale rendering for this market.',
+    section_live_sub:'Live market section with 50-day and 200-day breadth overlays.',
+    section_value_sub:'50-day now · 200-day {value}%',
+    breadth_50_tile:'50d breadth',
+    breadth_200_tile:'200d breadth',
+    dashboard_data_error:'Dashboard data could not be loaded.',
+    updated:'Updated: {date}',
+    error_prefix:'Error: {message}',
+    status_ok:'OK',
+    status_partial:'PARTIAL',
+    status_error:'ERROR',
+    signal_asia_us_lead:'Asia U.S. Lead',
+    signal_tri_market_deviation:'Tri-Market Deviation',
+    signal_regime_overlay:'Regime Overlay',
+    direction_LONG:'LONG',
+    direction_SHORT:'SHORT',
+    direction_NEUTRAL:'NEUTRAL'
+  },
+  ko:{
+    page_title:'마켓 브레드스 대시보드',
+    eyebrow:'크로스 마켓 모니터',
+    hero_title:'마켓 브레드스 대시보드',
+    hero_copy:'시장별 상태, 실시간 브레드스 시계열, 전략 오버레이를 함께 보는 글로벌 브레드스 모니터입니다. 구조화된 시장 상태 메타데이터를 기준으로 stale 또는 invalid 시장을 최신 데이터처럼 그리지 않습니다.',
+    chip_us:'<strong>미국</strong> 청록색 굵은 선',
+    chip_jp:'<strong>일본</strong> 파란색 중간 선',
+    chip_kr:'<strong>한국</strong> 빨간색 얇은 선',
+    chip_price:'<strong>가격 기준</strong> 분할조정, 배당비조정',
+    overview_title:'개요',
+    loading:'불러오는 중...',
+    overview_key:'정상 시장 수',
+    overview_waiting:'최신 스냅샷을 기다리는 중입니다.',
+    global_title:'글로벌 브레드스',
+    global_sub:'세 시장의 50일 및 200일 브레드스를 색상과 선 두께 기준으로 비교합니다.',
+    button_50:'50일',
+    button_200:'200일',
+    footer_meta:'데이터: yfinance+pykrx | 엔진: market_breadth v3.1',
+    footer_widget:'위젯 보기',
+    footer_api:'최신 API',
+    market_sp500:'S&P 500',
+    market_nikkei225:'니케이 225',
+    market_kospi200:'코스피 200',
+    status_heading:'시장 상태',
+    signals_heading:'시그널',
+    markets_online:'정상 시장 수',
+    all_markets_loaded:'최신 스냅샷 기준으로 모든 사용 가능 시장을 불러왔습니다.',
+    partial_markets:'{count}개 시장이 부분 상태로 표시됩니다.',
+    signal_mode:'시그널 모드',
+    signal_mode_complete:'완전',
+    signal_mode_partial:'부분',
+    signal_inputs_missing:'일부 시그널 입력 시장이 비어 있습니다.',
+    signal_inputs_complete:'현재 시그널에 필요한 시장 데이터가 모두 있습니다.',
+    pipeline_date:'파이프라인 날짜',
+    structured_metadata_note:'구조화된 시장 메타데이터를 기준으로 렌더링했습니다.',
+    price_basis:'가격 기준',
+    close_price:'종가',
+    price_basis_desc:'분할조정, 배당비조정 시계열입니다.',
+    unavailable:'이용 불가',
+    latest_update_failed:'최신 업데이트에 실패했습니다.',
+    label_50_day:'50일',
+    label_200_day:'200일',
+    as_of:'기준일',
+    no_data:'데이터 없음',
+    no_active_signals:'활성 시그널 없음',
+    partial_data:'부분 데이터',
+    global_chart_fallback:'차트 라이브러리를 불러오지 못해 글로벌 차트를 표시할 수 없습니다. 요약 패널과 시장 상태는 계속 표시됩니다.',
+    market_chart_fallback:'차트 라이브러리를 불러오지 못해 {market} 차트를 표시할 수 없습니다.',
+    section_unavailable_sub:'구조화된 상태 정보가 이 시장의 stale 렌더링을 차단합니다.',
+    section_live_sub:'50일 및 200일 브레드스 오버레이를 함께 보여주는 시장 섹션입니다.',
+    section_value_sub:'현재 50일 · 200일 {value}%',
+    breadth_50_tile:'50일 브레드스',
+    breadth_200_tile:'200일 브레드스',
+    dashboard_data_error:'대시보드 데이터를 불러오지 못했습니다.',
+    updated:'업데이트: {date}',
+    error_prefix:'오류: {message}',
+    status_ok:'정상',
+    status_partial:'부분',
+    status_error:'오류',
+    signal_asia_us_lead:'아시아-미국 리드',
+    signal_tri_market_deviation:'3시장 괴리',
+    signal_regime_overlay:'레짐 오버레이',
+    direction_LONG:'매수',
+    direction_SHORT:'매도',
+    direction_NEUTRAL:'중립'
+  },
+  ja:{
+    page_title:'マーケットブレッドス・ダッシュボード',
+    eyebrow:'クロスマーケット監視',
+    hero_title:'マーケットブレッドス・ダッシュボード',
+    hero_copy:'市場ごとの状態、ライブのブレッドス時系列、戦略オーバーレイをまとめて見るためのグローバルモニターです。構造化された市場ステータスメタデータを基準にし、古い市場データを最新のようには描画しません。',
+    chip_us:'<strong>米国</strong> ティールの太線',
+    chip_jp:'<strong>日本</strong> 青の中線',
+    chip_kr:'<strong>韓国</strong> 赤の細線',
+    chip_price:'<strong>価格基準</strong> 分割調整・配当未調整',
+    overview_title:'概要',
+    loading:'読み込み中...',
+    overview_key:'稼働市場数',
+    overview_waiting:'最新スナップショットを待機しています。',
+    global_title:'グローバルブレッドス',
+    global_sub:'3市場の50日・200日ブレッドスを、色と線の太さで見分けながら比較します。',
+    button_50:'50日',
+    button_200:'200日',
+    footer_meta:'データ: yfinance+pykrx | エンジン: market_breadth v3.1',
+    footer_widget:'ウィジェット表示',
+    footer_api:'最新API',
+    market_sp500:'S&P 500',
+    market_nikkei225:'日経225',
+    market_kospi200:'KOSPI 200',
+    status_heading:'市場ステータス',
+    signals_heading:'シグナル',
+    markets_online:'稼働市場数',
+    all_markets_loaded:'最新スナップショットで利用可能な市場をすべて読み込みました。',
+    partial_markets:'{count}市場が部分状態として判定されています。',
+    signal_mode:'シグナルモード',
+    signal_mode_complete:'完全',
+    signal_mode_partial:'部分',
+    signal_inputs_missing:'一部のシグナル入力市場が不足しています。',
+    signal_inputs_complete:'現在のシグナルに必要な市場データはすべて揃っています。',
+    pipeline_date:'パイプライン日付',
+    structured_metadata_note:'構造化された市場メタデータを基準に描画しています。',
+    price_basis:'価格基準',
+    close_price:'終値',
+    price_basis_desc:'分割調整・配当未調整の系列です。',
+    unavailable:'利用不可',
+    latest_update_failed:'最新更新に失敗しました。',
+    label_50_day:'50日',
+    label_200_day:'200日',
+    as_of:'基準日',
+    no_data:'データなし',
+    no_active_signals:'有効なシグナルなし',
+    partial_data:'部分データ',
+    global_chart_fallback:'チャートライブラリを読み込めないためグローバルチャートを表示できません。要約パネルと市場ステータスは表示を続けます。',
+    market_chart_fallback:'チャートライブラリを読み込めないため{market}のチャートを表示できません。',
+    section_unavailable_sub:'構造化されたステータスにより、この市場の古い描画はブロックされています。',
+    section_live_sub:'50日と200日のブレッドスを重ねて見る市場セクションです。',
+    section_value_sub:'現在の50日 · 200日 {value}%',
+    breadth_50_tile:'50日ブレッドス',
+    breadth_200_tile:'200日ブレッドス',
+    dashboard_data_error:'ダッシュボードデータを読み込めませんでした。',
+    updated:'更新: {date}',
+    error_prefix:'エラー: {message}',
+    status_ok:'正常',
+    status_partial:'一部',
+    status_error:'エラー',
+    signal_asia_us_lead:'アジア・米国リード',
+    signal_tri_market_deviation:'3市場乖離',
+    signal_regime_overlay:'レジームオーバーレイ',
+    direction_LONG:'ロング',
+    direction_SHORT:'ショート',
+    direction_NEUTRAL:'中立'
+  }
+};
+
+function detectLocale(){
+  const param=new URLSearchParams(window.location.search).get('lang');
+  if(param && ['ko','ja','en'].includes(param)) return param;
+  const langs=[...(navigator.languages||[]), navigator.language].filter(Boolean).map(x=>String(x).toLowerCase());
+  if(langs.some(x=>x.startsWith('ko'))) return 'ko';
+  if(langs.some(x=>x.startsWith('ja'))) return 'ja';
+  return 'en';
+}
+
+const LOCALE=detectLocale();
+
+function t(key, vars={}){
+  const dict=TRANSLATIONS[LOCALE] || TRANSLATIONS.en;
+  let text=dict[key] ?? TRANSLATIONS.en[key] ?? key;
+  Object.entries(vars).forEach(([name,val])=>{
+    text=text.replaceAll(`{${name}}`, String(val));
+  });
+  return text;
+}
+
+document.documentElement.lang=LOCALE;
+document.title=t('page_title');
+
 const API_DEFAULT='https://kgh1178.github.io/market-breadth/api';
 const API_LOCAL=`${window.location.origin}/api`;
 const API_PARAM=new URLSearchParams(window.location.search).get('api_base');
@@ -573,9 +797,9 @@ const API=API_PARAM||(window.location.hostname==='127.0.0.1'||window.location.ho
   :API_DEFAULT);
 
 const MARKETS = [
-  {id:'sp500', label:'S&P 500', color:'#0f766e', soft:'#67b8b1', width:4},
-  {id:'nikkei225', label:'Nikkei 225', color:'#1a73e8', soft:'#7baaf7', width:3},
-  {id:'kospi200', label:'KOSPI 200', color:'#ea4335', soft:'#f28b82', width:2},
+  {id:'sp500', color:'#0f766e', soft:'#67b8b1', width:4},
+  {id:'nikkei225', color:'#1a73e8', soft:'#7baaf7', width:3},
+  {id:'kospi200', color:'#ea4335', soft:'#f28b82', width:2},
 ];
 
 const state = {
@@ -589,12 +813,50 @@ const state = {
   miniCharts: [],
 };
 
-function setStamp(text){
-  document.getElementById('stamp').textContent = text;
+function marketLabel(market){
+  return t(`market_${market.id}`);
+}
+
+function signalLabel(key){
+  return t(`signal_${key}`);
+}
+
+function directionLabel(direction){
+  return t(`direction_${direction || 'NEUTRAL'}`);
 }
 
 function statusLabel(status){
-  return (status || 'error').toUpperCase();
+  return t(`status_${status || 'error'}`);
+}
+
+function applyStaticText(){
+  document.getElementById('eyebrow').textContent=t('eyebrow');
+  document.getElementById('heroTitle').textContent=t('hero_title');
+  document.getElementById('heroCopy').textContent=t('hero_copy');
+  document.getElementById('chipUs').innerHTML=t('chip_us');
+  document.getElementById('chipJp').innerHTML=t('chip_jp');
+  document.getElementById('chipKr').innerHTML=t('chip_kr');
+  document.getElementById('chipPrice').innerHTML=t('chip_price');
+  document.getElementById('overviewTitle').textContent=t('overview_title');
+  document.getElementById('stamp').textContent=t('loading');
+  document.getElementById('overviewKey').textContent=t('overview_key');
+  document.getElementById('overviewWaiting').textContent=t('overview_waiting');
+  document.getElementById('globalTitle').textContent=t('global_title');
+  document.getElementById('globalSub').textContent=t('global_sub');
+  document.getElementById('btn50').textContent=t('button_50');
+  document.getElementById('btn200').textContent=t('button_200');
+  document.getElementById('legendUs').innerHTML=`<i class="us"></i>${marketLabel(MARKETS[0])}`;
+  document.getElementById('legendJp').innerHTML=`<i class="jp"></i>${marketLabel(MARKETS[1])}`;
+  document.getElementById('legendKr').innerHTML=`<i class="kr"></i>${marketLabel(MARKETS[2])}`;
+  document.getElementById('statusHeading').textContent=t('status_heading');
+  document.getElementById('signalsHeading').textContent=t('signals_heading');
+  document.getElementById('footerMeta').textContent=t('footer_meta');
+  document.getElementById('footerWidgetLink').textContent=t('footer_widget');
+  document.getElementById('footerApiLink').textContent=t('footer_api');
+}
+
+function setStamp(text){
+  document.getElementById('stamp').textContent = text;
 }
 
 function statusClass(status){
@@ -610,27 +872,27 @@ function safeNumber(value){
 function renderOverview(latest, signals){
   const marketsOnline = MARKETS.filter(m=>latest[m.id]?.status === 'ok').length;
   const partialCount = MARKETS.filter(m=>latest[m.id]?.status === 'partial').length;
-  const signalMode = signals.partial_data ? 'Partial' : 'Complete';
+  const signalMode = signals.partial_data ? t('signal_mode_partial') : t('signal_mode_complete');
   document.getElementById('overviewGrid').innerHTML = `
     <div class="overview-card">
-      <div class="k">Markets Online</div>
+      <div class="k">${t('markets_online')}</div>
       <div class="v">${marketsOnline}/3</div>
-      <div class="s">${partialCount > 0 ? `${partialCount} market flagged partial.` : 'All available markets loaded from the latest snapshot.'}</div>
+      <div class="s">${partialCount > 0 ? t('partial_markets',{count:partialCount}) : t('all_markets_loaded')}</div>
     </div>
     <div class="overview-card">
-      <div class="k">Signal Mode</div>
+      <div class="k">${t('signal_mode')}</div>
       <div class="v">${signalMode}</div>
-      <div class="s">${signals.partial_data ? 'Some signal inputs are unavailable.' : 'All required markets are available for current signals.'}</div>
+      <div class="s">${signals.partial_data ? t('signal_inputs_missing') : t('signal_inputs_complete')}</div>
     </div>
     <div class="overview-card">
-      <div class="k">Pipeline Date</div>
+      <div class="k">${t('pipeline_date')}</div>
       <div class="v">${latest.pipeline_date || latest.date || '-'}</div>
-      <div class="s">Rendered from structured market metadata.</div>
+      <div class="s">${t('structured_metadata_note')}</div>
     </div>
     <div class="overview-card">
-      <div class="k">Price Basis</div>
-      <div class="v">Close</div>
-      <div class="s">Split-adjusted, dividend-unadjusted series.</div>
+      <div class="k">${t('price_basis')}</div>
+      <div class="v">${t('close_price')}</div>
+      <div class="s">${t('price_basis_desc')}</div>
     </div>
   `;
 }
@@ -641,11 +903,11 @@ function makeSummaryCard(market, payload){
     return `
       <article class="panel summary-card" style="--accent:${market.color}">
         <div class="summary-top">
-          <div class="label">${market.label}</div>
+          <div class="label">${marketLabel(market)}</div>
           <div class="status-tag ${statusClass(status)}">${statusLabel(status)}</div>
         </div>
-        <div class="market-name">Unavailable</div>
-        <div class="unavailable">${payload.error_message || 'Latest update failed.'}</div>
+        <div class="market-name">${t('unavailable')}</div>
+        <div class="unavailable">${payload.error_message || t('latest_update_failed')}</div>
       </article>
     `;
   }
@@ -653,24 +915,24 @@ function makeSummaryCard(market, payload){
   return `
     <article class="panel summary-card" style="--accent:${market.color}">
       <div class="summary-top">
-        <div class="label">${market.label}</div>
+        <div class="label">${marketLabel(market)}</div>
         <div class="status-tag ${statusClass(status)}">${statusLabel(status)}</div>
       </div>
-      <div class="market-name">${market.label}</div>
+      <div class="market-name">${marketLabel(market)}</div>
       <div class="big">${safeNumber(activeValue)?.toFixed(2) || '-'}%</div>
       <div class="summary-metrics">
         <div class="metric">
-          <div class="k">50-Day</div>
+          <div class="k">${t('label_50_day')}</div>
           <div class="v">${safeNumber(payload.breadth_50)?.toFixed(2) || '-'}%</div>
           <div class="s">${payload.n_above_50 ?? payload.count_above_50}/${payload.n_valid_50 ?? '-'}</div>
         </div>
         <div class="metric">
-          <div class="k">200-Day</div>
+          <div class="k">${t('label_200_day')}</div>
           <div class="v">${safeNumber(payload.breadth_200)?.toFixed(2) || '-'}%</div>
           <div class="s">${payload.n_above_200 ?? payload.count_above_200}/${payload.n_valid_200 ?? '-'}</div>
         </div>
       </div>
-      <div class="basis">as of ${payload.as_of_date || '-'} · split-adj, div-unadj</div>
+      <div class="basis">${t('as_of')} ${payload.as_of_date || '-'} · ${t('price_basis_desc')}</div>
     </article>
   `;
 }
@@ -688,9 +950,9 @@ function renderStatusList(latest){
       <div class="status-item">
         <span class="swatch" style="background:${market.color}"></span>
         <div>
-          <div class="status-title">${market.label}</div>
+          <div class="status-title">${marketLabel(market)}</div>
           <div class="status-meta">
-            ${payload.as_of_date || 'No data'}
+            ${payload.as_of_date || t('no_data')}
             ${payload.status === 'ok' ? ` · ${safeNumber(payload.breadth_50)?.toFixed(2) || '-'}% / ${safeNumber(payload.breadth_200)?.toFixed(2) || '-'}%` : ''}
           </div>
         </div>
@@ -706,13 +968,12 @@ function renderSignals(signals){
     if(!signal.valid) continue;
     const dir = signal.direction || 'NEUTRAL';
     const cls = dir === 'LONG' ? 'b-long' : dir === 'SHORT' ? 'b-short' : 'b-neut';
-    const label = key.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-    html += `<span class="badge ${cls}">${label}: ${dir}</span>`;
+    html += `<span class="badge ${cls}">${signalLabel(key)}: ${directionLabel(dir)}</span>`;
   }
   if(signals.partial_data){
-    html += `<span class="badge b-off">Partial data</span>`;
+    html += `<span class="badge b-off">${t('partial_data')}</span>`;
   }
-  document.getElementById('signals').innerHTML = html || `<span class="badge b-off">No active signals</span>`;
+  document.getElementById('signals').innerHTML = html || `<span class="badge b-off">${t('no_active_signals')}</span>`;
 }
 
 function renderChartFallback(el, message){
@@ -752,13 +1013,13 @@ function renderMarketSections(latest){
         <section class="panel market-panel">
           <div class="market-header">
             <div>
-              <div class="label">${market.label}</div>
-              <h2>Unavailable</h2>
-              <div class="sub">Structured status blocks stale rendering for this market.</div>
+              <div class="label">${marketLabel(market)}</div>
+              <h2>${t('unavailable')}</h2>
+              <div class="sub">${t('section_unavailable_sub')}</div>
             </div>
             <div class="status-tag ${statusClass(payload.status)}">${statusLabel(payload.status)}</div>
           </div>
-          <div class="unavailable">${payload.error_message || 'Latest update failed.'}</div>
+          <div class="unavailable">${payload.error_message || t('latest_update_failed')}</div>
         </section>
       `;
     }
@@ -766,21 +1027,21 @@ function renderMarketSections(latest){
       <section class="panel market-panel">
         <div class="market-header">
           <div>
-            <div class="label">${market.label}</div>
-            <h2>${market.label}</h2>
-            <div class="sub">Live market section with 50-day and 200-day breadth overlays.</div>
+            <div class="label">${marketLabel(market)}</div>
+            <h2>${marketLabel(market)}</h2>
+            <div class="sub">${t('section_live_sub')}</div>
           </div>
-          <div class="status-tag ok">OK</div>
+          <div class="status-tag ok">${t('status_ok')}</div>
         </div>
         <div class="market-value" style="color:${market.color}">
           ${safeNumber(payload.breadth_50)?.toFixed(2) || '-'}%
-          <small>50-day now · 200-day ${safeNumber(payload.breadth_200)?.toFixed(2) || '-'}%</small>
+          <small>${t('section_value_sub',{value:safeNumber(payload.breadth_200)?.toFixed(2) || '-'})}</small>
         </div>
         <div class="metrics">
-          <div class="tile">50d breadth<b>${payload.n_above_50 ?? payload.count_above_50}/${payload.n_valid_50 ?? '-'}</b></div>
-          <div class="tile">200d breadth<b>${payload.n_above_200 ?? payload.count_above_200}/${payload.n_valid_200 ?? '-'}</b></div>
+          <div class="tile">${t('breadth_50_tile')}<b>${payload.n_above_50 ?? payload.count_above_50}/${payload.n_valid_50 ?? '-'}</b></div>
+          <div class="tile">${t('breadth_200_tile')}<b>${payload.n_above_200 ?? payload.count_above_200}/${payload.n_valid_200 ?? '-'}</b></div>
         </div>
-        <div class="basis">as of ${payload.as_of_date || '-'} · split-adj, div-unadj</div>
+        <div class="basis">${t('as_of')} ${payload.as_of_date || '-'} · ${t('price_basis_desc')}</div>
         <div class="mini-chart" id="chart-${market.id}"></div>
       </section>
     `;
@@ -791,7 +1052,7 @@ async function renderGlobalChart(latest, seriesMap){
   const chartRoot = document.getElementById('globalChart');
   const createChart = await ensureChartFactory();
   if(!createChart){
-    renderChartFallback(chartRoot, 'Global chart unavailable because the chart library could not be loaded. Summary panels and market status remain live.');
+    renderChartFallback(chartRoot, t('global_chart_fallback'));
     return;
   }
   chartRoot.innerHTML = '';
@@ -814,7 +1075,7 @@ async function renderGlobalChart(latest, seriesMap){
     const series = state.globalChart.addLineSeries({
       color: state.activeWindow === '200' ? market.soft : market.color,
       lineWidth: state.activeWindow === '200' ? Math.max(2, market.width - 1) : market.width,
-      title: market.label,
+      title: marketLabel(market),
     });
     state.globalSeries.push(series);
     series.setData((seriesMap[market.id]?.[`breadth_${state.activeWindow}`] || []).map(x=>({
@@ -834,7 +1095,7 @@ async function renderMiniCharts(latest, seriesMap){
     const el = document.getElementById(`chart-${market.id}`);
     if(!el) return;
     if(!createChart){
-      renderChartFallback(el, `${market.label} chart unavailable because the chart library could not be loaded.`);
+      renderChartFallback(el, t('market_chart_fallback',{market:marketLabel(market)}));
       return;
     }
     el.innerHTML = '';
@@ -847,8 +1108,8 @@ async function renderMiniCharts(latest, seriesMap){
       rightPriceScale:{scaleMargins:{top:.08,bottom:.06}},
     });
     state.miniCharts.push(chart);
-    const s50 = chart.addLineSeries({color:market.color,lineWidth:market.width,title:'50-Day'});
-    const s200 = chart.addLineSeries({color:market.soft,lineWidth:Math.max(2, market.width - 1),title:'200-Day'});
+    const s50 = chart.addLineSeries({color:market.color,lineWidth:market.width,title:t('label_50_day')});
+    const s200 = chart.addLineSeries({color:market.soft,lineWidth:Math.max(2, market.width - 1),title:t('label_200_day')});
     s50.setData((seriesMap[market.id]?.breadth_50 || []).map(x=>({time:x.date,value:x.value})));
     s200.setData((seriesMap[market.id]?.breadth_200 || []).map(x=>({time:x.date,value:x.value})));
     chart.timeScale().fitContent();
@@ -878,7 +1139,7 @@ async function fetchState(){
 async function renderAll(){
   const latest = state.latest;
   const signals = state.signals;
-  setStamp(`Updated: ${latest.date}`);
+  setStamp(t('updated',{date:latest.date}));
   renderOverview(latest, signals);
   renderSummary(latest);
   renderStatusList(latest);
@@ -893,9 +1154,9 @@ async function refresh(){
     await fetchState();
     await renderAll();
   }catch(err){
-    setStamp(`Error: ${err.message || err}`);
+    setStamp(t('error_prefix',{message:err.message || err}));
     console.error(err);
-    renderChartFallback(document.getElementById('globalChart'), 'Dashboard data could not be loaded.');
+    renderChartFallback(document.getElementById('globalChart'), t('dashboard_data_error'));
   }
 }
 
@@ -906,7 +1167,7 @@ function setWindow(next){
   if(state.latest){
     renderSummary(state.latest);
     renderGlobalChart(state.latest, state.seriesMap).catch(err=>{
-      setStamp(`Error: ${err.message || err}`);
+      setStamp(t('error_prefix',{message:err.message || err}));
       console.error(err);
     });
   }
@@ -921,6 +1182,7 @@ new ResizeObserver(()=>{
   }
 }).observe(document.getElementById('globalChart'));
 
+applyStaticText();
 refresh();
 </script>
 </body>

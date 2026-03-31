@@ -53,7 +53,7 @@ def test_full_dashboard_browser_smoke(tmp_path: Path):
         env = os.environ.copy()
         env["CODEX_HOME"] = env.get("CODEX_HOME", str(Path.home() / ".codex"))
         env["PLAYWRIGHT_CLI_SESSION"] = "mbdashsmoke"
-        url = f"http://127.0.0.1:{port}/"
+        url = f"http://127.0.0.1:{port}/?lang=en"
 
         subprocess.run(
             [str(PWCLI), "open", url],
