@@ -71,11 +71,13 @@ import{createChart}from'https://unpkg.com/lightweight-charts@4.1.1/dist/lightwei
 const B='https://kgh1178.github.io/market-breadth/api'; 
 
 const M=[
-  {id:'sp500',    lb:'S&P 500',   c:'#1a73e8'},
+  {id:'sp500',    lb:'S&P 500',    c:'#1a73e8'},
   {id:'nikkei225',lb:'Nikkei 225', c:'#ea4335'},
   {id:'kospi200', lb:'KOSPI 200',  c:'#34a853'},
+  {id:'global50', lb:'Global 50d', c:'#555'},
+  {id:'global200',lb:'Global 200d',c:'#555'}
 ];
-let chart,s50,s200,cur='sp500';
+let chart,activeSeries=[],cur='sp500';
 
 function init(){
   try {
@@ -86,13 +88,13 @@ function init(){
       timeScale:{timeVisible:false},
       rightPriceScale:{scaleMargins:{top:.08,bottom:.05}},
     });
-    s50=chart.addLineSeries({color:'#1a73e8',lineWidth:2,title:'50-Day'});
-    s200=chart.addLineSeries({color:'#ff6d00',lineWidth:2,
-      lineStyle:2,title:'200-Day'});
-    // 50% 기준선
-    const ref=chart.addLineSeries({color:'#bbb',lineWidth:1,lineStyle:1,
-      priceLineVisible:false,lastValueVisible:false});
-    ref.setData([{time:'2023-01-01',value:50},{time:'2028-01-01',value:50}]);
+    // 배경 참조선
+    const r50=chart.addLineSeries({color:'#bbb',lineWidth:1,lineStyle:1,priceLineVisible:false,lastValueVisible:false});
+    r50.setData([{time:'2023-01-01',value:50},{time:'2028-01-01',value:50}]);
+    const r20=chart.addLineSeries({color:'#fca5a5',lineWidth:1,lineStyle:2,priceLineVisible:false,lastValueVisible:false});
+    r20.setData([{time:'2023-01-01',value:20},{time:'2028-01-01',value:20}]);
+    const r10=chart.addLineSeries({color:'#ef4444',lineWidth:1,lineStyle:2,priceLineVisible:false,lastValueVisible:false});
+    r10.setData([{time:'2023-01-01',value:10},{time:'2028-01-01',value:10}]);
   } catch (err) {
     document.getElementById('dt').textContent=`Init Error: ${err.message || err}`;
     console.error('Init Error:', err);
@@ -100,7 +102,7 @@ function init(){
 }
 
 async function load(mid){
-  if (!s50 || !chart) {
+  if (!chart) {
     if (!document.getElementById('dt').textContent.includes('Init Error')) {
       document.getElementById('dt').textContent = 'Error: Chart not initialized';
     }
@@ -109,39 +111,76 @@ async function load(mid){
   cur=mid;
   const cb = '?t=' + new Date().getTime(); // 캐시 버스터
   try {
-    const[tsR,ltR,sgR]=await Promise.all([
-      fetch(`${B}/${mid}.json${cb}`),fetch(`${B}/latest.json${cb}`),
-      fetch(`${B}/signals.json${cb}`)]);
-    const ts=await tsR.json(),lt=await ltR.json(),sg=await sgR.json();
-    const d=lt[mid]||{};
+    const[ltR,sgR]=await Promise.all([
+      fetch(`${B}/latest.json${cb}`), fetch(`${B}/signals.json${cb}`)]);
+    const lt=await ltR.json(),sg=await sgR.json();
+    
+    let reqs = [];
+    const isGlobal = mid.startsWith('global');
+    if (isGlobal) {
+      reqs = [fetch(`${B}/sp500.json${cb}`), fetch(`${B}/nikkei225.json${cb}`), fetch(`${B}/kospi200.json${cb}`)];
+    } else {
+      reqs = [fetch(`${B}/${mid}.json${cb}`)];
+    }
+    const resps = await Promise.all(reqs);
+    const tss = await Promise.all(resps.map(r => r.json()));
 
-    // 차트
-    s50.setData((ts.breadth_50||[]).map(x=>({time:x.date,value:x.value})));
-    s200.setData((ts.breadth_200||[]).map(x=>({time:x.date,value:x.value})));
+    // 차트 초기화 및 재생성
+    activeSeries.forEach(s => chart.removeSeries(s));
+    activeSeries = [];
+
+    if (isGlobal) {
+      const w = mid === 'global50' ? 'breadth_50' : 'breadth_200';
+      tss.forEach((ts, idx) => {
+        const s = chart.addLineSeries({color: M[idx].c, lineWidth:2, title: M[idx].lb});
+        activeSeries.push(s);
+        s.setData((ts[w]||[]).map(x=>({time:x.date,value:x.value})));
+      });
+    } else {
+      const ts = tss[0];
+      const s50 = chart.addLineSeries({color:'#1a73e8', lineWidth:2, title:'50-Day'});
+      const s200 = chart.addLineSeries({color:'#ff6d00', lineWidth:2, lineStyle:2, title:'200-Day'});
+      activeSeries.push(s50, s200);
+      s50.setData((ts.breadth_50||[]).map(x=>({time:x.date,value:x.value})));
+      s200.setData((ts.breadth_200||[]).map(x=>({time:x.date,value:x.value})));
+    }
     chart.timeScale().fitContent();
 
-    // 날짜 + 배당락 경고
+    // 상단 텍스트
     document.getElementById('dt').textContent=`Updated: ${lt.date}`;
-    document.getElementById('warn').textContent=
-      d.ex_div_flag?'⚠ Ex-Div Window':'';
+    document.getElementById('warn').textContent='';
+    if (!isGlobal) {
+      const d=lt[mid]||{};
+      document.getElementById('warn').textContent=d.ex_div_flag?'⚠ Ex-Div Window':'';
+    }
 
     // 통계 카드
     const cards=document.getElementById('cards');
-    cards.innerHTML=[
-      mkCard('50-Day',d.breadth_50,'%',d.ci_lower_50,d.ci_upper_50,
-             d.deff_50,d.n_eff_50,d.estimated_icc),
-      mkCard('200-Day',d.breadth_200,'%',d.ci_lower_200,d.ci_upper_200,
-             d.deff_200,d.n_eff_200,d.estimated_icc),
-      mkCard('Logit-Z',d.logit_z_50,'σ',null,null),
-    ].join('');
+    if (isGlobal) {
+       const w = mid === 'global50' ? 'breadth_50' : 'breadth_200';
+       cards.innerHTML = [0,1,2].map(idx => {
+         const d = lt[M[idx].id]||{};
+         return mkCard(M[idx].lb, d[w], '%', null, null, null, null, null);
+       }).join('');
+    } else {
+      const d=lt[mid]||{};
+      cards.innerHTML=[
+        mkCard('50-Day',d.breadth_50,'%',d.ci_lower_50,d.ci_upper_50,d.deff_50,d.n_eff_50,d.estimated_icc),
+        mkCard('200-Day',d.breadth_200,'%',d.ci_lower_200,d.ci_upper_200,d.deff_200,d.n_eff_200,d.estimated_icc),
+        mkCard('Logit-Z',d.logit_z_50,'σ',null,null)
+      ].join('');
+    }
 
     // 시장별 특수 지표
     const ex=document.getElementById('extra');
     let exH='';
-    if(mid==='nikkei225'&&d.pwds_50!=null)
-      exH+=`PWDS(50d): <b>${d.pwds_50>0?'+':''}${d.pwds_50}</b>%p `;
-    if(mid==='kospi200'&&d.ex_top5_spread_50!=null)
-      exH+=`Ex-Top5(50d): <b>${d.ex_top5_spread_50>0?'+':''}${d.ex_top5_spread_50}</b>%p `;
+    if(!isGlobal) {
+      const d=lt[mid]||{};
+      if(mid==='nikkei225'&&d.pwds_50!=null)
+        exH+=`PWDS(50d): <b>${d.pwds_50>0?'+':''}${d.pwds_50}</b>%p `;
+      if(mid==='kospi200'&&d.ex_top5_spread_50!=null)
+        exH+=`Ex-Top5(50d): <b>${d.ex_top5_spread_50>0?'+':''}${d.ex_top5_spread_50}</b>%p `;
+    }
     ex.innerHTML=exH;
 
     // 전략 신호
@@ -171,7 +210,7 @@ function mkCard(label,val,unit,lo,hi,deff,neff,icc){
   const isZ=unit==='σ';
   const n=isZ?parseFloat(val)||0:parseFloat(val)||50;
   const cls=isZ?(n>1?'bull':n<-1?'bear':'neut'):
-    (n>60?'bull':n<40?'bear':'neut');
+    (n>60?'bull':n<20?'bear':'neut');  /* 20 미만일때 빨간색 강조로 수정 */
   let ciH='';
   if(lo!=null&&hi!=null){
     const bg=cls==='bull'?'#a8dab5':cls==='bear'?'#f5bcb5':'#fce094';
