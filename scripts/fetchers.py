@@ -18,6 +18,7 @@ from io import StringIO
 
 import pandas as pd
 import requests
+import urllib3
 import yfinance as yf
 
 from config import (
@@ -31,6 +32,7 @@ from config import (
 )
 
 logger = logging.getLogger(__name__)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 YFIUA_BASE = "https://yfiua.github.io/index-constituents/constituents-{}.json"
 WIKIPEDIA_SP500 = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
@@ -38,7 +40,14 @@ WIKIPEDIA_NIKKEI = "https://en.wikipedia.org/wiki/Nikkei_225"
 
 
 def fetch_sp500_wikipedia() -> list[str]:
-    tables = pd.read_html(WIKIPEDIA_SP500, header=0)
+    resp = requests.get(
+        WIKIPEDIA_SP500,
+        headers={"User-Agent": "Mozilla/5.0"},
+        timeout=15,
+        verify=False,
+    )
+    resp.raise_for_status()
+    tables = pd.read_html(resp.text, header=0)
     df = tables[0]
     tickers = df["Symbol"].tolist()
     tickers = [t.strip().replace(".", "-") for t in tickers]
@@ -46,7 +55,14 @@ def fetch_sp500_wikipedia() -> list[str]:
 
 
 def fetch_nikkei225_wikipedia() -> list[str]:
-    tables = pd.read_html(WIKIPEDIA_NIKKEI, header=0)
+    resp = requests.get(
+        WIKIPEDIA_NIKKEI,
+        headers={"User-Agent": "Mozilla/5.0"},
+        timeout=15,
+        verify=False,
+    )
+    resp.raise_for_status()
+    tables = pd.read_html(resp.text, header=0)
     for tbl in tables:
         cols_lower = [str(c).lower() for c in tbl.columns]
         if any("ticker" in c or "code" in c or "symbol" in c for c in cols_lower):
@@ -101,11 +117,18 @@ def fetch_kospi200_krx_otp() -> list[str]:
 
 def fetch_yfiua_fallback(index_code: str) -> list[str]:
     url = YFIUA_BASE.format(index_code)
-    resp = requests.get(url, timeout=15)
+    resp = requests.get(url, timeout=15, verify=False)
     resp.raise_for_status()
     data = resp.json()
     if isinstance(data, list):
-        tickers = [d.get("symbol", d.get("ticker", "")) for d in data]
+        tickers = [
+            d.get("symbol")
+            or d.get("ticker")
+            or d.get("Symbol")
+            or d.get("Ticker")
+            or ""
+            for d in data
+        ]
         return sorted(set(t for t in tickers if t))
     return []
 
@@ -128,7 +151,6 @@ def fetch_constituents(market_id: str) -> list[str]:
         fetchers = [
             ("pykrx", fetch_kospi200_pykrx),
             ("KRX OTP", fetch_kospi200_krx_otp),
-            ("yfiua", lambda: fetch_yfiua_fallback("kospi200")),
         ]
 
     min_count = int(cfg.expected_count[0] * 0.85)

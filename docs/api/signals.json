@@ -1,44 +1,54 @@
 {
   "date": "2026-03-31",
+  "partial_data": true,
   "signals": {
     "asia_us_lead": {
       "strategy": "asia_us_lead",
-      "direction": "NEUTRAL",
-      "trigger_value": 50.0,
-      "filter_passed": true,
-      "hit_rate_252d": {
-        "hit_rate": 0,
-        "ci_lower": 0,
-        "ci_upper": 0,
-        "n_trials": 0,
-        "insufficient": true
-      }
+      "valid": false,
+      "required_markets": [
+        "sp500",
+        "nikkei225",
+        "kospi200"
+      ],
+      "missing_markets": [
+        "nikkei225",
+        "kospi200"
+      ],
+      "invalid_reason": "missing_market_data",
+      "direction": "UNAVAILABLE",
+      "hit_rate_252d": null
     },
     "tri_market_deviation": {
       "strategy": "tri_market_deviation",
-      "outlier_market": null,
-      "z_deviation": 0.0,
-      "direction": "NEUTRAL",
-      "hit_rate_252d": {
-        "hit_rate": 0,
-        "ci_lower": 0,
-        "ci_upper": 0,
-        "n_trials": 0,
-        "insufficient": true
-      }
+      "valid": false,
+      "required_markets": [
+        "sp500",
+        "nikkei225",
+        "kospi200"
+      ],
+      "missing_markets": [
+        "nikkei225",
+        "kospi200"
+      ],
+      "invalid_reason": "missing_market_data",
+      "direction": "UNAVAILABLE",
+      "hit_rate_252d": null
     },
     "regime_overlay": {
       "strategy": "regime_overlay",
-      "grs_raw": 50.0,
-      "regime": "SELECTIVE",
-      "equity_weight_pct": 60,
-      "hit_rate_252d": {
-        "hit_rate": 0,
-        "ci_lower": 0,
-        "ci_upper": 0,
-        "n_trials": 0,
-        "insufficient": true
-      }
+      "valid": false,
+      "required_markets": [
+        "sp500",
+        "nikkei225",
+        "kospi200"
+      ],
+      "missing_markets": [
+        "nikkei225",
+        "kospi200"
+      ],
+      "invalid_reason": "missing_market_data",
+      "direction": "UNAVAILABLE",
+      "hit_rate_252d": null
     }
   },
   "etf_map": {

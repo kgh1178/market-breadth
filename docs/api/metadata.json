@@ -1,5 +1,6 @@
 {
   "date": "2026-03-31",
+  "pipeline_date": "2026-03-31",
   "markets": {
     "sp500": {
       "status": "ok",
@@ -9,46 +10,46 @@
       "coverage_pct": 100.0,
       "failed_symbols": [],
       "validation": {
-        "s5fi": {
-          "source": "barchart_s5fi",
-          "computed": 19.48,
-          "official": 19.68,
-          "diff": 0.2,
-          "pass": true,
-          "n_valid": 503,
-          "n_total": 503
-        },
-        "internal": {
-          "range_50": true,
-          "range_200": true,
-          "all_pass": true
-        }
-      }
+        "market": "sp500",
+        "computed_50": 19.48,
+        "computed_200": 42.43,
+        "n_valid": 503,
+        "n_total": 503,
+        "official_50": null,
+        "diff_50": null,
+        "pass_50": null,
+        "source": null,
+        "range_check_50d": true,
+        "range_check_200d": true
+      },
+      "price_basis": "split-adjusted, dividend-unadjusted"
     },
     "nikkei225": {
       "status": "error",
       "error_code": "constituents_fetch_failed",
-      "error": "nikkei225: all constituent fetchers failed. Last error: Expecting value: line 1 column 1 (char 0)"
+      "error": "[nikkei225] 모든 구성종목 소스 실패",
+      "price_basis": "split-adjusted, dividend-unadjusted"
     },
     "kospi200": {
       "status": "error",
       "error_code": "constituents_fetch_failed",
-      "error": "kospi200: all constituent fetchers failed. Last error: No columns to parse from file"
+      "error": "[kospi200] 모든 구성종목 소스 실패",
+      "price_basis": "split-adjusted, dividend-unadjusted"
     }
   },
   "errors": [
     {
       "market": "nikkei225",
       "error_code": "constituents_fetch_failed",
-      "error": "nikkei225: all constituent fetchers failed. Last error: Expecting value: line 1 column 1 (char 0)"
+      "error": "[nikkei225] 모든 구성종목 소스 실패"
     },
     {
       "market": "kospi200",
       "error_code": "constituents_fetch_failed",
-      "error": "kospi200: all constituent fetchers failed. Last error: No columns to parse from file"
+      "error": "[kospi200] 모든 구성종목 소스 실패"
     }
   ],
-  "pipeline_duration_sec": 72.1,
+  "pipeline_duration_sec": 66.4,
   "price_basis": "split-adjusted, dividend-unadjusted (Barchart S5FI compatible)",
   "yfinance_auto_adjust": false,
   "price_column": "Close"
