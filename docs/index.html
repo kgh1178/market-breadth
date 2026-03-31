@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Market Breadth Dashboard</title>
+  <style>
+    :root{
+      --us:#c58b00;
+      --jp:#1a73e8;
+      --kr:#ea4335;
+      --ink:#202124;
+      --muted:#5f6368;
+      --line:#e5e7eb;
+      --panel:#f8f9fa;
+      --panel-strong:#f1f3f4;
+      --warn:#b26a00;
+      --bg:#ffffff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;
+      background:linear-gradient(180deg,#fbfbfc 0%,#ffffff 100%);
+      color:var(--ink);
+    }
+    .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 48px}
+    .hero{
+      display:flex;justify-content:space-between;align-items:flex-end;
+      gap:16px;padding-bottom:18px;border-bottom:1px solid var(--line)
+    }
+    .hero h1{margin:0;font-size:32px;line-height:1.05}
+    .hero p{margin:8px 0 0;color:var(--muted);font-size:14px}
+    .stamp{font-size:13px;color:var(--muted);text-align:right}
+    .summary{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;margin-top:20px
+    }
+    .panel{
+      background:var(--panel);border:1px solid #eef0f2;border-radius:16px;
+      padding:16px 16px 14px
+    }
+    .summary .panel{position:relative;overflow:hidden}
+    .summary .panel::before{
+      content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent,#999)
+    }
+    .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .market{font-size:20px;font-weight:700;margin:8px 0 10px}
+    .big{
+      font-size:34px;font-weight:800;line-height:1;color:var(--accent,#202124)
+    }
+    .pair{display:flex;gap:16px;margin-top:12px;font-size:13px;color:var(--muted)}
+    .pair b{display:block;color:var(--ink);font-size:18px;margin-top:2px}
+    .basis{margin-top:12px;font-size:11px;color:#8b9095}
+    .layout{
+      display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:20px
+    }
+    .chart-panel{padding:18px}
+    .chart-head{
+      display:flex;justify-content:space-between;align-items:center;
+      gap:12px;margin-bottom:10px
+    }
+    .chart-head h2,.side h2{margin:0;font-size:18px}
+    .switch{display:flex;gap:8px}
+    .switch button{
+      border:1px solid var(--line);background:#fff;color:var(--muted);
+      border-radius:999px;padding:7px 12px;font-size:12px;cursor:pointer
+    }
+    .switch button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+    .legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:var(--muted)}
+    .legend span{display:flex;align-items:center;gap:8px}
+    .legend i{display:inline-block;width:28px;height:0;border-top-style:solid}
+    .legend .us{border-top-width:4px;border-top-color:var(--us)}
+    .legend .jp{border-top-width:3px;border-top-color:var(--jp)}
+    .legend .kr{border-top-width:2px;border-top-color:var(--kr)}
+    .chart{height:360px}
+    .side{display:flex;flex-direction:column;gap:18px}
+    .status-list{display:flex;flex-direction:column;gap:12px}
+    .status-item{
+      display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center
+    }
+    .swatch{width:10px;height:10px;border-radius:999px;background:var(--accent,#999)}
+    .status-title{font-size:14px;font-weight:600}
+    .status-meta{font-size:12px;color:var(--muted);margin-top:2px}
+    .status-pill{
+      font-size:11px;border-radius:999px;padding:4px 10px;background:#eef2f7;color:#4b5563
+    }
+    .status-pill.ok{background:#e7f6ec;color:#1f7a3f}
+    .status-pill.err{background:#fdecec;color:#b42318}
+    .signals{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .badge{
+      display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700
+    }
+    .b-long{background:#e6f4ea;color:#0d904f}
+    .b-short{background:#fce8e6;color:#d93025}
+    .b-neut{background:#fef7e0;color:#b26a00}
+    .b-off{background:#f1f3f4;color:#5f6368}
+    .market-grid{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:20px
+    }
+    .mini-chart{height:220px;margin-top:12px}
+    .metrics{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--muted)}
+    .metrics b{display:block;color:var(--ink);font-size:16px}
+    .unavailable{
+      margin-top:12px;padding:12px;border-radius:12px;background:#fdecec;color:#b42318;font-size:13px
+    }
+    .foot{
+      margin-top:28px;padding-top:16px;border-top:1px solid var(--line);
+      display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+      font-size:12px;color:#8b9095
+    }
+    .foot a{color:#1a73e8;text-decoration:none}
+    @media (max-width:960px){
+      .layout,.market-grid,.summary{grid-template-columns:1fr}
+      .hero{align-items:flex-start;flex-direction:column}
+      .chart{height:300px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <h1>Market Breadth Dashboard</h1>
+        <p>Global breadth monitor with market-level status, live series, and strategy overlays.</p>
+      </div>
+      <div class="stamp" id="stamp">Loading...</div>
+    </section>
+
+    <section class="summary" id="summary"></section>
+
+    <section class="layout">
+      <article class="panel chart-panel">
+        <div class="chart-head">
+          <h2>Global Breadth</h2>
+          <div class="switch">
+            <button id="btn50" class="on" type="button">50-Day</button>
+            <button id="btn200" type="button">200-Day</button>
+          </div>
+        </div>
+        <div class="legend">
+          <span><i class="us"></i>S&amp;P 500</span>
+          <span><i class="jp"></i>Nikkei 225</span>
+          <span><i class="kr"></i>KOSPI 200</span>
+        </div>
+        <div class="chart" id="globalChart"></div>
+      </article>
+
+      <aside class="side">
+        <section class="panel">
+          <h2>Market Status</h2>
+          <div class="status-list" id="statusList"></div>
+        </section>
+        <section class="panel">
+          <h2>Signals</h2>
+          <div class="signals" id="signals"></div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="market-grid" id="marketGrid"></section>
+
+    <footer class="foot">
+      <span>Data: yfinance+pykrx | Engine: market_breadth v3.1</span>
+      <span><a href="./widget.html">Widget View</a></span>
+    </footer>
+  </div>
+
+<script type="module">
+import { createChart } from 'https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.mjs';
+
+const API_DEFAULT='https://kgh1178.github.io/market-breadth/api';
+const API_LOCAL=`${window.location.origin}/api`;
+const API_PARAM=new URLSearchParams(window.location.search).get('api_base');
+const API=API_PARAM||(window.location.hostname==='127.0.0.1'||window.location.hostname==='localhost'
+  ?API_LOCAL
+  :API_DEFAULT);
+
+const MARKETS = [
+  {id:'sp500', label:'S&P 500', color:'#c58b00', width:4},
+  {id:'nikkei225', label:'Nikkei 225', color:'#1a73e8', width:3},
+  {id:'kospi200', label:'KOSPI 200', color:'#ea4335', width:2},
+];
+
+let globalChart;
+let globalSeries = [];
+let activeWindow = '50';
+
+function marketColor(id){
+  return MARKETS.find(m=>m.id===id)?.color || '#666';
+}
+
+function setStamp(text){
+  document.getElementById('stamp').textContent = text;
+}
+
+function clearSeries(){
+  globalSeries.forEach(s=>globalChart.removeSeries(s));
+  globalSeries = [];
+}
+
+function makeSummaryCard(market, payload){
+  if(payload.status !== 'ok'){
+    return `
+      <article class="panel" style="--accent:${market.color}">
+        <div class="label">${market.label}</div>
+        <div class="market">Unavailable</div>
+        <div class="unavailable">${payload.error_message || 'Latest update failed.'}</div>
+      </article>
+    `;
+  }
+  return `
+    <article class="panel" style="--accent:${market.color}">
+      <div class="label">${market.label}</div>
+      <div class="big">${payload[`breadth_${activeWindow}`].toFixed(2)}%</div>
+      <div class="pair">
+        <div>50d<b>${payload.breadth_50.toFixed(2)}%</b></div>
+        <div>200d<b>${payload.breadth_200.toFixed(2)}%</b></div>
+      </div>
+      <div class="basis">as of ${payload.as_of_date || '-'} · split-adj, div-unadj</div>
+    </article>
+  `;
+}
+
+function renderStatusList(latest){
+  document.getElementById('statusList').innerHTML = MARKETS.map(market=>{
+    const payload = latest[market.id];
+    const statusClass = payload.status === 'ok' ? 'ok' : 'err';
+    const statusLabel = payload.status === 'ok' ? 'OK' : 'ERROR';
+    return `
+      <div class="status-item">
+        <span class="swatch" style="--accent:${market.color};background:${market.color}"></span>
+        <div>
+          <div class="status-title">${market.label}</div>
+          <div class="status-meta">${payload.as_of_date || 'No data'}${payload.status === 'ok' ? ` · ${payload.breadth_50.toFixed(2)}% / ${payload.breadth_200.toFixed(2)}%` : ''}</div>
+        </div>
+        <span class="status-pill ${statusClass}">${statusLabel}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSignals(signals){
+  let html = '';
+  for(const [key, signal] of Object.entries(signals.signals || {})){
+    if(!signal.valid) continue;
+    const dir = signal.direction || 'NEUTRAL';
+    const cls = dir === 'LONG' ? 'b-long' : dir === 'SHORT' ? 'b-short' : 'b-neut';
+    const label = key.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    html += `<span class="badge ${cls}">${label}: ${dir}</span>`;
+  }
+  if(signals.partial_data){
+    html += `<span class="badge b-off">Partial data</span>`;
+  }
+  document.getElementById('signals').innerHTML = html || `<span class="badge b-off">No active signals</span>`;
+}
+
+function renderSummary(latest){
+  document.getElementById('summary').innerHTML = MARKETS.map(market =>
+    makeSummaryCard(market, latest[market.id])
+  ).join('');
+}
+
+function renderMarketSections(latest, seriesMap){
+  document.getElementById('marketGrid').innerHTML = MARKETS.map(market=>{
+    const payload = latest[market.id];
+    if(payload.status !== 'ok'){
+      return `
+        <section class="panel">
+          <div class="label">${market.label}</div>
+          <div class="market">Unavailable</div>
+          <div class="unavailable">${payload.error_message || 'Latest update failed.'}</div>
+        </section>
+      `;
+    }
+    return `
+      <section class="panel" id="section-${market.id}">
+        <div class="label">${market.label}</div>
+        <div class="market" style="color:${market.color}">${payload.breadth_50.toFixed(2)}% / ${payload.breadth_200.toFixed(2)}%</div>
+        <div class="metrics">
+          <div>50d<b>${payload.n_above_50 || payload.count_above_50}/${payload.n_valid_50}</b></div>
+          <div>200d<b>${payload.n_above_200 || payload.count_above_200}/${payload.n_valid_200}</b></div>
+        </div>
+        <div class="mini-chart" id="chart-${market.id}"></div>
+      </section>
+    `;
+  }).join('');
+
+  MARKETS.forEach(market=>{
+    const payload = latest[market.id];
+    if(payload.status !== 'ok') return;
+    const series = seriesMap[market.id];
+    const chart = createChart(document.getElementById(`chart-${market.id}`), {
+      width: document.getElementById(`chart-${market.id}`).clientWidth,
+      height: 220,
+      layout:{background:{color:'#f8f9fa'},textColor:'#4b5563',fontSize:11},
+      grid:{vertLines:{color:'#eceff1'},horzLines:{color:'#eceff1'}},
+      timeScale:{timeVisible:false},
+      rightPriceScale:{scaleMargins:{top:.08,bottom:.06}},
+    });
+    const s50 = chart.addLineSeries({color:market.color,lineWidth:market.width,title:'50-Day'});
+    const s200 = chart.addLineSeries({color:'#ff8a1f',lineWidth:2,title:'200-Day'});
+    s50.setData((series.breadth_50||[]).map(x=>({time:x.date,value:x.value})));
+    s200.setData((series.breadth_200||[]).map(x=>({time:x.date,value:x.value})));
+    chart.timeScale().fitContent();
+  });
+}
+
+async function renderGlobalChart(latest, seriesMap){
+  clearSeries();
+  MARKETS.filter(market => latest[market.id].status === 'ok').forEach(market=>{
+    const series = globalChart.addLineSeries({
+      color: market.color,
+      lineWidth: market.width,
+      title: market.label,
+    });
+    globalSeries.push(series);
+    series.setData((seriesMap[market.id][`breadth_${activeWindow}`]||[]).map(x=>({
+      time:x.date,
+      value:x.value
+    })));
+  });
+  globalChart.timeScale().fitContent();
+}
+
+async function load(){
+  const cb='?t='+Date.now();
+  const [latestRes, signalsRes] = await Promise.all([
+    fetch(`${API}/latest.json${cb}`),
+    fetch(`${API}/signals.json${cb}`)
+  ]);
+  const latest = await latestRes.json();
+  const signals = await signalsRes.json();
+
+  const okMarkets = MARKETS.filter(m=>latest[m.id].status === 'ok');
+  const seriesPairs = await Promise.all(okMarkets.map(async market => {
+    const res = await fetch(`${API}/${market.id}.json${cb}`);
+    return [market.id, await res.json()];
+  }));
+  const seriesMap = Object.fromEntries(seriesPairs);
+
+  setStamp(`Updated: ${latest.date}`);
+  renderSummary(latest);
+  renderStatusList(latest);
+  renderSignals(signals);
+  renderMarketSections(latest, seriesMap);
+  renderGlobalChart(latest, seriesMap);
+}
+
+function setWindow(next){
+  activeWindow = next;
+  document.getElementById('btn50').classList.toggle('on', next === '50');
+  document.getElementById('btn200').classList.toggle('on', next === '200');
+  load().catch(err=>{
+    setStamp(`Error: ${err.message || err}`);
+    console.error(err);
+  });
+}
+
+globalChart = createChart(document.getElementById('globalChart'), {
+  width: document.getElementById('globalChart').clientWidth,
+  height: 360,
+  layout:{background:{color:'#fff'},textColor:'#4b5563',fontSize:11},
+  grid:{vertLines:{color:'#eceff1'},horzLines:{color:'#eceff1'}},
+  timeScale:{timeVisible:false},
+  rightPriceScale:{scaleMargins:{top:.08,bottom:.06}},
+});
+
+document.getElementById('btn50').onclick = ()=>setWindow('50');
+document.getElementById('btn200').onclick = ()=>setWindow('200');
+
+load().catch(err=>{
+  setStamp(`Error: ${err.message || err}`);
+  console.error(err);
+});
+
+new ResizeObserver(()=>{
+  globalChart.applyOptions({width:document.getElementById('globalChart').clientWidth});
+}).observe(document.getElementById('globalChart'));
+</script>
+</body>
+</html>
