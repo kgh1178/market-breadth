@@ -150,7 +150,7 @@ async function load(mid){
     document.querySelectorAll('.tab').forEach(t=>
       t.classList.toggle('on',t.dataset.m===mid));
   } catch (err) {
-    document.getElementById('dt').textContent=`Error loading data`;
+    document.getElementById('dt').textContent=`Error: ${err.message || err}`;
     console.error(err);
   }
 }
