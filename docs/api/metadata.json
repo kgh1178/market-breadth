@@ -1,10 +1,10 @@
 {
-  "date": "2026-03-30",
+  "date": "2026-03-31",
   "markets": {},
   "errors": [
     {
       "market": "sp500",
-      "error": "single positional indexer is out-of-bounds"
+      "error": "sp500: all constituent fetchers failed. Last error: HTTP Error 403: Forbidden"
     },
     {
       "market": "nikkei225",
@@ -15,5 +15,5 @@
       "error": "kospi200: all constituent fetchers failed. Last error: No columns to parse from file"
     }
   ],
-  "pipeline_duration_sec": 34.5
+  "pipeline_duration_sec": 3.0
 }
