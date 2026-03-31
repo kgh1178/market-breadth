@@ -1,125 +1,258 @@
-"""브레드스 계산, DEFF 신뢰구간, 시장별 특수 지표"""
+"""
+Market Breadth Engine
+=====================
+v3.1  2026-03-31  Fix: split-only adjusted price, n_valid denominator
+
+핵심 원칙:
+  - Close 열만 사용 (split-adjusted, dividend-unadjusted)
+  - Adj Close 열은 절대 참조하지 않음
+  - SMA(W)는 min_periods=W 로 데이터 부족 종목 자동 NaN 처리
+  - 분모는 n_valid (SMA 산출 가능 종목 수)
+"""
+
+import logging
+
 import numpy as np
 import pandas as pd
-from scipy import stats
-from config import MarketConfig
+from scipy import stats as sp_stats
 
-def compute_breadth(prices: pd.DataFrame, window: int) -> dict:
-    """최신일 기준 브레드스 계산"""
-    sma = prices.rolling(window=window, min_periods=window).mean()
-    latest_price = prices.iloc[-1]
+from config import PRICE_COLUMN
+
+logger = logging.getLogger(__name__)
+
+
+def _extract_close(prices_df: pd.DataFrame) -> pd.DataFrame:
+    if isinstance(prices_df.columns, pd.MultiIndex):
+        return prices_df[PRICE_COLUMN].copy()
+    if PRICE_COLUMN in prices_df.columns:
+        return prices_df[[PRICE_COLUMN]].copy()
+    return prices_df.copy()
+
+
+def compute_breadth(
+    prices_df: pd.DataFrame,
+    window: int = 50,
+) -> dict:
+    """
+    Barchart S5FI 호환 breadth 계산.
+    """
+    close = _extract_close(prices_df)
+    sma = close.rolling(window=window, min_periods=window).mean()
+
+    latest_close = close.iloc[-1]
     latest_sma = sma.iloc[-1]
-    # MA 윈도우 미달 종목 제외
-    valid = latest_sma.notna()
-    above = (latest_price[valid] > latest_sma[valid]).sum()
-    n_active = valid.sum()
-    breadth_pct = (above / n_active * 100) if n_active > 0 else np.nan
-    return {"breadth_pct": float(breadth_pct),
-            "count_above": int(above),
-            "n_active": int(n_active)}
 
-def compute_breadth_timeseries(prices: pd.DataFrame,
-                                windows: list,
-                                days: int = 504) -> dict:
-    """최근 N일의 브레드스 시계열"""
-    result = {}
-    for w in windows:
-        sma = prices.rolling(window=w, min_periods=w).mean()
-        above_matrix = (prices > sma) & sma.notna()
-        n_active = sma.notna().sum(axis=1)
-        breadth = (above_matrix.sum(axis=1) / n_active * 100).dropna()
-        breadth = breadth.tail(days)
-        result[f"breadth_{w}"] = [
-            {"date": d.strftime("%Y-%m-%d"), "value": round(v, 2)}
-            for d, v in breadth.items()
-        ]
-    return result
+    valid_mask = latest_close.notna() & latest_sma.notna()
+    n_valid = int(valid_mask.sum())
+    n_total = len(latest_close)
 
-def compute_deff_ci(k: int, n: int, icc: float,
-                    alpha: float = 0.05) -> dict:
-    """DEFF 보정 Clopper-Pearson 신뢰구간"""
-    deff = 1 + (n - 1) * icc
-    n_eff = max(n / deff, 2)  # 최소 2로 클리핑
-    k_eff = round(k * n_eff / n)
-    k_eff = max(0, min(k_eff, int(n_eff)))
-    result = stats.binomtest(k_eff, int(round(n_eff)))
-    ci = result.proportion_ci(confidence_level=1 - alpha, method='exact')
-    grade = "A" if n_eff >= 30 else ("B" if n_eff >= 10 else "C")
-    return {
-        "lower": round(ci.low * 100, 2),
-        "upper": round(ci.high * 100, 2),
-        "deff": round(deff, 2),
-        "n_eff": round(n_eff, 1),
-        "confidence_grade": grade,
+    above_mask = (latest_close > latest_sma) & valid_mask
+    n_above = int(above_mask.sum())
+
+    breadth = (n_above / n_valid * 100) if n_valid > 0 else np.nan
+
+    per_stock = {}
+    for ticker in latest_close.index:
+        if bool(valid_mask.get(ticker, False)):
+            per_stock[ticker] = {
+                "close": round(float(latest_close[ticker]), 4),
+                "sma": round(float(latest_sma[ticker]), 4),
+                "above": bool(above_mask[ticker]),
+            }
+
+    result = {
+        "breadth": round(breadth, 2) if not np.isnan(breadth) else None,
+        "n_above": n_above,
+        "n_valid": n_valid,
+        "n_total": n_total,
+        "n_excluded": n_total - n_valid,
+        "window": window,
+        "per_stock": per_stock,
     }
 
-def flag_ex_dividend(date_str: str, cfg: MarketConfig) -> bool:
-    """배당락 시즌 윈도우 내 여부 확인"""
-    import exchange_calendars as xcals
-    from datetime import date, timedelta
-    d = date.fromisoformat(date_str)
-    if d.month not in cfg.ex_div_months:
-        return False
-    cal = xcals.get_calendar(cfg.exchange_cal_code)
-    # 해당 월의 마지막 거래일
-    month_end = date(d.year, d.month + 1, 1) - timedelta(days=1) \
-                if d.month < 12 else date(d.year, 12, 31)
-    sessions = cal.sessions_in_range(
-        pd.Timestamp(d.year, d.month, 1),
-        pd.Timestamp(month_end))
-    if len(sessions) == 0:
-        return False
-    last_trading = sessions[-1].date()
-    window_start = last_trading - timedelta(days=cfg.ex_div_window_days * 2)
-    window_end = last_trading + timedelta(days=cfg.ex_div_window_days * 2)
-    return window_start <= d <= window_end
+    logger.info(
+        "Breadth(W=%s): %s%% (%s/%s, excluded=%s)",
+        window,
+        result["breadth"],
+        n_above,
+        n_valid,
+        result["n_excluded"],
+    )
+    return result
 
-def compute_pwds(prices: pd.DataFrame, window: int = 50) -> float:
-    """Nikkei 가격가중괴리지표 (PWDS)"""
-    sma = prices.rolling(window=window, min_periods=window).mean()
-    latest_p = prices.iloc[-1]
+
+def compute_breadth_timeseries(
+    prices_df: pd.DataFrame,
+    window: int = 50,
+    lookback: int = 504,
+) -> pd.DataFrame:
+    """
+    과거 lookback 거래일에 대한 일별 breadth 시계열.
+    """
+    close = _extract_close(prices_df)
+    sma = close.rolling(window=window, min_periods=window).mean()
+
+    records = []
+    start_idx = max(0, len(close) - lookback)
+
+    for i in range(start_idx, len(close)):
+        row_close = close.iloc[i]
+        row_sma = sma.iloc[i]
+        valid = row_close.notna() & row_sma.notna()
+        n_valid = int(valid.sum())
+        n_above = int(((row_close > row_sma) & valid).sum())
+        breadth = (n_above / n_valid * 100) if n_valid > 0 else np.nan
+
+        records.append({
+            "date": close.index[i].strftime("%Y-%m-%d"),
+            "breadth": round(breadth, 2) if not np.isnan(breadth) else None,
+            "n_above": n_above,
+            "n_valid": n_valid,
+        })
+
+    return pd.DataFrame(records)
+
+
+def compute_deff_ci(
+    n_above: int,
+    n_valid: int,
+    icc: float = 0.08,
+    alpha: float = 0.05,
+) -> dict:
+    """
+    Design Effect (DEFF) 보정된 Clopper-Pearson 신뢰구간.
+    """
+    if n_valid == 0:
+        return {"lower": None, "upper": None, "deff": None, "n_eff": None}
+
+    deff = 1.0 + (n_valid - 1) * icc
+    n_eff = n_valid / deff
+    p_hat = n_above / n_valid
+
+    k_eff = round(p_hat * n_eff)
+    n_eff_int = round(n_eff)
+
+    if n_eff_int <= 0:
+        return {
+            "lower": None,
+            "upper": None,
+            "deff": round(deff, 2),
+            "n_eff": round(n_eff, 1),
+        }
+
+    lower = sp_stats.beta.ppf(alpha / 2, k_eff, n_eff_int - k_eff + 1) * 100
+    upper = sp_stats.beta.ppf(1 - alpha / 2, k_eff + 1, n_eff_int - k_eff) * 100
+
+    return {
+        "lower": round(float(lower), 2),
+        "upper": round(float(upper), 2),
+        "deff": round(deff, 2),
+        "n_eff": round(n_eff, 1),
+    }
+
+
+def compute_pwds(
+    prices_df: pd.DataFrame,
+    weights: pd.Series | None = None,
+    window: int = 50,
+) -> float:
+    """
+    Price-Weighted Divergence Score (PWDS) for Nikkei 225.
+    """
+    close = _extract_close(prices_df)
+    sma = close.rolling(window=window, min_periods=window).mean()
+    latest_close = close.iloc[-1]
     latest_sma = sma.iloc[-1]
-    valid = latest_sma.notna()
-    lp, ls = latest_p[valid], latest_sma[valid]
-    above = (lp > ls)
-    # 동일 가중 브레드스
-    ew = above.mean() * 100
-    # 가격 가중 브레드스
-    weights = lp / lp.sum()
-    pw = (weights * above.astype(float)).sum() * 100
-    return float(ew - pw)
 
-def compute_ex_top5_spread(prices: pd.DataFrame,
-                           cfg: MarketConfig,
-                           window: int = 50) -> float:
-    """KOSPI 상위5종목 제외 브레드스 스프레드"""
-    sma = prices.rolling(window=window, min_periods=window).mean()
-    latest_p = prices.iloc[-1]
+    valid = latest_close.notna() & latest_sma.notna()
+    above = (latest_close > latest_sma) & valid
+
+    if weights is None:
+        weights = latest_close[valid]
+
+    common_tickers = list(set(weights.index) & set(above.index))
+    if not common_tickers:
+        return np.nan
+
+    w = weights[common_tickers]
+    w_norm = w / w.sum()
+    weighted_breadth = (above[common_tickers].astype(float) * w_norm).sum() * 100
+    equal_breadth = above[common_tickers].mean() * 100
+
+    pwds = weighted_breadth - equal_breadth
+    return round(float(pwds), 2)
+
+
+def compute_ex_top5_spread(
+    prices_df: pd.DataFrame,
+    market_cap: pd.Series | None = None,
+    window: int = 50,
+) -> float:
+    """
+    Cap-Weighted Breadth Spread (CWBS) for KOSPI 200.
+    """
+    close = _extract_close(prices_df)
+    sma = close.rolling(window=window, min_periods=window).mean()
+    latest_close = close.iloc[-1]
     latest_sma = sma.iloc[-1]
-    valid = latest_sma.notna()
-    lp, ls = latest_p[valid], latest_sma[valid]
-    # 상위 5 종목 (최근 평균 가격 기준)
-    avg20 = prices[valid.index].tail(20).mean()
-    top5 = avg20.nlargest(5).index
-    above_all = (lp > ls)
-    above_ex = above_all.drop(top5, errors='ignore')
-    full_breadth = above_all.mean() * 100
-    ex_breadth = above_ex.mean() * 100
-    return float(full_breadth - ex_breadth)
 
-def estimate_icc(prices: pd.DataFrame, n_pairs: int = 100, seed: int = 42) -> float:
-    """100개 무작위 쌍의 일일 수익률 상관계수 평균"""
-    np.random.seed(seed)
-    returns = prices.pct_change().dropna(how='all')
-    cols = returns.columns.tolist()
-    if len(cols) < 2:
-        return 0.0
-    
-    corrs = []
-    for _ in range(n_pairs):
-        pair = np.random.choice(cols, 2, replace=False)
-        corr = returns[pair[0]].corr(returns[pair[1]])
-        if not np.isnan(corr):
-            corrs.append(corr)
-            
-    return float(np.mean(corrs)) if corrs else 0.0
+    valid = latest_close.notna() & latest_sma.notna()
+    above = (latest_close > latest_sma) & valid
+
+    n_valid = int(valid.sum())
+    total_breadth = above.sum() / n_valid * 100 if n_valid > 0 else np.nan
+
+    if market_cap is None:
+        market_cap = close.tail(20).mean()
+
+    common = list(set(market_cap.index) & set(valid[valid].index))
+    if len(common) < 6:
+        return np.nan
+
+    top5 = market_cap[common].nlargest(5).index
+    ex_top5_valid = valid.drop(top5, errors="ignore")
+    ex_top5_above = above.drop(top5, errors="ignore")
+    n_ex = int(ex_top5_valid.sum())
+    ex_breadth = ex_top5_above.sum() / n_ex * 100 if n_ex > 0 else np.nan
+
+    spread = ex_breadth - total_breadth
+    return round(float(spread), 2)
+
+
+def flag_ex_dividend_window(
+    ex_dates: dict,
+    reference_date: pd.Timestamp,
+    buffer_days: int = 1,
+) -> dict:
+    """
+    reference_date ± buffer_days 내에 배당락일이 있는 종목 플래그.
+    """
+    flagged = {}
+    window_start = reference_date - pd.Timedelta(days=buffer_days)
+    window_end = reference_date + pd.Timedelta(days=buffer_days)
+
+    for ticker, dates in ex_dates.items():
+        for d in dates:
+            dt = pd.Timestamp(d)
+            if window_start <= dt <= window_end:
+                flagged[ticker] = str(d)
+                break
+
+    return {
+        "count": len(flagged),
+        "tickers": flagged,
+        "window": f"{window_start.date()} ~ {window_end.date()}",
+    }
+
+
+def estimate_icc(
+    breadth_series: pd.Series,
+    lag: int = 1,
+) -> float:
+    """
+    breadth 시계열의 자기상관으로 ICC 근사 추정.
+    """
+    if len(breadth_series) < lag + 10:
+        return np.nan
+    clean = breadth_series.dropna()
+    return round(float(clean.autocorr(lag=lag)), 4)

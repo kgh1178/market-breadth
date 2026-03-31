@@ -27,6 +27,9 @@
           text-align:center;position:relative}
     .card .v{font-size:22px;font-weight:700}
     .card .l{font-size:11px;color:#666;margin-top:2px}
+    .card .detail{font-size:11px;color:#5f6368;margin-top:4px}
+    .card .note{font-size:10px;color:#b26a00;margin-top:4px}
+    .card .basis{font-size:10px;color:#9aa0a6;margin-top:6px}
     .card .ci{height:4px;background:#e0e0e0;border-radius:2px;
               margin-top:6px;position:relative;overflow:hidden}
     .card .ci-f{height:100%;border-radius:2px;position:absolute}
@@ -43,6 +46,11 @@
     .b-long{background:#e6f4ea;color:#0d904f}
     .b-short{background:#fce8e6;color:#d93025}
     .b-neut{background:#fef7e0;color:#f9ab00}
+    .b-off{background:#f1f3f4;color:#5f6368}
+    .msg{margin:0 16px 8px;padding:8px 10px;border-radius:8px;
+         font-size:12px;line-height:1.4}
+    .msg.warn{background:#fef7e0;color:#8d6e00}
+    .msg.err{background:#fce8e6;color:#b3261e}
     .ftr{padding:8px 16px;font-size:10px;color:#aaa;text-align:right;
          border-top:1px solid #f0f0f0}
     .ftr a{color:#1a73e8;text-decoration:none}
@@ -57,10 +65,11 @@
   <div class="tabs" id="tabs"></div>
   <div class="cards" id="cards"></div>
   <div class="extra" id="extra"></div>
+  <div id="msg"></div>
   <div class="chart" id="chart"></div>
   <div class="sig" id="sig"></div>
   <div class="ftr">
-    Data: yfinance+pykrx | Engine: market_breadth v3.0 |
+    Data: yfinance+pykrx | Engine: market_breadth v3.1 |
     <a href="https://kgh1178.github.io/market-breadth/"
        target="_blank">Full Dashboard</a>
   </div>
@@ -68,19 +77,79 @@
 <script type="module">
 import{createChart}from'https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.mjs';
 
-const B='https://kgh1178.github.io/market-breadth/api'; 
+const API_DEFAULT='https://kgh1178.github.io/market-breadth/api';
+const API_LOCAL=`${window.location.origin}/api`;
+const API_PARAM=new URLSearchParams(window.location.search).get('api_base');
+const B=API_PARAM||(window.location.hostname==='127.0.0.1'||window.location.hostname==='localhost'
+  ?API_LOCAL
+  :API_DEFAULT);
 
 const M=[
-  {id:'sp500',    lb:'S&P 500',    c:'#34a853'}, /* 미국: 초록색(에버그린) */
-  {id:'nikkei225',lb:'Nikkei 225', c:'#1a73e8'}, /* 일본: 파란색 */
-  {id:'kospi200', lb:'KOSPI 200',  c:'#ea4335'}, /* 한국: 빨간색 */
-  {id:'global50', lb:'Global 50d', c:'#555'},
+  {id:'sp500',lb:'S&P 500',c:'#34a853'},
+  {id:'nikkei225',lb:'Nikkei 225',c:'#1a73e8'},
+  {id:'kospi200',lb:'KOSPI 200',c:'#ea4335'},
+  {id:'global50',lb:'Global 50d',c:'#555'},
   {id:'global200',lb:'Global 200d',c:'#555'}
 ];
 let chart,activeSeries=[],cur='sp500';
 
+function marketMeta(latest, marketId){
+  return latest[marketId] || {};
+}
+
+function marketAvailable(latest, marketId){
+  const meta = marketMeta(latest, marketId);
+  return meta.status === 'ok' && meta.series_valid === true;
+}
+
+function setMessage(text, kind='warn'){
+  const el=document.getElementById('msg');
+  el.innerHTML=text?`<div class="msg ${kind}">${text}</div>`:'';
+}
+
+function setChartVisible(visible){
+  document.getElementById('chart').style.display=visible?'block':'none';
+}
+
+function clearChartSeries(){
+  activeSeries.forEach(s=>chart.removeSeries(s));
+  activeSeries=[];
+}
+
+function mkCard(label,val,unit,lo,hi,deff,neff,icc,above,valid,excluded=0){
+  if(val==null) val='-';
+  const isZ=unit==='σ';
+  const n=isZ?parseFloat(val)||0:parseFloat(val)||50;
+  const cls=isZ?(n>1?'bull':n<-1?'bear':'neut'):
+    (n>60?'bull':n<20?'bear':'neut');
+  let ciH='';
+  if(lo!=null&&hi!=null){
+    const bg=cls==='bull'?'#a8dab5':cls==='bear'?'#f5bcb5':'#fce094';
+    ciH=`<div class="ci"><div class="ci-f" style="left:${lo}%;width:${hi-lo}%;background:${bg}"></div></div>`;
+  }
+  let tipText=(deff!=null)?
+    `CI [${lo}, ${hi}], DEFF=${deff}, n_eff=${neff}, ICC=${icc||'?'}`:'';
+  if(above!=null && valid!=null){
+    tipText=tipText?`(${above}/${valid}) | `+tipText:`(${above}/${valid})`;
+  }
+  const detail=(above!=null && valid!=null)?`<div class="detail">(${above}/${valid})</div>`:'';
+  const note=excluded>0?`<div class="note">${excluded} symbols excluded</div>`:'';
+  const basis=unit==='%'?`<div class="basis">split-adj, div-unadj</div>`:'';
+  return`<div class="card">
+    ${tipText?`<div class="tip">${tipText}</div>`:''}
+    <div class="v ${cls}">${val}${unit}</div>
+    <div class="l">${label}</div>${detail}${ciH}${note}${basis}</div>`;
+}
+
+function mkStatusCard(label, value){
+  return`<div class="card">
+    <div class="v neut">${value||'-'}</div>
+    <div class="l">${label}</div>
+  </div>`;
+}
+
 function init(){
-  try {
+  try{
     chart=createChart(document.getElementById('chart'),{
       width:document.getElementById('chart').clientWidth,height:300,
       layout:{background:{color:'#fff'},textColor:'#333',fontSize:11},
@@ -88,144 +157,144 @@ function init(){
       timeScale:{timeVisible:false},
       rightPriceScale:{scaleMargins:{top:.08,bottom:.05}},
     });
-    // 배경 참조선
     const r50=chart.addLineSeries({color:'#bbb',lineWidth:1,lineStyle:1,priceLineVisible:false,lastValueVisible:false});
     r50.setData([{time:'2023-01-01',value:50},{time:'2028-01-01',value:50}]);
     const r20=chart.addLineSeries({color:'#fca5a5',lineWidth:1,lineStyle:2,priceLineVisible:false,lastValueVisible:false});
     r20.setData([{time:'2023-01-01',value:20},{time:'2028-01-01',value:20}]);
     const r10=chart.addLineSeries({color:'#ef4444',lineWidth:1,lineStyle:2,priceLineVisible:false,lastValueVisible:false});
     r10.setData([{time:'2023-01-01',value:10},{time:'2028-01-01',value:10}]);
-  } catch (err) {
+  }catch(err){
     document.getElementById('dt').textContent=`Init Error: ${err.message || err}`;
     console.error('Init Error:', err);
   }
 }
 
 async function load(mid){
-  if (!chart) {
-    if (!document.getElementById('dt').textContent.includes('Init Error')) {
-      document.getElementById('dt').textContent = 'Error: Chart not initialized';
+  if(!chart){
+    if(!document.getElementById('dt').textContent.includes('Init Error')){
+      document.getElementById('dt').textContent='Error: Chart not initialized';
     }
     return;
   }
   cur=mid;
-  const cb = '?t=' + new Date().getTime(); // 캐시 버스터
-  try {
-    const[ltR,sgR]=await Promise.all([
-      fetch(`${B}/latest.json${cb}`), fetch(`${B}/signals.json${cb}`)]);
+  const cb='?t='+new Date().getTime();
+  try{
+    const [ltR,sgR]=await Promise.all([
+      fetch(`${B}/latest.json${cb}`),fetch(`${B}/signals.json${cb}`)
+    ]);
     const lt=await ltR.json(),sg=await sgR.json();
-    
-    let reqs = [];
-    const isGlobal = mid.startsWith('global');
-    if (isGlobal) {
-      reqs = [fetch(`${B}/sp500.json${cb}`), fetch(`${B}/nikkei225.json${cb}`), fetch(`${B}/kospi200.json${cb}`)];
-    } else {
-      reqs = [fetch(`${B}/${mid}.json${cb}`)];
-    }
-    const resps = await Promise.all(reqs);
-    const tss = await Promise.all(resps.map(r => r.json()));
+    const isGlobal=mid.startsWith('global');
 
-    // 차트 초기화 및 재생성
-    activeSeries.forEach(s => chart.removeSeries(s));
-    activeSeries = [];
+    clearChartSeries();
+    setMessage('');
+    setChartVisible(true);
 
-    if (isGlobal) {
-      const w = mid === 'global50' ? 'breadth_50' : 'breadth_200';
-      tss.forEach((ts, idx) => {
-        const s = chart.addLineSeries({color: M[idx].c, lineWidth:2, title: M[idx].lb});
-        activeSeries.push(s);
-        s.setData((ts[w]||[]).map(x=>({time:x.date,value:x.value})));
-      });
-    } else {
-      const ts = tss[0];
-      const mcol = M.find(x => x.id === mid).c || '#1a73e8';
-      const s50 = chart.addLineSeries({color: mcol, lineWidth:2, title:'50-Day'});
-      const s200 = chart.addLineSeries({color:'#ff6d00', lineWidth:2, lineStyle:2, title:'200-Day'});
-      activeSeries.push(s50, s200);
-      s50.setData((ts.breadth_50||[]).map(x=>({time:x.date,value:x.value})));
-      s200.setData((ts.breadth_200||[]).map(x=>({time:x.date,value:x.value})));
-    }
-    chart.timeScale().fitContent();
-
-    // 상단 텍스트
     document.getElementById('dt').textContent=`Updated: ${lt.date}`;
     document.getElementById('warn').textContent='';
-    if (!isGlobal) {
+    if(!isGlobal){
       const d=lt[mid]||{};
-      document.getElementById('warn').textContent=d.ex_div_flag?'⚠ Ex-Div Window':'';
+      document.getElementById('warn').textContent=
+        (d.status==='ok'&&d.ex_div_flag)?'⚠ Ex-Div Window':'';
     }
 
-    // 통계 카드
     const cards=document.getElementById('cards');
-    if (isGlobal) {
-       const w = mid === 'global50' ? 'breadth_50' : 'breadth_200';
-       cards.innerHTML = [0,1,2].map(idx => {
-         const d = lt[M[idx].id]||{};
-         return mkCard(M[idx].lb, d[w], '%', null, null, null, null, null);
-       }).join('');
-    } else {
+    if(isGlobal){
+      const w=mid==='global50'?'50':'200';
+      cards.innerHTML=[0,1,2].map(idx=>{
+        const d=lt[M[idx].id]||{};
+        const above=d[`n_above_${w}`] ?? d[`count_above_${w}`];
+        return d.status==='ok'
+          ? mkCard(M[idx].lb,d[`breadth_${w}`],'%',null,null,null,null,null,above,d[`n_valid_${w}`],d.n_excluded_50||0)
+          : mkStatusCard(M[idx].lb,d.error_message||'Unavailable');
+      }).join('');
+    }else{
       const d=lt[mid]||{};
-      cards.innerHTML=[
-        mkCard('50-Day',d.breadth_50,'%',d.ci_lower_50,d.ci_upper_50,d.deff_50,d.n_eff_50,d.estimated_icc),
-        mkCard('200-Day',d.breadth_200,'%',d.ci_lower_200,d.ci_upper_200,d.deff_200,d.n_eff_200,d.estimated_icc),
+      cards.innerHTML=d.status==='ok' ? [
+        mkCard('50-Day',d.breadth_50,'%',d.ci_lower_50,d.ci_upper_50,d.deff_50,d.n_eff_50,d.icc_estimate||d.estimated_icc,d.n_above_50??d.count_above_50,d.n_valid_50,d.n_excluded_50||0),
+        mkCard('200-Day',d.breadth_200,'%',d.ci_lower_200,d.ci_upper_200,d.deff_200,d.n_eff_200,d.icc_estimate||d.estimated_icc,d.n_above_200??d.count_above_200,d.n_valid_200,d.n_excluded_200||0),
         mkCard('Logit-Z',d.logit_z_50,'σ',null,null)
+      ].join('') : [
+        mkStatusCard('Market Status',(d.status||'unavailable').toUpperCase()),
+        mkStatusCard('Error Code',d.error_code||'-'),
+        mkStatusCard('As Of',d.as_of_date||'-'),
       ].join('');
     }
 
-    // 시장별 특수 지표
     const ex=document.getElementById('extra');
     let exH='';
-    if(!isGlobal) {
+    if(!isGlobal){
       const d=lt[mid]||{};
-      if(mid==='nikkei225'&&d.pwds_50!=null)
+      if(d.status==='ok'&&mid==='nikkei225'&&d.pwds_50!=null)
         exH+=`PWDS(50d): <b>${d.pwds_50>0?'+':''}${d.pwds_50}</b>%p `;
-      if(mid==='kospi200'&&d.ex_top5_spread_50!=null)
+      if(d.status==='ok'&&mid==='kospi200'&&d.ex_top5_spread_50!=null)
         exH+=`Ex-Top5(50d): <b>${d.ex_top5_spread_50>0?'+':''}${d.ex_top5_spread_50}</b>%p `;
     }
     ex.innerHTML=exH;
 
-    // 전략 신호
+    if(isGlobal){
+      const marketIds=['sp500','nikkei225','kospi200'];
+      const available=marketIds.filter(id=>marketAvailable(lt,id));
+      const unavailable=marketIds.filter(id=>!marketAvailable(lt,id));
+      if(unavailable.length){
+        setMessage(`Unavailable: ${unavailable.map(id=>M.find(x=>x.id===id).lb).join(', ')}`,'warn');
+      }
+      if(!available.length){
+        setChartVisible(false);
+        setMessage('No market series available for the selected global view.','err');
+      }else{
+        const w=mid==='global50'?'breadth_50':'breadth_200';
+        const resps=await Promise.all(available.map(id=>fetch(`${B}/${id}.json${cb}`)));
+        const tss=await Promise.all(resps.map(r=>r.json()));
+        tss.forEach((ts,idx)=>{
+          const marketId=available[idx];
+          const meta=M.find(x=>x.id===marketId);
+          const s=chart.addLineSeries({color:meta.c,lineWidth:2,title:meta.lb});
+          activeSeries.push(s);
+          s.setData((ts[w]||[]).map(x=>({time:x.date,value:x.value})));
+        });
+        chart.timeScale().fitContent();
+      }
+    }else{
+      const d=lt[mid]||{};
+      if(marketAvailable(lt,mid)){
+        const ts=await (await fetch(`${B}/${mid}.json${cb}`)).json();
+        const mcol=M.find(x=>x.id===mid).c||'#1a73e8';
+        const s50=chart.addLineSeries({color:mcol,lineWidth:2,title:'50-Day'});
+        const s200=chart.addLineSeries({color:'#ff6d00',lineWidth:2,lineStyle:2,title:'200-Day'});
+        activeSeries.push(s50,s200);
+        s50.setData((ts.breadth_50||[]).map(x=>({time:x.date,value:x.value})));
+        s200.setData((ts.breadth_200||[]).map(x=>({time:x.date,value:x.value})));
+        chart.timeScale().fitContent();
+      }else{
+        setChartVisible(false);
+        setMessage(d.error_message||'Latest update failed for this market.','err');
+      }
+    }
+
     const sigEl=document.getElementById('sig');
     let sH='';
     if(sg.signals){
-      for(const[k,v]of Object.entries(sg.signals)){
+      for(const [k,v] of Object.entries(sg.signals)){
+        if(!v.valid) continue;
         const dir=v.direction||'NEUTRAL';
         const cls=dir==='LONG'?'b-long':dir==='SHORT'?'b-short':'b-neut';
         const label=k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
         sH+=`<span class="badge ${cls}">${label}: ${dir}</span>`;
       }
     }
+    if(sg.partial_data){
+      sH+=`<span class="badge b-off">Unavailable due to missing market data</span>`;
+    }
     sigEl.innerHTML=sH;
 
-    // 탭 활성화
     document.querySelectorAll('.tab').forEach(t=>
       t.classList.toggle('on',t.dataset.m===mid));
-  } catch (err) {
+  }catch(err){
     document.getElementById('dt').textContent=`Error: ${err.message || err}`;
     console.error(err);
   }
 }
 
-function mkCard(label,val,unit,lo,hi,deff,neff,icc){
-  if(val==null) val='-';
-  const isZ=unit==='σ';
-  const n=isZ?parseFloat(val)||0:parseFloat(val)||50;
-  const cls=isZ?(n>1?'bull':n<-1?'bear':'neut'):
-    (n>60?'bull':n<20?'bear':'neut');  /* 20 미만일때 빨간색 강조로 수정 */
-  let ciH='';
-  if(lo!=null&&hi!=null){
-    const bg=cls==='bull'?'#a8dab5':cls==='bear'?'#f5bcb5':'#fce094';
-    ciH=`<div class="ci"><div class="ci-f" style="left:${lo}%;width:${hi-lo}%;background:${bg}"></div></div>`;
-  }
-  const tipText=(deff!=null)?
-    `CI [${lo}, ${hi}], DEFF=${deff}, n_eff=${neff}, ICC=${icc||'?'}`:'';
-  return`<div class="card">
-    ${tipText?`<div class="tip">${tipText}</div>`:''}
-    <div class="v ${cls}">${val}${unit}</div>
-    <div class="l">${label}</div>${ciH}</div>`;
-}
-
-// 탭 생성
 const tb=document.getElementById('tabs');
 M.forEach(m=>{
   const t=document.createElement('div');
@@ -233,12 +302,12 @@ M.forEach(m=>{
   t.onclick=()=>load(m.id);tb.appendChild(t);
 });
 
-// 초기화
 init();load('sp500');
 
-// 반응형
 new ResizeObserver(()=>{
-  chart.applyOptions({width:document.getElementById('chart').clientWidth});
+  if(chart){
+    chart.applyOptions({width:document.getElementById('chart').clientWidth});
+  }
 }).observe(document.getElementById('chart'));
 </script>
 </body>

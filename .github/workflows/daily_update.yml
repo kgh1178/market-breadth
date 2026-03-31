@@ -31,7 +31,6 @@ jobs:
 
       - name: Run unit tests
         run: pytest tests/ -v --tb=short
-        continue-on-error: true
 
       - name: Run breadth pipeline
         run: python scripts/generate_json.py
@@ -49,9 +48,44 @@ jobs:
           for f in files:
               d = json.loads(f.read_text())
               assert isinstance(d, (dict, list)), f'{f.name} invalid JSON'
-          # latest.json 필수 키 확인
           latest = json.loads((api_dir / 'latest.json').read_text())
           assert 'date' in latest, 'latest.json missing date'
+          assert 'pipeline_date' in latest, 'latest.json missing pipeline_date'
+          metadata = json.loads((api_dir / 'metadata.json').read_text())
+          signals = json.loads((api_dir / 'signals.json').read_text())
+          assert metadata['price_basis'].startswith('split-adjusted'), 'metadata missing price_basis'
+          assert metadata['yfinance_auto_adjust'] is False, 'metadata yfinance_auto_adjust must be false'
+          assert metadata['price_column'] == 'Close', 'metadata price_column must be Close'
+          required_markets = ['sp500', 'nikkei225', 'kospi200']
+          required_market_fields = [
+              'status', 'as_of_date', 'series_valid', 'metrics_valid',
+              'price_basis',
+              'error_code', 'error_message'
+          ]
+          for market in required_markets:
+              assert market in latest, f'latest.json missing {market}'
+              payload = latest[market]
+              for field in required_market_fields:
+                  assert field in payload, f'{market} missing {field}'
+              series_path = api_dir / f'{market}.json'
+              if payload['status'] == 'ok':
+                  assert payload['series_valid'] is True, f'{market} should have valid series'
+                  assert payload['metrics_valid'] is True, f'{market} should have valid metrics'
+                  assert payload['as_of_date'], f'{market} missing as_of_date'
+                  assert payload['price_basis'] == 'split-adjusted, dividend-unadjusted', f'{market} invalid price_basis'
+                  assert series_path.exists(), f'{market}.json missing for ok market'
+                  series = json.loads(series_path.read_text())
+                  assert 'breadth_50' in series and 'breadth_200' in series, f'{market} series missing breadth keys'
+              else:
+                  assert payload['status'] in ['partial', 'error'], f'{market} invalid status'
+                  assert payload['series_valid'] is False, f'{market} should not have series'
+                  assert payload['metrics_valid'] is False, f'{market} should not have metrics'
+                  assert not series_path.exists(), f'{market}.json should be removed for error market'
+          assert 'partial_data' in signals, 'signals.json missing partial_data'
+          assert 'signals' in signals, 'signals.json missing signals'
+          for name, signal in signals['signals'].items():
+              for field in ['valid', 'required_markets', 'missing_markets', 'invalid_reason']:
+                  assert field in signal, f'{name} missing {field}'
           print('✅ JSON validation passed')
           "
 

@@ -1,213 +1,290 @@
-"""구성종목 수집 및 가격 다운로드"""
-import pandas as pd
-import numpy as np
-import yfinance as yf
-import time
+"""
+Market Breadth — Data Fetchers
+==============================
+v3.1  2026-03-31  Fix: YFINANCE_PARAMS 참조, 구성종목 수 검증
+
+구성종목 소스:
+  - S&P 500:   Wikipedia → yfiua fallback
+  - Nikkei 225: Wikipedia → yfiua fallback
+  - KOSPI 200:  pykrx → KRX OTP → yfiua fallback
+
+가격 소스:
+  - yfinance (auto_adjust=False) → Close = split-only adjusted
+"""
+
 import logging
-from typing import List
-from config import MarketConfig, BATCH_SIZE, BATCH_SLEEP, MAX_RETRIES
-from utils import retry_with_backoff
+import time
+from io import StringIO
 
-log = logging.getLogger(__name__)
+import pandas as pd
+import requests
+import yfinance as yf
 
-# ──────────────────────────────────────────────
-#  구성종목 수집: 시장별 개별 함수
-# ──────────────────────────────────────────────
+from config import (
+    BATCH_SIZE,
+    BATCH_SLEEP_SEC,
+    MARKETS,
+    MAX_RETRIES,
+    PRICE_COLUMN,
+    RETRY_BACKOFF_BASE,
+    YFINANCE_PARAMS,
+)
 
-def _fetch_sp500_wikipedia() -> List[str]:
-    """Wikipedia에서 S&P 500 구성종목 추출"""
-    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    tables = pd.read_html(url, header=0)
+logger = logging.getLogger(__name__)
+
+YFIUA_BASE = "https://yfiua.github.io/index-constituents/constituents-{}.json"
+WIKIPEDIA_SP500 = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+WIKIPEDIA_NIKKEI = "https://en.wikipedia.org/wiki/Nikkei_225"
+
+
+def fetch_sp500_wikipedia() -> list[str]:
+    tables = pd.read_html(WIKIPEDIA_SP500, header=0)
     df = tables[0]
-    symbols = df["Symbol"].str.strip().dropna().tolist()
-    # yfinance 호환 변환 및 빈 문자열 필터링
-    symbols = [s.replace(".", "-") for s in symbols if s and isinstance(s, str)]
-    log.info(f"S&P 500: {len(symbols)} symbols from Wikipedia")
-    return symbols
+    tickers = df["Symbol"].tolist()
+    tickers = [t.strip().replace(".", "-") for t in tickers]
+    return sorted(set(tickers))
 
-def _fetch_nikkei225_wikipedia() -> List[str]:
-    """Wikipedia에서 Nikkei 225 구성종목 추출"""
-    url = "https://en.wikipedia.org/wiki/Nikkei_225"
-    tables = pd.read_html(url, match="Company")
-    # 첫 번째 매칭 테이블에서 종목코드 열 탐색
-    df = tables[0]
-    # 열 이름에 'Code', 'Ticker', 'Symbol' 등이 포함된 열 찾기
-    code_col = None
-    for col in df.columns:
-        if any(kw in str(col).lower() for kw in
-               ["code", "ticker", "symbol", "securities"]):
-            code_col = col
-            break
-    if code_col is None:
-        # 숫자 4자리가 가장 많은 열을 코드 열로 추정
-        for col in df.columns:
-            vals = df[col].astype(str)
-            if vals.str.match(r'^\d{4}$').sum() > 100:
-                code_col = col
-                break
-    if code_col is None:
-        raise ValueError("Nikkei 225 Wikipedia 테이블에서 종목코드 열 미탐지")
-    codes = df[code_col].astype(str).str.strip().dropna()
-    codes = codes[codes.str.match(r'^\d{4}$')]
-    symbols = [c + ".T" for c in codes if c]
-    log.info(f"Nikkei 225: {len(symbols)} symbols from Wikipedia")
-    return symbols
 
-def _fetch_kospi200_pykrx() -> List[str]:
-    """pykrx에서 KOSPI 200 구성종목 추출"""
-    from pykrx import stock
-    codes = stock.get_index_portfolio_deposit_file("1028")
-    symbols = [c + ".KS" for c in codes if c]
-    log.info(f"KOSPI 200: {len(symbols)} symbols from pykrx")
-    return symbols
+def fetch_nikkei225_wikipedia() -> list[str]:
+    tables = pd.read_html(WIKIPEDIA_NIKKEI, header=0)
+    for tbl in tables:
+        cols_lower = [str(c).lower() for c in tbl.columns]
+        if any("ticker" in c or "code" in c or "symbol" in c for c in cols_lower):
+            for col in tbl.columns:
+                if any(kw in str(col).lower() for kw in ["ticker", "code", "symbol"]):
+                    codes = tbl[col].dropna().astype(str).tolist()
+                    tickers = []
+                    for c in codes:
+                        c = c.strip().split(".")[0]
+                        if c.isdigit() and len(c) == 4:
+                            tickers.append(f"{c}.T")
+                    if len(tickers) >= 200:
+                        return sorted(set(tickers))
+    raise ValueError("Nikkei 225 구성종목 테이블을 찾을 수 없음")
 
-def _fetch_kospi200_krx_otp() -> List[str]:
-    """KRX OTP POST 방식으로 KOSPI 200 구성종목 추출 (폴백)"""
-    import requests
+
+def fetch_kospi200_pykrx() -> list[str]:
+    try:
+        from pykrx import stock as pykrx_stock
+
+        codes = pykrx_stock.get_index_portfolio_deposit_file("1028")
+        tickers = [f"{c}.KS" for c in codes]
+        return sorted(set(tickers))
+    except Exception as exc:
+        logger.warning("pykrx KOSPI 200 조회 실패: %s", exc)
+        raise
+
+
+def fetch_kospi200_krx_otp() -> list[str]:
     otp_url = "http://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd"
     otp_params = {
         "locale": "ko_KR",
-        "indIdx": "028",    # KOSPI 200
+        "indIdx": "028",
         "indIdx2": "028",
         "trdDd": pd.Timestamp.today().strftime("%Y%m%d"),
         "money": "1",
         "csvxls_is498": "false",
         "name": "fileDown",
-        "url": "dbms/MDC/STAT/standard/MDCSTAT00601"
+        "url": "dbms/MDC/STAT/standard/MDCSTAT00601",
     }
     headers = {"User-Agent": "Mozilla/5.0", "Referer": "http://data.krx.co.kr"}
-    otp = requests.post(otp_url, data=otp_params, headers=headers).text
+    otp = requests.post(otp_url, data=otp_params, headers=headers, timeout=15).text
     download_url = "http://data.krx.co.kr/comm/fileDn/download_csv/download.cmd"
-    resp = requests.post(download_url, data={"code": otp}, headers=headers)
-    from io import StringIO
+    resp = requests.post(download_url, data={"code": otp}, headers=headers, timeout=15)
     df = pd.read_csv(StringIO(resp.text), encoding="euc-kr")
-    # 종목코드 열 탐색
     code_col = [c for c in df.columns if "종목코드" in c or "코드" in c]
     if not code_col:
-        code_col = [df.columns[0]]  # 첫 열이 코드일 가능성
+        code_col = [df.columns[0]]
     codes = df[code_col[0]].astype(str).str.strip().str.zfill(6).dropna()
-    symbols = [c + ".KS" for c in codes if c and c != "000000"]
-    log.info(f"KOSPI 200: {len(symbols)} symbols from KRX OTP")
-    return symbols
+    return sorted(set(f"{c}.KS" for c in codes if c and c != "000000"))
 
-def _fetch_from_yfiua(index_code: str, suffix: str) -> List[str]:
-    """yfiua GitHub JSON에서 구성종목 추출 (최종 폴백)"""
-    import requests
-    url = f"https://yfiua.github.io/index-constituents/constituents-{index_code}.json"
-    data = requests.get(url, timeout=30).json()
-    symbols = [str(item.get("symbol", item.get("ticker", ""))).strip()
-               for item in data if isinstance(item, dict)]
-    # 빈 값 제거
-    symbols = [s for s in symbols if s]
-    # 접미사 확인 및 추가
-    if suffix and symbols and not symbols[0].endswith(suffix):
-        symbols = [s + suffix for s in symbols]
-    log.info(f"{index_code}: {len(symbols)} symbols from yfiua GitHub")
-    return symbols
 
-# ──────────────────────────────────────────────
-#  디스패처
-# ──────────────────────────────────────────────
+def fetch_yfiua_fallback(index_code: str) -> list[str]:
+    url = YFIUA_BASE.format(index_code)
+    resp = requests.get(url, timeout=15)
+    resp.raise_for_status()
+    data = resp.json()
+    if isinstance(data, list):
+        tickers = [d.get("symbol", d.get("ticker", "")) for d in data]
+        return sorted(set(t for t in tickers if t))
+    return []
 
-def fetch_constituents(cfg: MarketConfig) -> List[str]:
-    """시장 설정에 따라 구성종목을 수집, 실패 시 폴백"""
+
+def fetch_constituents(market_id: str) -> list[str]:
+    cfg = MARKETS[market_id]
     fetchers = []
-    if cfg.market_id == "sp500":
-        fetchers = [
-            _fetch_sp500_wikipedia,
-            lambda: _fetch_from_yfiua("sp500", cfg.yf_suffix),
-        ]
-    elif cfg.market_id == "nikkei225":
-        fetchers = [
-            _fetch_nikkei225_wikipedia,
-            lambda: _fetch_from_yfiua("nikkei225", cfg.yf_suffix),
-        ]
-    elif cfg.market_id == "kospi200":
-        fetchers = [
-            _fetch_kospi200_pykrx,
-            _fetch_kospi200_krx_otp,
-        ]
-    else:
-        raise ValueError(f"Unknown market: {cfg.market_id}")
 
-    last_error = None
-    for fn in fetchers:
+    if market_id == "sp500":
+        fetchers = [
+            ("Wikipedia", fetch_sp500_wikipedia),
+            ("yfiua", lambda: fetch_yfiua_fallback("sp500")),
+        ]
+    elif market_id == "nikkei225":
+        fetchers = [
+            ("Wikipedia", fetch_nikkei225_wikipedia),
+            ("yfiua", lambda: fetch_yfiua_fallback("nikkei225")),
+        ]
+    elif market_id == "kospi200":
+        fetchers = [
+            ("pykrx", fetch_kospi200_pykrx),
+            ("KRX OTP", fetch_kospi200_krx_otp),
+            ("yfiua", lambda: fetch_yfiua_fallback("kospi200")),
+        ]
+
+    min_count = int(cfg.expected_count[0] * 0.85)
+
+    for name, fn in fetchers:
         try:
-            symbols = fn()
-            if len(symbols) >= cfg.expected_count * 0.85:
-                return symbols
-            log.warning(f"{cfg.market_id}: got {len(symbols)} symbols "
-                        f"(expected ~{cfg.expected_count}), trying fallback")
-        except Exception as e:
-            last_error = e
-            log.warning(f"{cfg.market_id}: {fn.__name__} failed: {e}")
+            tickers = fn()
+            if len(tickers) >= min_count:
+                exp_min, exp_max = cfg.expected_count
+                if not (exp_min <= len(tickers) <= exp_max):
+                    logger.warning(
+                        "[%s] %s: 종목 수 %s (예상 %s-%s)",
+                        market_id,
+                        name,
+                        len(tickers),
+                        exp_min,
+                        exp_max,
+                    )
+                else:
+                    logger.info("[%s] %s: %s개 종목 로드 성공", market_id, name, len(tickers))
+                return tickers
+            logger.warning(
+                "[%s] %s: %s개 종목 (최소 %s 미달)",
+                market_id,
+                name,
+                len(tickers),
+                min_count,
+            )
+        except Exception as exc:
+            logger.warning("[%s] %s 실패: %s", market_id, name, exc)
 
-    raise RuntimeError(
-        f"{cfg.market_id}: all constituent fetchers failed. "
-        f"Last error: {last_error}")
+    raise RuntimeError(f"[{market_id}] 모든 구성종목 소스 실패")
 
-# ──────────────────────────────────────────────
-#  가격 다운로드
-# ──────────────────────────────────────────────
 
-@retry_with_backoff(max_retries=MAX_RETRIES, initial_wait=5.0)
-def _download_batch(symbols: List[str], period: str) -> pd.DataFrame:
-    """yfinance 단일 배치 다운로드"""
-    # 유효한 심볼만 필터링
-    valid_symbols = [s for s in symbols if s and isinstance(s, str)]
-    if not valid_symbols:
-        return pd.DataFrame()
-    df = yf.download(
-        tickers=valid_symbols,
-        period=period,
-        auto_adjust=True,
-        progress=False,
-        threads=False,
-    )
-    if df.empty:
+def _coerce_download_frame(df: pd.DataFrame, tickers: list[str]) -> pd.DataFrame:
+    if df is None or df.empty:
         return pd.DataFrame()
     if isinstance(df.columns, pd.MultiIndex):
-        # 'Close'가 없을 경우 'Adj Close' 시도
-        if "Close" in df.columns.levels[0]:
-            return df["Close"]
-        elif "Adj Close" in df.columns.levels[0]:
-            return df["Adj Close"]
-        return pd.DataFrame()
+        return df
+    if len(tickers) == 1:
+        ticker = tickers[0]
+        df.columns = pd.MultiIndex.from_product([df.columns, [ticker]])
+        return df
     return df
 
-def fetch_prices(symbols: List[str], cfg: MarketConfig,
-                 lookback_days: int = 504) -> pd.DataFrame:
+
+def fetch_prices(
+    tickers: list[str],
+    market_id: str,
+) -> pd.DataFrame:
     """
-    전체 구성종목의 종가 다운로드.
-    배치 크기 BATCH_SIZE, 배치 간 BATCH_SLEEP초 대기.
+    yfinance로 가격 데이터 다운로드.
     """
-    # lookback_days를 yfinance period 문자열로 변환
-    period = f"{lookback_days + 50}d"  # 여유분 50일
-    all_dfs = []
-    failed_symbols = []
+    all_data = []
 
-    for i in range(0, len(symbols), BATCH_SIZE):
-        batch = symbols[i:i + BATCH_SIZE]
-        try:
-            df = _download_batch(batch, period)
-            all_dfs.append(df)
-        except Exception as e:
-            log.error(f"{cfg.market_id}: batch {i//BATCH_SIZE} failed: {e}")
-            failed_symbols.extend(batch)
+    for batch_start in range(0, len(tickers), BATCH_SIZE):
+        batch = tickers[batch_start:batch_start + BATCH_SIZE]
+        batch_num = batch_start // BATCH_SIZE + 1
+        total_batches = (len(tickers) + BATCH_SIZE - 1) // BATCH_SIZE
 
-        if i + BATCH_SIZE < len(symbols):
-            time.sleep(BATCH_SLEEP)
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                logger.info(
+                    "[%s] 배치 %s/%s (%s종목) 다운로드 중... (시도 %s/%s)",
+                    market_id,
+                    batch_num,
+                    total_batches,
+                    len(batch),
+                    attempt,
+                    MAX_RETRIES,
+                )
+                df = yf.download(tickers=batch, **YFINANCE_PARAMS)
+                df = _coerce_download_frame(df, batch)
+                if df is not None and not df.empty:
+                    all_data.append(df)
+                    break
+            except Exception as exc:
+                wait = RETRY_BACKOFF_BASE ** attempt
+                logger.warning(
+                    "[%s] 배치 %s 실패 (시도 %s): %s. %.0f초 후 재시도.",
+                    market_id,
+                    batch_num,
+                    attempt,
+                    exc,
+                    wait,
+                )
+                time.sleep(wait)
+        else:
+            logger.error("[%s] 배치 %s 최종 실패", market_id, batch_num)
 
-    if not all_dfs:
-        raise RuntimeError(f"{cfg.market_id}: no price data downloaded")
+        if batch_start + BATCH_SIZE < len(tickers):
+            time.sleep(BATCH_SLEEP_SEC)
 
-    prices = pd.concat(all_dfs, axis=1)
+    if not all_data:
+        raise RuntimeError(f"[{market_id}] 가격 데이터 다운로드 완전 실패")
 
-    # 중복 열 제거 (동일 종목이 여러 배치에 포함된 경우)
-    prices = prices.loc[:, ~prices.columns.duplicated()]
+    combined = all_data[0] if len(all_data) == 1 else pd.concat(all_data, axis=1)
+    combined = combined.loc[:, ~combined.columns.duplicated()]
 
-    coverage = len(prices.columns) / len(symbols) * 100
-    log.info(f"{cfg.market_id}: {len(prices.columns)}/{len(symbols)} "
-             f"symbols downloaded ({coverage:.1f}%)")
+    if isinstance(combined.columns, pd.MultiIndex):
+        close_cols = combined[PRICE_COLUMN].columns if PRICE_COLUMN in combined.columns.get_level_values(0) else []
+    else:
+        close_cols = combined.columns
 
-    return prices, failed_symbols, coverage
+    n_downloaded = len(close_cols)
+    n_expected = len(tickers)
+    coverage = n_downloaded / n_expected if n_expected else 0.0
+
+    logger.info(
+        "[%s] 가격 다운로드 완료: %s/%s 종목 (%.1f%%)",
+        market_id,
+        n_downloaded,
+        n_expected,
+        coverage * 100,
+    )
+
+    downloaded_set = set(str(c) for c in close_cols)
+    missing = [t for t in tickers if t not in downloaded_set]
+    if missing:
+        logger.warning(
+            "[%s] 다운로드 누락 %s종목: %s%s",
+            market_id,
+            len(missing),
+            missing[:10],
+            "..." if len(missing) > 10 else "",
+        )
+
+    return combined
+
+
+def fetch_prices_pykrx(
+    tickers: list[str],
+    start_date: str,
+    end_date: str,
+) -> pd.DataFrame:
+    """
+    pykrx를 사용한 KOSPI 200 가격 데이터 대안.
+    """
+    try:
+        from pykrx import stock as pykrx_stock
+
+        frames = {}
+        for ticker in tickers:
+            code = ticker.replace(".KS", "")
+            try:
+                df = pykrx_stock.get_market_ohlcv(start_date, end_date, code)
+                if df is not None and not df.empty:
+                    frames[ticker] = df["종가"]
+            except Exception as exc:
+                logger.debug("pykrx %s 실패: %s", code, exc)
+
+        if frames:
+            result = pd.DataFrame(frames)
+            logger.info("[kospi200] pykrx 가격 로드: %s종목", len(frames))
+            return result
+    except ImportError:
+        logger.warning("pykrx 미설치")
+
+    raise RuntimeError("pykrx 가격 다운로드 실패")

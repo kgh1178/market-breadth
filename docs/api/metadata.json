@@ -1,19 +1,55 @@
 {
   "date": "2026-03-31",
-  "markets": {},
+  "markets": {
+    "sp500": {
+      "status": "ok",
+      "as_of_date": "2026-03-30",
+      "symbols_requested": 503,
+      "symbols_downloaded": 503,
+      "coverage_pct": 100.0,
+      "failed_symbols": [],
+      "validation": {
+        "s5fi": {
+          "source": "barchart_s5fi",
+          "computed": 19.48,
+          "official": 19.68,
+          "diff": 0.2,
+          "pass": true,
+          "n_valid": 503,
+          "n_total": 503
+        },
+        "internal": {
+          "range_50": true,
+          "range_200": true,
+          "all_pass": true
+        }
+      }
+    },
+    "nikkei225": {
+      "status": "error",
+      "error_code": "constituents_fetch_failed",
+      "error": "nikkei225: all constituent fetchers failed. Last error: Expecting value: line 1 column 1 (char 0)"
+    },
+    "kospi200": {
+      "status": "error",
+      "error_code": "constituents_fetch_failed",
+      "error": "kospi200: all constituent fetchers failed. Last error: No columns to parse from file"
+    }
+  },
   "errors": [
     {
-      "market": "sp500",
-      "error": "sp500: all constituent fetchers failed. Last error: HTTP Error 403: Forbidden"
-    },
-    {
       "market": "nikkei225",
+      "error_code": "constituents_fetch_failed",
       "error": "nikkei225: all constituent fetchers failed. Last error: Expecting value: line 1 column 1 (char 0)"
     },
     {
       "market": "kospi200",
+      "error_code": "constituents_fetch_failed",
       "error": "kospi200: all constituent fetchers failed. Last error: No columns to parse from file"
     }
   ],
-  "pipeline_duration_sec": 3.0
+  "pipeline_duration_sec": 72.1,
+  "price_basis": "split-adjusted, dividend-unadjusted (Barchart S5FI compatible)",
+  "yfinance_auto_adjust": false,
+  "price_column": "Close"
 }

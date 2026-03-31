@@ -1,12 +1,59 @@
 {
   "date": "2026-03-31",
+  "pipeline_date": "2026-03-31",
   "sp500": {
-    "error": "sp500: all constituent fetchers failed. Last error: HTTP Error 403: Forbidden"
+    "status": "ok",
+    "as_of_date": "2026-03-30",
+    "series_valid": true,
+    "metrics_valid": true,
+    "price_basis": "split-adjusted, dividend-unadjusted",
+    "error_code": null,
+    "error_message": null,
+    "breadth_50": 19.48,
+    "count_above_50": 98,
+    "n_valid_50": 503,
+    "n_total_50": 503,
+    "n_excluded_50": 0,
+    "ci_lower_50": 2.09,
+    "ci_upper_50": 48.41,
+    "deff_50": 41.16,
+    "n_eff_50": 12.2,
+    "confidence_grade_50": "B",
+    "logit_z_50": -2.266,
+    "percentile_50": 2.8,
+    "composite_50": -1.605,
+    "breadth_200": 42.43,
+    "count_above_200": 213,
+    "n_valid_200": 502,
+    "n_total_200": 503,
+    "n_excluded_200": 1,
+    "ci_lower_200": 15.17,
+    "ci_upper_200": 72.33,
+    "deff_200": 41.08,
+    "n_eff_200": 12.2,
+    "confidence_grade_200": "B",
+    "logit_z_200": -1.234,
+    "percentile_200": 10.3,
+    "composite_200": -1.014,
+    "ex_div_flag": true,
+    "estimated_icc": 0.08
   },
   "nikkei225": {
-    "error": "nikkei225: all constituent fetchers failed. Last error: Expecting value: line 1 column 1 (char 0)"
+    "status": "error",
+    "as_of_date": null,
+    "series_valid": false,
+    "metrics_valid": false,
+    "price_basis": "split-adjusted, dividend-unadjusted",
+    "error_code": "constituents_fetch_failed",
+    "error_message": "nikkei225: all constituent fetchers failed. Last error: Expecting value: line 1 column 1 (char 0)"
   },
   "kospi200": {
-    "error": "kospi200: all constituent fetchers failed. Last error: No columns to parse from file"
+    "status": "error",
+    "as_of_date": null,
+    "series_valid": false,
+    "metrics_valid": false,
+    "price_basis": "split-adjusted, dividend-unadjusted",
+    "error_code": "constituents_fetch_failed",
+    "error_message": "kospi200: all constituent fetchers failed. Last error: No columns to parse from file"
   }
 }
