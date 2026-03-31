@@ -31,9 +31,17 @@
       "price_basis": "split-adjusted, dividend-unadjusted"
     },
     "kospi200": {
-      "status": "error",
-      "error_code": "constituents_fetch_failed",
-      "error": "[kospi200] 모든 구성종목 소스 실패",
+      "status": "ok",
+      "as_of_date": "2026-03-31",
+      "symbols_requested": 200,
+      "symbols_downloaded": 200,
+      "coverage_pct": 100.0,
+      "failed_symbols": [],
+      "validation": {
+        "breadth_50_range": true,
+        "breadth_200_range": true,
+        "short_term_stronger": false
+      },
       "price_basis": "split-adjusted, dividend-unadjusted"
     }
   },
@@ -42,14 +50,9 @@
       "market": "nikkei225",
       "error_code": "constituents_fetch_failed",
       "error": "[nikkei225] 모든 구성종목 소스 실패"
-    },
-    {
-      "market": "kospi200",
-      "error_code": "constituents_fetch_failed",
-      "error": "[kospi200] 모든 구성종목 소스 실패"
     }
   ],
-  "pipeline_duration_sec": 66.4,
+  "pipeline_duration_sec": 91.9,
   "price_basis": "split-adjusted, dividend-unadjusted (Barchart S5FI compatible)",
   "yfinance_auto_adjust": false,
   "price_column": "Close"

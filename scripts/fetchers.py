@@ -37,32 +37,52 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 YFIUA_BASE = "https://yfiua.github.io/index-constituents/constituents-{}.json"
 WIKIPEDIA_SP500 = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 WIKIPEDIA_NIKKEI = "https://en.wikipedia.org/wiki/Nikkei_225"
+WIKIPEDIA_KOSPI200 = "https://en.wikipedia.org/wiki/KOSPI_200"
+NIKKEI_COMPONENTS = "https://indexes.nikkei.co.jp/en/nkave/index/component"
 
 
-def fetch_sp500_wikipedia() -> list[str]:
+def _read_html_from_url(url: str, match: str | None = None) -> list[pd.DataFrame]:
     resp = requests.get(
-        WIKIPEDIA_SP500,
+        url,
         headers={"User-Agent": "Mozilla/5.0"},
         timeout=15,
         verify=False,
     )
     resp.raise_for_status()
-    tables = pd.read_html(resp.text, header=0)
+    html = StringIO(resp.text)
+    if match:
+        return pd.read_html(html, match=match, header=0)
+    return pd.read_html(html, header=0)
+
+
+def fetch_sp500_wikipedia() -> list[str]:
+    tables = _read_html_from_url(WIKIPEDIA_SP500)
     df = tables[0]
     tickers = df["Symbol"].tolist()
     tickers = [t.strip().replace(".", "-") for t in tickers]
     return sorted(set(tickers))
 
 
+def fetch_nikkei225_official() -> list[str]:
+    tables = _read_html_from_url(NIKKEI_COMPONENTS)
+    tickers = []
+    for tbl in tables:
+        cols_lower = [str(c).lower() for c in tbl.columns]
+        if "code" not in cols_lower:
+            continue
+        for col in tbl.columns:
+            if str(col).lower() == "code":
+                codes = tbl[col].dropna().astype(str).str.extract(r"(\d{4})")[0]
+                tickers.extend([f"{code}.T" for code in codes.dropna()])
+                break
+    tickers = sorted(set(tickers))
+    if len(tickers) >= 200:
+        return tickers
+    raise ValueError("Nikkei official components page did not yield enough codes")
+
+
 def fetch_nikkei225_wikipedia() -> list[str]:
-    resp = requests.get(
-        WIKIPEDIA_NIKKEI,
-        headers={"User-Agent": "Mozilla/5.0"},
-        timeout=15,
-        verify=False,
-    )
-    resp.raise_for_status()
-    tables = pd.read_html(resp.text, header=0)
+    tables = _read_html_from_url(WIKIPEDIA_NIKKEI)
     for tbl in tables:
         cols_lower = [str(c).lower() for c in tbl.columns]
         if any("ticker" in c or "code" in c or "symbol" in c for c in cols_lower):
@@ -76,7 +96,28 @@ def fetch_nikkei225_wikipedia() -> list[str]:
                             tickers.append(f"{c}.T")
                     if len(tickers) >= 200:
                         return sorted(set(tickers))
+        for col in tbl.columns:
+            values = tbl[col].astype(str).str.extract(r"(\d{4})")[0].dropna()
+            if len(values) >= 200:
+                return sorted(set(f"{code}.T" for code in values))
     raise ValueError("Nikkei 225 구성종목 테이블을 찾을 수 없음")
+
+
+def fetch_kospi200_wikipedia() -> list[str]:
+    tables = _read_html_from_url(WIKIPEDIA_KOSPI200, match="Company|Symbol|GICS Sector")
+    for tbl in tables:
+        cols_lower = [str(c).lower() for c in tbl.columns]
+        if "symbol" not in cols_lower:
+            continue
+        symbol_col = next(col for col in tbl.columns if str(col).lower() == "symbol")
+        codes = tbl[symbol_col].dropna().astype(str).str.extract(r"(\d{6}|\d{4,6}|[0-9A-Z]{6})")[0]
+        tickers = []
+        for code in codes.dropna():
+            if code.isdigit():
+                tickers.append(f"{code.zfill(6)}.KS")
+        if len(tickers) >= 180:
+            return sorted(set(tickers))
+    raise ValueError("KOSPI 200 Wikipedia components table not found")
 
 
 def fetch_kospi200_pykrx() -> list[str]:
@@ -144,11 +185,13 @@ def fetch_constituents(market_id: str) -> list[str]:
         ]
     elif market_id == "nikkei225":
         fetchers = [
+            ("Nikkei official", fetch_nikkei225_official),
             ("Wikipedia", fetch_nikkei225_wikipedia),
             ("yfiua", lambda: fetch_yfiua_fallback("nikkei225")),
         ]
     elif market_id == "kospi200":
         fetchers = [
+            ("Wikipedia", fetch_kospi200_wikipedia),
             ("pykrx", fetch_kospi200_pykrx),
             ("KRX OTP", fetch_kospi200_krx_otp),
         ]

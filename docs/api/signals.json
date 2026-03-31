@@ -11,8 +11,7 @@
         "kospi200"
       ],
       "missing_markets": [
-        "nikkei225",
-        "kospi200"
+        "nikkei225"
       ],
       "invalid_reason": "missing_market_data",
       "direction": "UNAVAILABLE",
@@ -27,8 +26,7 @@
         "kospi200"
       ],
       "missing_markets": [
-        "nikkei225",
-        "kospi200"
+        "nikkei225"
       ],
       "invalid_reason": "missing_market_data",
       "direction": "UNAVAILABLE",
@@ -43,8 +41,7 @@
         "kospi200"
       ],
       "missing_markets": [
-        "nikkei225",
-        "kospi200"
+        "nikkei225"
       ],
       "invalid_reason": "missing_market_data",
       "direction": "UNAVAILABLE",
