@@ -146,12 +146,13 @@ function updateActiveTabs(mid){
   });
 }
 
-function mkCard(label,val,unit,lo,hi,deff,neff,icc,above,valid,excluded=0){
+function mkCard(label,val,unit,lo,hi,deff,neff,icc,above,valid,excluded=0,accentColor=null){
   if(val==null) val='-';
   const isZ=unit==='σ';
   const n=isZ?parseFloat(val)||0:parseFloat(val)||50;
   const cls=isZ?(n>1?'bull':n<-1?'bear':'neut'):
     (n>60?'bull':n<20?'bear':'neut');
+  const valueStyle=accentColor?` style="color:${accentColor}"`:'';
   let ciH='';
   if(lo!=null&&hi!=null){
     const bg=cls==='bull'?'#a8dab5':cls==='bear'?'#f5bcb5':'#fce094';
@@ -167,7 +168,7 @@ function mkCard(label,val,unit,lo,hi,deff,neff,icc,above,valid,excluded=0){
   const basis=unit==='%'?`<div class="basis">split-adj, div-unadj</div>`:'';
   return`<div class="card">
     ${tipText?`<div class="tip">${tipText}</div>`:''}
-    <div class="v ${cls}">${val}${unit}</div>
+    <div class="v ${cls}"${valueStyle}>${val}${unit}</div>
     <div class="l">${label}</div>${detail}${ciH}${note}${basis}</div>`;
 }
 
@@ -235,14 +236,15 @@ async function load(mid){
         const d=lt[M[idx].id]||{};
         const above=d[`n_above_${w}`] ?? d[`count_above_${w}`];
         return d.status==='ok'
-          ? mkCard(M[idx].lb,d[`breadth_${w}`],'%',null,null,null,null,null,above,d[`n_valid_${w}`],d.n_excluded_50||0)
+          ? mkCard(M[idx].lb,d[`breadth_${w}`],'%',null,null,null,null,null,above,d[`n_valid_${w}`],d.n_excluded_50||0,M[idx].c)
           : mkStatusCard(M[idx].lb,d.error_message||'Unavailable');
       }).join('');
     }else{
       const d=lt[mid]||{};
+      const marketMeta=M.find(x=>x.id===mid)||M[0];
       cards.innerHTML=d.status==='ok' ? [
-        mkCard('50-Day',d.breadth_50,'%',d.ci_lower_50,d.ci_upper_50,d.deff_50,d.n_eff_50,d.icc_estimate||d.estimated_icc,d.n_above_50??d.count_above_50,d.n_valid_50,d.n_excluded_50||0),
-        mkCard('200-Day',d.breadth_200,'%',d.ci_lower_200,d.ci_upper_200,d.deff_200,d.n_eff_200,d.icc_estimate||d.estimated_icc,d.n_above_200??d.count_above_200,d.n_valid_200,d.n_excluded_200||0),
+        mkCard('50-Day',d.breadth_50,'%',d.ci_lower_50,d.ci_upper_50,d.deff_50,d.n_eff_50,d.icc_estimate||d.estimated_icc,d.n_above_50??d.count_above_50,d.n_valid_50,d.n_excluded_50||0,marketMeta.c),
+        mkCard('200-Day',d.breadth_200,'%',d.ci_lower_200,d.ci_upper_200,d.deff_200,d.n_eff_200,d.icc_estimate||d.estimated_icc,d.n_above_200??d.count_above_200,d.n_valid_200,d.n_excluded_200||0,marketMeta.c),
         mkCard('Logit-Z',d.logit_z_50,'σ',null,null)
       ].join('') : [
         mkStatusCard('Market Status',(d.status||'unavailable').toUpperCase()),
