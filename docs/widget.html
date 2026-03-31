@@ -24,8 +24,6 @@
             border-bottom:1px solid #f3f4f6}
     .legend-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#555}
     .legend-line{width:22px;height:0;border-top-width:3px;border-top-style:solid}
-    .legend-line.jp{border-top-style:dashed}
-    .legend-line.kr{border-top-style:dotted}
     .legend-note{font-size:10px;color:#888}
     .chart{width:100%;height:300px}
     .cards{display:grid;grid-template-columns:repeat(3,1fr);
@@ -93,9 +91,9 @@ const B=API_PARAM||(window.location.hostname==='127.0.0.1'||window.location.host
   :API_DEFAULT);
 
 const M=[
-  {id:'sp500',lb:'S&P 500',c:'#c58b00',lineStyle:0,lineWidth:3,legendClass:'us',note:'US solid'},
-  {id:'nikkei225',lb:'Nikkei 225',c:'#1a73e8',lineStyle:2,lineWidth:2,legendClass:'jp',note:'Japan dashed'},
-  {id:'kospi200',lb:'KOSPI 200',c:'#ea4335',lineStyle:1,lineWidth:2,legendClass:'kr',note:'Korea dotted'},
+  {id:'sp500',lb:'S&P 500',c:'#c58b00',lineStyle:0,lineWidth:4,legendClass:'us',note:'US thick'},
+  {id:'nikkei225',lb:'Nikkei 225',c:'#1a73e8',lineStyle:0,lineWidth:3,legendClass:'jp',note:'Japan medium'},
+  {id:'kospi200',lb:'KOSPI 200',c:'#ea4335',lineStyle:0,lineWidth:2,legendClass:'kr',note:'Korea thin'},
   {id:'global50',lb:'Global 50d',c:'#555',lineStyle:0,lineWidth:2,legendClass:'gl',note:'50-day mix'},
   {id:'global200',lb:'Global 200d',c:'#555',lineStyle:0,lineWidth:2,legendClass:'gl',note:'200-day mix'}
 ];
@@ -128,8 +126,8 @@ function renderLegend(mid){
   const isGlobal=mid.startsWith('global');
   const items=isGlobal?M.slice(0,3):[M.find(x=>x.id===mid)];
   const extra=isGlobal
-    ? `<span class="legend-note">Colors and line styles both identify markets.</span>`
-    : `<span class="legend-note">50-day uses the market style; 200-day uses orange dashed.</span>`;
+    ? `<span class="legend-note">Colors and line thickness together identify markets.</span>`
+    : `<span class="legend-note">50-day uses the market color and thickness; 200-day stays orange dashed.</span>`;
   document.getElementById('legend').innerHTML=items.map(item=>`
     <div class="legend-item">
       <span class="legend-line ${item.legendClass}" style="border-top-color:${item.c};border-top-width:${item.lineWidth}px"></span>
