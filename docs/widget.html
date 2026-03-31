@@ -78,23 +78,32 @@ const M=[
 let chart,s50,s200,cur='sp500';
 
 function init(){
-  chart=createChart(document.getElementById('chart'),{
-    width:document.getElementById('chart').clientWidth,height:300,
-    layout:{background:{color:'#fff'},textColor:'#333',fontSize:11},
-    grid:{vertLines:{color:'#f0f0f0'},horzLines:{color:'#f0f0f0'}},
-    timeScale:{timeVisible:false},
-    rightPriceScale:{scaleMargins:{top:.08,bottom:.05}},
-  });
-  s50=chart.addLineSeries({color:'#1a73e8',lineWidth:2,title:'50-Day'});
-  s200=chart.addLineSeries({color:'#ff6d00',lineWidth:2,
-    lineStyle:2,title:'200-Day'});
-  // 50% 기준선
-  const ref=chart.addLineSeries({color:'#bbb',lineWidth:1,lineStyle:1,
-    priceLineVisible:false,lastValueVisible:false});
-  ref.setData([{time:'2023-01-01',value:50},{time:'2028-01-01',value:50}]);
+  try {
+    chart=createChart(document.getElementById('chart'),{
+      width:document.getElementById('chart').clientWidth,height:300,
+      layout:{background:{color:'#fff'},textColor:'#333',fontSize:11},
+      grid:{vertLines:{color:'#f0f0f0'},horzLines:{color:'#f0f0f0'}},
+      timeScale:{timeVisible:false},
+      rightPriceScale:{scaleMargins:{top:.08,bottom:.05}},
+    });
+    s50=chart.addLineSeries({color:'#1a73e8',lineWidth:2,title:'50-Day'});
+    s200=chart.addLineSeries({color:'#ff6d00',lineWidth:2,
+      lineStyle:2,title:'200-Day'});
+    // 50% 기준선
+    const ref=chart.addLineSeries({color:'#bbb',lineWidth:1,lineStyle:1,
+      priceLineVisible:false,lastValueVisible:false});
+    ref.setData([{time:'2023-01-01',value:50},{time:'2028-01-01',value:50}]);
+  } catch (err) {
+    document.getElementById('dt').textContent=`Init Error: ${err.message || err}`;
+    console.error('Init Error:', err);
+  }
 }
 
 async function load(mid){
+  if (!s50 || !chart) {
+    document.getElementById('dt').textContent = 'Error: Chart not initialized';
+    return;
+  }
   cur=mid;
   const cb = '?t=' + new Date().getTime(); // 캐시 버스터
   try {
