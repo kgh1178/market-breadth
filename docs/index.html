@@ -6,9 +6,12 @@
   <title>Market Breadth Dashboard</title>
   <style>
     :root{
-      --us:#c58b00;
+      --us:#0f766e;
+      --us-soft:#67b8b1;
       --jp:#1a73e8;
+      --jp-soft:#7baaf7;
       --kr:#ea4335;
+      --kr-soft:#f28b82;
       --ink:#1f2328;
       --muted:#66707a;
       --line:#e5e7eb;
@@ -21,14 +24,13 @@
       --bad:#b42318;
       --partial:#b26a00;
       --link:#1a73e8;
-      --orange:#ff8a1f;
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;
       background:
-        radial-gradient(circle at top left, rgba(197,139,0,.08), transparent 28%),
+        radial-gradient(circle at top left, rgba(15,118,110,.08), transparent 28%),
         radial-gradient(circle at top right, rgba(26,115,232,.08), transparent 30%),
         linear-gradient(180deg,#fafbfc 0%,#f4f6f8 100%);
       color:var(--ink);
@@ -46,7 +48,7 @@
     .hero-main{
       padding:26px 24px 22px;
       background:
-        linear-gradient(135deg, rgba(197,139,0,.09) 0%, rgba(197,139,0,0) 35%),
+        linear-gradient(135deg, rgba(15,118,110,.09) 0%, rgba(15,118,110,0) 35%),
         linear-gradient(225deg, rgba(26,115,232,.08) 0%, rgba(26,115,232,0) 32%),
         var(--panel);
     }
@@ -492,7 +494,7 @@
           being rendered as fresh.
         </p>
         <div class="hero-meta">
-          <span class="chip"><strong>United States</strong> yellow, thick line</span>
+          <span class="chip"><strong>United States</strong> teal, thick line</span>
           <span class="chip"><strong>Japan</strong> blue, medium line</span>
           <span class="chip"><strong>Korea</strong> red, thin line</span>
           <span class="chip"><strong>Price Basis</strong> split-adj, div-unadj</span>
@@ -571,9 +573,9 @@ const API=API_PARAM||(window.location.hostname==='127.0.0.1'||window.location.ho
   :API_DEFAULT);
 
 const MARKETS = [
-  {id:'sp500', label:'S&P 500', color:'#c58b00', width:4},
-  {id:'nikkei225', label:'Nikkei 225', color:'#1a73e8', width:3},
-  {id:'kospi200', label:'KOSPI 200', color:'#ea4335', width:2},
+  {id:'sp500', label:'S&P 500', color:'#0f766e', soft:'#67b8b1', width:4},
+  {id:'nikkei225', label:'Nikkei 225', color:'#1a73e8', soft:'#7baaf7', width:3},
+  {id:'kospi200', label:'KOSPI 200', color:'#ea4335', soft:'#f28b82', width:2},
 ];
 
 const state = {
@@ -810,8 +812,8 @@ async function renderGlobalChart(latest, seriesMap){
 
   MARKETS.filter(market => latest[market.id]?.status === 'ok').forEach(market=>{
     const series = state.globalChart.addLineSeries({
-      color: market.color,
-      lineWidth: market.width,
+      color: state.activeWindow === '200' ? market.soft : market.color,
+      lineWidth: state.activeWindow === '200' ? Math.max(2, market.width - 1) : market.width,
       title: market.label,
     });
     state.globalSeries.push(series);
@@ -846,7 +848,7 @@ async function renderMiniCharts(latest, seriesMap){
     });
     state.miniCharts.push(chart);
     const s50 = chart.addLineSeries({color:market.color,lineWidth:market.width,title:'50-Day'});
-    const s200 = chart.addLineSeries({color:'#ff8a1f',lineWidth:2,title:'200-Day'});
+    const s200 = chart.addLineSeries({color:market.soft,lineWidth:Math.max(2, market.width - 1),title:'200-Day'});
     s50.setData((seriesMap[market.id]?.breadth_50 || []).map(x=>({time:x.date,value:x.value})));
     s200.setData((seriesMap[market.id]?.breadth_200 || []).map(x=>({time:x.date,value:x.value})));
     chart.timeScale().fitContent();

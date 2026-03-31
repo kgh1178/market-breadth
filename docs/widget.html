@@ -90,9 +90,9 @@ const B=API_PARAM||(window.location.hostname==='127.0.0.1'||window.location.host
   :API_DEFAULT);
 
 const M=[
-  {id:'sp500',lb:'S&P 500',c:'#c58b00',lineStyle:0,lineWidth:4,legendClass:'us',note:'US thick'},
-  {id:'nikkei225',lb:'Nikkei 225',c:'#1a73e8',lineStyle:0,lineWidth:3,legendClass:'jp',note:'Japan medium'},
-  {id:'kospi200',lb:'KOSPI 200',c:'#ea4335',lineStyle:0,lineWidth:2,legendClass:'kr',note:'Korea thin'},
+  {id:'sp500',lb:'S&P 500',c:'#0f766e',c200:'#67b8b1',lineStyle:0,lineWidth:4,legendClass:'us',note:'US teal thick'},
+  {id:'nikkei225',lb:'Nikkei 225',c:'#1a73e8',c200:'#7baaf7',lineStyle:0,lineWidth:3,legendClass:'jp',note:'Japan blue medium'},
+  {id:'kospi200',lb:'KOSPI 200',c:'#ea4335',c200:'#f28b82',lineStyle:0,lineWidth:2,legendClass:'kr',note:'Korea red thin'},
   {id:'global50',lb:'Global 50d',c:'#555',lineStyle:0,lineWidth:2,legendClass:'gl',note:'50-day mix'},
   {id:'global200',lb:'Global 200d',c:'#555',lineStyle:0,lineWidth:2,legendClass:'gl',note:'200-day mix'}
 ];
@@ -126,7 +126,7 @@ function renderLegend(mid){
   const items=isGlobal?M.slice(0,3):[M.find(x=>x.id===mid)];
   const extra=isGlobal
     ? `<span class="legend-note">Colors and line thickness together identify markets.</span>`
-    : `<span class="legend-note">50-day uses the market color and thickness; 200-day uses an orange solid line.</span>`;
+    : `<span class="legend-note">50-day uses the stronger market tone; 200-day uses the lighter tone of the same market color.</span>`;
   document.getElementById('legend').innerHTML=items.map(item=>`
     <div class="legend-item">
       <span class="legend-line ${item.legendClass}" style="border-top-color:${item.c};border-top-width:${item.lineWidth}px"></span>
@@ -280,9 +280,10 @@ async function load(mid){
         tss.forEach((ts,idx)=>{
           const marketId=available[idx];
           const meta=M.find(x=>x.id===marketId);
+          const is200=mid==='global200';
           const s=chart.addLineSeries({
-            color:meta.c,
-            lineWidth:meta.lineWidth,
+            color:is200?meta.c200:meta.c,
+            lineWidth:is200?Math.max(2, meta.lineWidth-1):meta.lineWidth,
             lineStyle:meta.lineStyle,
             title:meta.lb
           });
@@ -302,7 +303,7 @@ async function load(mid){
           lineStyle:marketMeta.lineStyle,
           title:'50-Day'
         });
-        const s200=chart.addLineSeries({color:'#ff8a1f',lineWidth:2,lineStyle:0,title:'200-Day'});
+        const s200=chart.addLineSeries({color:marketMeta.c200,lineWidth:Math.max(2, marketMeta.lineWidth-1),lineStyle:0,title:'200-Day'});
         activeSeries.push(s50,s200);
         s50.setData((ts.breadth_50||[]).map(x=>({time:x.date,value:x.value})));
         s200.setData((ts.breadth_200||[]).map(x=>({time:x.date,value:x.value})));
