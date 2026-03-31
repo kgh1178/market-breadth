@@ -19,7 +19,14 @@
          cursor:pointer;border-bottom:2px solid transparent;
          transition:all .2s}
     .tab:hover{background:#f8f9fa}
-    .tab.on{color:#1a73e8;border-bottom-color:#1a73e8;font-weight:600}
+    .tab.on{color:var(--tab-color,#1a73e8);border-bottom-color:var(--tab-color,#1a73e8);font-weight:600}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;padding:8px 16px 4px;
+            border-bottom:1px solid #f3f4f6}
+    .legend-item{display:flex;align-items:center;gap:8px;font-size:11px;color:#555}
+    .legend-line{width:22px;height:0;border-top-width:3px;border-top-style:solid}
+    .legend-line.jp{border-top-style:dashed}
+    .legend-line.kr{border-top-style:dotted}
+    .legend-note{font-size:10px;color:#888}
     .chart{width:100%;height:300px}
     .cards{display:grid;grid-template-columns:repeat(3,1fr);
            gap:8px;padding:12px 16px}
@@ -63,6 +70,7 @@
          <span class="warn" id="warn"></span></div>
   </div>
   <div class="tabs" id="tabs"></div>
+  <div class="legend" id="legend"></div>
   <div class="cards" id="cards"></div>
   <div class="extra" id="extra"></div>
   <div id="msg"></div>
@@ -85,11 +93,11 @@ const B=API_PARAM||(window.location.hostname==='127.0.0.1'||window.location.host
   :API_DEFAULT);
 
 const M=[
-  {id:'sp500',lb:'S&P 500',c:'#34a853'},
-  {id:'nikkei225',lb:'Nikkei 225',c:'#1a73e8'},
-  {id:'kospi200',lb:'KOSPI 200',c:'#ea4335'},
-  {id:'global50',lb:'Global 50d',c:'#555'},
-  {id:'global200',lb:'Global 200d',c:'#555'}
+  {id:'sp500',lb:'S&P 500',c:'#c58b00',lineStyle:0,lineWidth:3,legendClass:'us',note:'US solid'},
+  {id:'nikkei225',lb:'Nikkei 225',c:'#1a73e8',lineStyle:2,lineWidth:2,legendClass:'jp',note:'Japan dashed'},
+  {id:'kospi200',lb:'KOSPI 200',c:'#ea4335',lineStyle:1,lineWidth:2,legendClass:'kr',note:'Korea dotted'},
+  {id:'global50',lb:'Global 50d',c:'#555',lineStyle:0,lineWidth:2,legendClass:'gl',note:'50-day mix'},
+  {id:'global200',lb:'Global 200d',c:'#555',lineStyle:0,lineWidth:2,legendClass:'gl',note:'200-day mix'}
 ];
 let chart,activeSeries=[],cur='sp500';
 
@@ -114,6 +122,30 @@ function setChartVisible(visible){
 function clearChartSeries(){
   activeSeries.forEach(s=>chart.removeSeries(s));
   activeSeries=[];
+}
+
+function renderLegend(mid){
+  const isGlobal=mid.startsWith('global');
+  const items=isGlobal?M.slice(0,3):[M.find(x=>x.id===mid)];
+  const extra=isGlobal
+    ? `<span class="legend-note">Colors and line styles both identify markets.</span>`
+    : `<span class="legend-note">50-day uses the market style; 200-day uses orange dashed.</span>`;
+  document.getElementById('legend').innerHTML=items.map(item=>`
+    <div class="legend-item">
+      <span class="legend-line ${item.legendClass}" style="border-top-color:${item.c};border-top-width:${item.lineWidth}px"></span>
+      <span>${item.lb}</span>
+      <span class="legend-note">${item.note}</span>
+    </div>
+  `).join('')+extra;
+}
+
+function updateActiveTabs(mid){
+  document.querySelectorAll('.tab').forEach(t=>{
+    const isOn=t.dataset.m===mid;
+    const meta=M.find(x=>x.id===t.dataset.m) || {c:'#1a73e8'};
+    t.classList.toggle('on',isOn);
+    t.style.setProperty('--tab-color',isOn ? meta.c : '#1a73e8');
+  });
 }
 
 function mkCard(label,val,unit,lo,hi,deff,neff,icc,above,valid,excluded=0){
@@ -184,6 +216,7 @@ async function load(mid){
     ]);
     const lt=await ltR.json(),sg=await sgR.json();
     const isGlobal=mid.startsWith('global');
+    renderLegend(mid);
 
     clearChartSeries();
     setMessage('');
@@ -248,7 +281,12 @@ async function load(mid){
         tss.forEach((ts,idx)=>{
           const marketId=available[idx];
           const meta=M.find(x=>x.id===marketId);
-          const s=chart.addLineSeries({color:meta.c,lineWidth:2,title:meta.lb});
+          const s=chart.addLineSeries({
+            color:meta.c,
+            lineWidth:meta.lineWidth,
+            lineStyle:meta.lineStyle,
+            title:meta.lb
+          });
           activeSeries.push(s);
           s.setData((ts[w]||[]).map(x=>({time:x.date,value:x.value})));
         });
@@ -258,8 +296,13 @@ async function load(mid){
       const d=lt[mid]||{};
       if(marketAvailable(lt,mid)){
         const ts=await (await fetch(`${B}/${mid}.json${cb}`)).json();
-        const mcol=M.find(x=>x.id===mid).c||'#1a73e8';
-        const s50=chart.addLineSeries({color:mcol,lineWidth:2,title:'50-Day'});
+        const marketMeta=M.find(x=>x.id===mid)||M[0];
+        const s50=chart.addLineSeries({
+          color:marketMeta.c,
+          lineWidth:marketMeta.lineWidth,
+          lineStyle:marketMeta.lineStyle,
+          title:'50-Day'
+        });
         const s200=chart.addLineSeries({color:'#ff6d00',lineWidth:2,lineStyle:2,title:'200-Day'});
         activeSeries.push(s50,s200);
         s50.setData((ts.breadth_50||[]).map(x=>({time:x.date,value:x.value})));
@@ -287,8 +330,7 @@ async function load(mid){
     }
     sigEl.innerHTML=sH;
 
-    document.querySelectorAll('.tab').forEach(t=>
-      t.classList.toggle('on',t.dataset.m===mid));
+    updateActiveTabs(mid);
   }catch(err){
     document.getElementById('dt').textContent=`Error: ${err.message || err}`;
     console.error(err);
