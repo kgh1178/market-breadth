@@ -1,7 +1,7 @@
 {
   "market": "Nikkei 225",
   "market_id": "nikkei225",
-  "as_of_date": "2026-03-31",
+  "as_of_date": "2026-04-01",
   "price_basis": "split-adjusted, dividend-unadjusted",
   "breadth_50": [
     {
@@ -2634,8 +2634,14 @@
     },
     {
       "date": "2026-03-31",
-      "value": 20.54,
+      "value": 20.44,
       "n_above": 46,
+      "n_valid": 225
+    },
+    {
+      "date": "2026-04-01",
+      "value": 40.18,
+      "n_above": 90,
       "n_valid": 224
     }
   ],
@@ -4370,8 +4376,14 @@
     },
     {
       "date": "2026-03-31",
-      "value": 64.73,
+      "value": 64.44,
       "n_above": 145,
+      "n_valid": 225
+    },
+    {
+      "date": "2026-04-01",
+      "value": 72.77,
+      "n_above": 163,
       "n_valid": 224
     }
   ]

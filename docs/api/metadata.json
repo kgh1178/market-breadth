@@ -1,18 +1,18 @@
 {
-  "date": "2026-03-31",
-  "pipeline_date": "2026-03-31",
+  "date": "2026-04-01",
+  "pipeline_date": "2026-04-01",
   "markets": {
     "sp500": {
       "status": "ok",
-      "as_of_date": "2026-03-30",
+      "as_of_date": "2026-03-31",
       "symbols_requested": 503,
       "symbols_downloaded": 503,
       "coverage_pct": 100.0,
       "failed_symbols": [],
       "validation": {
         "market": "sp500",
-        "computed_50": 19.48,
-        "computed_200": 42.43,
+        "computed_50": 24.06,
+        "computed_200": 47.21,
         "n_valid": 503,
         "n_total": 503,
         "official_50": null,
@@ -26,14 +26,14 @@
     },
     "nikkei225": {
       "status": "ok",
-      "as_of_date": "2026-03-31",
+      "as_of_date": "2026-04-01",
       "symbols_requested": 226,
       "symbols_downloaded": 226,
       "coverage_pct": 100.0,
       "failed_symbols": [],
       "validation": {
         "market": "nikkei225",
-        "computed_200": 64.73,
+        "computed_200": 72.77,
         "n_valid": 224,
         "n_total": 226,
         "official_200": null,
@@ -44,7 +44,7 @@
     },
     "kospi200": {
       "status": "ok",
-      "as_of_date": "2026-03-31",
+      "as_of_date": "2026-04-01",
       "symbols_requested": 200,
       "symbols_downloaded": 200,
       "coverage_pct": 100.0,
@@ -58,7 +58,7 @@
     }
   },
   "errors": [],
-  "pipeline_duration_sec": 124.0,
+  "pipeline_duration_sec": 165.1,
   "price_basis": "split-adjusted, dividend-unadjusted (Barchart S5FI compatible)",
   "yfinance_auto_adjust": false,
   "price_column": "Close"

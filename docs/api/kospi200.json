@@ -1,7 +1,7 @@
 {
   "market": "KOSPI 200",
   "market_id": "kospi200",
-  "as_of_date": "2026-03-31",
+  "as_of_date": "2026-04-01",
   "price_basis": "split-adjusted, dividend-unadjusted",
   "breadth_50": [
     {
@@ -1860,8 +1860,8 @@
     },
     {
       "date": "2025-09-19",
-      "value": 59.3,
-      "n_above": 118,
+      "value": 58.79,
+      "n_above": 117,
       "n_valid": 199
     },
     {
@@ -2022,8 +2022,8 @@
     },
     {
       "date": "2025-11-04",
-      "value": 61.62,
-      "n_above": 122,
+      "value": 61.11,
+      "n_above": 121,
       "n_valid": 198
     },
     {
@@ -2612,6 +2612,12 @@
       "date": "2026-03-31",
       "value": 25.63,
       "n_above": 51,
+      "n_valid": 199
+    },
+    {
+      "date": "2026-04-01",
+      "value": 40.2,
+      "n_above": 80,
       "n_valid": 199
     }
   ],
@@ -4324,6 +4330,12 @@
       "date": "2026-03-31",
       "value": 61.62,
       "n_above": 122,
+      "n_valid": 198
+    },
+    {
+      "date": "2026-04-01",
+      "value": 67.68,
+      "n_above": 134,
       "n_valid": 198
     }
   ]

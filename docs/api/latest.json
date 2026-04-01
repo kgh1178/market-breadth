@@ -1,21 +1,21 @@
 {
-  "date": "2026-03-31",
-  "pipeline_date": "2026-03-31",
+  "date": "2026-04-01",
+  "pipeline_date": "2026-04-01",
   "sp500": {
     "status": "ok",
-    "as_of_date": "2026-03-30",
+    "as_of_date": "2026-03-31",
     "series_valid": true,
     "metrics_valid": true,
     "error_code": null,
     "error_message": null,
     "market": "S&P 500",
     "market_id": "sp500",
-    "breadth_50": 19.48,
-    "breadth_200": 42.43,
-    "n_above_50": 98,
-    "n_above_200": 213,
-    "count_above_50": 98,
-    "count_above_200": 213,
+    "breadth_50": 24.06,
+    "breadth_200": 47.21,
+    "n_above_50": 121,
+    "n_above_200": 237,
+    "count_above_50": 121,
+    "count_above_200": 237,
     "n_valid_50": 503,
     "n_valid_200": 502,
     "n_total": 503,
@@ -24,21 +24,21 @@
     "n_excluded_50": 0,
     "n_excluded_200": 1,
     "ci_50": {
-      "lower": 2.09,
-      "upper": 48.41,
+      "lower": 5.49,
+      "upper": 57.19,
       "deff": 41.16,
       "n_eff": 12.2
     },
     "ci_200": {
-      "lower": 15.17,
-      "upper": 72.33,
+      "lower": 21.09,
+      "upper": 78.91,
       "deff": 41.08,
       "n_eff": 12.2
     },
-    "ci_lower_50": 2.09,
-    "ci_upper_50": 48.41,
-    "ci_lower_200": 15.17,
-    "ci_upper_200": 72.33,
+    "ci_lower_50": 5.49,
+    "ci_upper_50": 57.19,
+    "ci_lower_200": 21.09,
+    "ci_upper_200": 78.91,
     "deff_50": 41.16,
     "deff_200": 41.08,
     "n_eff_50": 12.2,
@@ -2755,6 +2755,12 @@
         "value": 19.48,
         "n_above": 98,
         "n_valid": 503
+      },
+      {
+        "date": "2026-03-31",
+        "value": 24.06,
+        "n_above": 121,
+        "n_valid": 503
       }
     ],
     "timeseries_200": [
@@ -4568,6 +4574,12 @@
         "date": "2026-03-30",
         "value": 42.43,
         "n_above": 213,
+        "n_valid": 502
+      },
+      {
+        "date": "2026-03-31",
+        "value": 47.21,
+        "n_above": 237,
         "n_valid": 502
       }
     ],
@@ -7283,6 +7295,12 @@
         "value": 19.48,
         "n_above": 98,
         "n_valid": 503
+      },
+      {
+        "date": "2026-03-31",
+        "value": 24.06,
+        "n_above": 121,
+        "n_valid": 503
       }
     ],
     "breadth_series_200": [
@@ -9097,12 +9115,18 @@
         "value": 42.43,
         "n_above": 213,
         "n_valid": 502
+      },
+      {
+        "date": "2026-03-31",
+        "value": 47.21,
+        "n_above": 237,
+        "n_valid": 502
       }
     ],
     "validation": {
       "market": "sp500",
-      "computed_50": 19.48,
-      "computed_200": 42.43,
+      "computed_50": 24.06,
+      "computed_200": 47.21,
       "n_valid": 503,
       "n_total": 503,
       "official_50": null,
@@ -9115,12 +9139,12 @@
     "price_basis": "split-adjusted, dividend-unadjusted",
     "icc_estimate": 0.08,
     "estimated_icc": 0.08,
-    "logit_z_50": -2.266,
-    "logit_z_200": -1.234,
-    "percentile_50": 2.8,
-    "percentile_200": 10.3,
-    "composite_50": -1.605,
-    "composite_200": -1.014,
+    "logit_z_50": -1.872,
+    "logit_z_200": -0.802,
+    "percentile_50": 6.3,
+    "percentile_200": 15.1,
+    "composite_50": -1.372,
+    "composite_200": -0.75,
     "coverage_pct": 100.0,
     "symbols_requested": 503,
     "symbols_downloaded": 503,
@@ -9129,19 +9153,19 @@
   },
   "nikkei225": {
     "status": "ok",
-    "as_of_date": "2026-03-31",
+    "as_of_date": "2026-04-01",
     "series_valid": true,
     "metrics_valid": true,
     "error_code": null,
     "error_message": null,
     "market": "Nikkei 225",
     "market_id": "nikkei225",
-    "breadth_50": 20.54,
-    "breadth_200": 64.73,
-    "n_above_50": 46,
-    "n_above_200": 145,
-    "count_above_50": 46,
-    "count_above_200": 145,
+    "breadth_50": 40.18,
+    "breadth_200": 72.77,
+    "n_above_50": 90,
+    "n_above_200": 163,
+    "count_above_50": 90,
+    "count_above_200": 163,
     "n_valid_50": 224,
     "n_valid_200": 224,
     "n_total": 226,
@@ -9150,21 +9174,21 @@
     "n_excluded_50": 2,
     "n_excluded_200": 2,
     "ci_50": {
-      "lower": 2.52,
-      "upper": 55.61,
+      "lower": 12.16,
+      "upper": 73.76,
       "deff": 23.3,
       "n_eff": 9.6
     },
     "ci_200": {
-      "lower": 26.24,
-      "upper": 87.84,
+      "lower": 34.75,
+      "upper": 93.33,
       "deff": 23.3,
       "n_eff": 9.6
     },
-    "ci_lower_50": 2.52,
-    "ci_upper_50": 55.61,
-    "ci_lower_200": 26.24,
-    "ci_upper_200": 87.84,
+    "ci_lower_50": 12.16,
+    "ci_upper_50": 73.76,
+    "ci_lower_200": 34.75,
+    "ci_upper_200": 93.33,
     "deff_50": 23.3,
     "deff_200": 23.3,
     "n_eff_50": 9.6,
@@ -11800,8 +11824,14 @@
       },
       {
         "date": "2026-03-31",
-        "value": 20.54,
+        "value": 20.44,
         "n_above": 46,
+        "n_valid": 225
+      },
+      {
+        "date": "2026-04-01",
+        "value": 40.18,
+        "n_above": 90,
         "n_valid": 224
       }
     ],
@@ -13536,8 +13566,14 @@
       },
       {
         "date": "2026-03-31",
-        "value": 64.73,
+        "value": 64.44,
         "n_above": 145,
+        "n_valid": 225
+      },
+      {
+        "date": "2026-04-01",
+        "value": 72.77,
+        "n_above": 163,
         "n_valid": 224
       }
     ],
@@ -16172,8 +16208,14 @@
       },
       {
         "date": "2026-03-31",
-        "value": 20.54,
+        "value": 20.44,
         "n_above": 46,
+        "n_valid": 225
+      },
+      {
+        "date": "2026-04-01",
+        "value": 40.18,
+        "n_above": 90,
         "n_valid": 224
       }
     ],
@@ -17908,14 +17950,20 @@
       },
       {
         "date": "2026-03-31",
-        "value": 64.73,
+        "value": 64.44,
         "n_above": 145,
+        "n_valid": 225
+      },
+      {
+        "date": "2026-04-01",
+        "value": 72.77,
+        "n_above": 163,
         "n_valid": 224
       }
     ],
     "validation": {
       "market": "nikkei225",
-      "computed_200": 64.73,
+      "computed_200": 72.77,
       "n_valid": 224,
       "n_total": 226,
       "official_200": null,
@@ -17925,35 +17973,35 @@
     "price_basis": "split-adjusted, dividend-unadjusted",
     "icc_estimate": 0.1,
     "estimated_icc": 0.1,
-    "logit_z_50": -2.249,
-    "logit_z_200": -0.308,
-    "percentile_50": 4.0,
-    "percentile_200": 34.5,
-    "composite_50": -1.585,
-    "composite_200": -0.309,
+    "logit_z_50": -1.167,
+    "logit_z_200": 0.127,
+    "percentile_50": 12.3,
+    "percentile_200": 41.7,
+    "composite_50": -0.96,
+    "composite_200": -0.02,
     "coverage_pct": 100.0,
     "symbols_requested": 226,
     "symbols_downloaded": 226,
     "failed_symbols": [],
     "ex_div_flag": false,
-    "pwds_50": -0.39,
-    "pwds_200": 11.14
+    "pwds_50": -1.41,
+    "pwds_200": 13.54
   },
   "kospi200": {
     "status": "ok",
-    "as_of_date": "2026-03-31",
+    "as_of_date": "2026-04-01",
     "series_valid": true,
     "metrics_valid": true,
     "error_code": null,
     "error_message": null,
     "market": "KOSPI 200",
     "market_id": "kospi200",
-    "breadth_50": 25.63,
-    "breadth_200": 61.62,
-    "n_above_50": 51,
-    "n_above_200": 122,
-    "count_above_50": 51,
-    "count_above_200": 122,
+    "breadth_50": 40.2,
+    "breadth_200": 67.68,
+    "n_above_50": 80,
+    "n_above_200": 134,
+    "count_above_50": 80,
+    "count_above_200": 134,
     "n_valid_50": 199,
     "n_valid_200": 198,
     "n_total": 200,
@@ -17962,8 +18010,8 @@
     "n_excluded_50": 1,
     "n_excluded_200": 2,
     "ci_50": {
-      "lower": 3.19,
-      "upper": 65.09,
+      "lower": 8.52,
+      "upper": 75.51,
       "deff": 24.76,
       "n_eff": 8.0
     },
@@ -17973,8 +18021,8 @@
       "deff": 24.64,
       "n_eff": 8.0
     },
-    "ci_lower_50": 3.19,
-    "ci_upper_50": 65.09,
+    "ci_lower_50": 8.52,
+    "ci_upper_50": 75.51,
     "ci_lower_200": 24.49,
     "ci_upper_200": 91.48,
     "deff_50": 24.76,
@@ -19838,8 +19886,8 @@
       },
       {
         "date": "2025-09-19",
-        "value": 59.3,
-        "n_above": 118,
+        "value": 58.79,
+        "n_above": 117,
         "n_valid": 199
       },
       {
@@ -20000,8 +20048,8 @@
       },
       {
         "date": "2025-11-04",
-        "value": 61.62,
-        "n_above": 122,
+        "value": 61.11,
+        "n_above": 121,
         "n_valid": 198
       },
       {
@@ -20590,6 +20638,12 @@
         "date": "2026-03-31",
         "value": 25.63,
         "n_above": 51,
+        "n_valid": 199
+      },
+      {
+        "date": "2026-04-01",
+        "value": 40.2,
+        "n_above": 80,
         "n_valid": 199
       }
     ],
@@ -22302,6 +22356,12 @@
         "date": "2026-03-31",
         "value": 61.62,
         "n_above": 122,
+        "n_valid": 198
+      },
+      {
+        "date": "2026-04-01",
+        "value": 67.68,
+        "n_above": 134,
         "n_valid": 198
       }
     ],
@@ -24162,8 +24222,8 @@
       },
       {
         "date": "2025-09-19",
-        "value": 59.3,
-        "n_above": 118,
+        "value": 58.79,
+        "n_above": 117,
         "n_valid": 199
       },
       {
@@ -24324,8 +24384,8 @@
       },
       {
         "date": "2025-11-04",
-        "value": 61.62,
-        "n_above": 122,
+        "value": 61.11,
+        "n_above": 121,
         "n_valid": 198
       },
       {
@@ -24914,6 +24974,12 @@
         "date": "2026-03-31",
         "value": 25.63,
         "n_above": 51,
+        "n_valid": 199
+      },
+      {
+        "date": "2026-04-01",
+        "value": 40.2,
+        "n_above": 80,
         "n_valid": 199
       }
     ],
@@ -26627,6 +26693,12 @@
         "value": 61.62,
         "n_above": 122,
         "n_valid": 198
+      },
+      {
+        "date": "2026-04-01",
+        "value": 67.68,
+        "n_above": 134,
+        "n_valid": 198
       }
     ],
     "validation": {
@@ -26637,18 +26709,18 @@
     "price_basis": "split-adjusted, dividend-unadjusted",
     "icc_estimate": 0.12,
     "estimated_icc": 0.12,
-    "logit_z_50": -1.668,
-    "logit_z_200": -0.796,
-    "percentile_50": 2.4,
-    "percentile_200": 19.0,
-    "composite_50": -1.31,
-    "composite_200": -0.708,
+    "logit_z_50": -0.959,
+    "logit_z_200": -0.422,
+    "percentile_50": 15.9,
+    "percentile_200": 24.6,
+    "composite_50": -0.821,
+    "composite_200": -0.465,
     "coverage_pct": 100.0,
     "symbols_requested": 200,
     "symbols_downloaded": 200,
     "failed_symbols": [],
     "ex_div_flag": false,
-    "ex_top5_spread_50": 0.15,
-    "ex_top5_spread_200": -0.48
+    "ex_top5_spread_50": -0.51,
+    "ex_top5_spread_200": -0.32
   }
 }

@@ -1,11 +1,11 @@
 {
-  "date": "2026-03-31",
+  "date": "2026-04-01",
   "partial_data": false,
   "signals": {
     "asia_us_lead": {
       "strategy": "asia_us_lead",
-      "direction": "SHORT",
-      "trigger_value": 23.09,
+      "direction": "NEUTRAL",
+      "trigger_value": 40.19,
       "filter_passed": true,
       "hit_rate_252d": {
         "hit_rate": 0,
@@ -46,7 +46,7 @@
     },
     "regime_overlay": {
       "strategy": "regime_overlay",
-      "grs_raw": 56.26,
+      "grs_raw": 62.55,
       "regime": "SELECTIVE",
       "equity_weight_pct": 60,
       "hit_rate_252d": {
