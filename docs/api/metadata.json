@@ -58,7 +58,7 @@
     }
   },
   "errors": [],
-  "pipeline_duration_sec": 143.8,
+  "pipeline_duration_sec": 154.9,
   "price_basis": "split-adjusted, dividend-unadjusted (Barchart S5FI compatible)",
   "yfinance_auto_adjust": false,
   "price_column": "Close"
