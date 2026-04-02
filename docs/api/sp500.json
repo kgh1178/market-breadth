@@ -1,15 +1,9 @@
 {
   "market": "S&P 500",
   "market_id": "sp500",
-  "as_of_date": "2026-03-31",
+  "as_of_date": "2026-04-01",
   "price_basis": "split-adjusted, dividend-unadjusted",
   "breadth_50": [
-    {
-      "date": "2024-06-10",
-      "value": 50.9,
-      "n_above": 255,
-      "n_valid": 501
-    },
     {
       "date": "2024-06-11",
       "value": 47.5,
@@ -2721,15 +2715,15 @@
       "value": 24.06,
       "n_above": 121,
       "n_valid": 503
+    },
+    {
+      "date": "2026-04-01",
+      "value": 26.24,
+      "n_above": 132,
+      "n_valid": 503
     }
   ],
   "breadth_200": [
-    {
-      "date": "2025-01-15",
-      "value": 57.88,
-      "n_above": 290,
-      "n_valid": 501
-    },
     {
       "date": "2025-01-16",
       "value": 60.88,
@@ -4540,6 +4534,12 @@
       "date": "2026-03-31",
       "value": 47.21,
       "n_above": 237,
+      "n_valid": 502
+    },
+    {
+      "date": "2026-04-01",
+      "value": 47.61,
+      "n_above": 239,
       "n_valid": 502
     }
   ]

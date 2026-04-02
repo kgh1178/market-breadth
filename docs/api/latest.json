@@ -1,21 +1,21 @@
 {
-  "date": "2026-04-01",
-  "pipeline_date": "2026-04-01",
+  "date": "2026-04-02",
+  "pipeline_date": "2026-04-02",
   "sp500": {
     "status": "ok",
-    "as_of_date": "2026-03-31",
+    "as_of_date": "2026-04-01",
     "series_valid": true,
     "metrics_valid": true,
     "error_code": null,
     "error_message": null,
     "market": "S&P 500",
     "market_id": "sp500",
-    "breadth_50": 24.06,
-    "breadth_200": 47.21,
-    "n_above_50": 121,
-    "n_above_200": 237,
-    "count_above_50": 121,
-    "count_above_200": 237,
+    "breadth_50": 26.24,
+    "breadth_200": 47.61,
+    "n_above_50": 132,
+    "n_above_200": 239,
+    "count_above_50": 132,
+    "count_above_200": 239,
     "n_valid_50": 503,
     "n_valid_200": 502,
     "n_total": 503,
@@ -45,12 +45,6 @@
     "n_eff_200": 12.2,
     "timeseries_50": [
       {
-        "date": "2024-06-10",
-        "value": 50.9,
-        "n_above": 255,
-        "n_valid": 501
-      },
-      {
         "date": "2024-06-11",
         "value": 47.5,
         "n_above": 238,
@@ -2760,17 +2754,17 @@
         "date": "2026-03-31",
         "value": 24.06,
         "n_above": 121,
+        "n_valid": 503
+      },
+      {
+        "date": "2026-04-01",
+        "value": 26.24,
+        "n_above": 132,
         "n_valid": 503
       }
     ],
     "timeseries_200": [
       {
-        "date": "2025-01-15",
-        "value": 57.88,
-        "n_above": 290,
-        "n_valid": 501
-      },
-      {
         "date": "2025-01-16",
         "value": 60.88,
         "n_above": 305,
@@ -4581,15 +4575,15 @@
         "value": 47.21,
         "n_above": 237,
         "n_valid": 502
+      },
+      {
+        "date": "2026-04-01",
+        "value": 47.61,
+        "n_above": 239,
+        "n_valid": 502
       }
     ],
     "breadth_series_50": [
-      {
-        "date": "2024-06-10",
-        "value": 50.9,
-        "n_above": 255,
-        "n_valid": 501
-      },
       {
         "date": "2024-06-11",
         "value": 47.5,
@@ -7301,15 +7295,15 @@
         "value": 24.06,
         "n_above": 121,
         "n_valid": 503
+      },
+      {
+        "date": "2026-04-01",
+        "value": 26.24,
+        "n_above": 132,
+        "n_valid": 503
       }
     ],
     "breadth_series_200": [
-      {
-        "date": "2025-01-15",
-        "value": 57.88,
-        "n_above": 290,
-        "n_valid": 501
-      },
       {
         "date": "2025-01-16",
         "value": 60.88,
@@ -9121,12 +9115,18 @@
         "value": 47.21,
         "n_above": 237,
         "n_valid": 502
+      },
+      {
+        "date": "2026-04-01",
+        "value": 47.61,
+        "n_above": 239,
+        "n_valid": 502
       }
     ],
     "validation": {
       "market": "sp500",
-      "computed_50": 24.06,
-      "computed_200": 47.21,
+      "computed_50": 26.24,
+      "computed_200": 47.61,
       "n_valid": 503,
       "n_total": 503,
       "official_50": null,
@@ -9139,12 +9139,12 @@
     "price_basis": "split-adjusted, dividend-unadjusted",
     "icc_estimate": 0.08,
     "estimated_icc": 0.08,
-    "logit_z_50": -1.872,
-    "logit_z_200": -0.802,
-    "percentile_50": 6.3,
-    "percentile_200": 15.1,
-    "composite_50": -1.372,
-    "composite_200": -0.75,
+    "logit_z_50": -1.704,
+    "logit_z_200": -0.771,
+    "percentile_50": 7.9,
+    "percentile_200": 15.5,
+    "composite_50": -1.273,
+    "composite_200": -0.731,
     "coverage_pct": 100.0,
     "symbols_requested": 503,
     "symbols_downloaded": 503,
@@ -9153,19 +9153,19 @@
   },
   "nikkei225": {
     "status": "ok",
-    "as_of_date": "2026-04-01",
+    "as_of_date": "2026-04-02",
     "series_valid": true,
     "metrics_valid": true,
     "error_code": null,
     "error_message": null,
     "market": "Nikkei 225",
     "market_id": "nikkei225",
-    "breadth_50": 40.18,
-    "breadth_200": 72.77,
-    "n_above_50": 90,
-    "n_above_200": 163,
-    "count_above_50": 90,
-    "count_above_200": 163,
+    "breadth_50": 33.48,
+    "breadth_200": 70.98,
+    "n_above_50": 75,
+    "n_above_200": 159,
+    "count_above_50": 75,
+    "count_above_200": 159,
     "n_valid_50": 224,
     "n_valid_200": 224,
     "n_total": 226,
@@ -9174,8 +9174,8 @@
     "n_excluded_50": 2,
     "n_excluded_200": 2,
     "ci_50": {
-      "lower": 12.16,
-      "upper": 73.76,
+      "lower": 6.67,
+      "upper": 65.25,
       "deff": 23.3,
       "n_eff": 9.6
     },
@@ -9185,8 +9185,8 @@
       "deff": 23.3,
       "n_eff": 9.6
     },
-    "ci_lower_50": 12.16,
-    "ci_upper_50": 73.76,
+    "ci_lower_50": 6.67,
+    "ci_upper_50": 65.25,
     "ci_lower_200": 34.75,
     "ci_upper_200": 93.33,
     "deff_50": 23.3,
@@ -9195,12 +9195,6 @@
     "n_eff_200": 9.6,
     "timeseries_50": [
       {
-        "date": "2024-06-12",
-        "value": 47.11,
-        "n_above": 106,
-        "n_valid": 225
-      },
-      {
         "date": "2024-06-13",
         "value": 36.44,
         "n_above": 82,
@@ -11830,19 +11824,19 @@
       },
       {
         "date": "2026-04-01",
-        "value": 40.18,
-        "n_above": 90,
+        "value": 40.44,
+        "n_above": 91,
+        "n_valid": 225
+      },
+      {
+        "date": "2026-04-02",
+        "value": 33.48,
+        "n_above": 75,
         "n_valid": 224
       }
     ],
     "timeseries_200": [
       {
-        "date": "2025-01-23",
-        "value": 43.11,
-        "n_above": 97,
-        "n_valid": 225
-      },
-      {
         "date": "2025-01-24",
         "value": 42.22,
         "n_above": 95,
@@ -13572,18 +13566,18 @@
       },
       {
         "date": "2026-04-01",
-        "value": 72.77,
-        "n_above": 163,
+        "value": 72.89,
+        "n_above": 164,
+        "n_valid": 225
+      },
+      {
+        "date": "2026-04-02",
+        "value": 70.98,
+        "n_above": 159,
         "n_valid": 224
       }
     ],
     "breadth_series_50": [
-      {
-        "date": "2024-06-12",
-        "value": 47.11,
-        "n_above": 106,
-        "n_valid": 225
-      },
       {
         "date": "2024-06-13",
         "value": 36.44,
@@ -16214,18 +16208,18 @@
       },
       {
         "date": "2026-04-01",
-        "value": 40.18,
-        "n_above": 90,
+        "value": 40.44,
+        "n_above": 91,
+        "n_valid": 225
+      },
+      {
+        "date": "2026-04-02",
+        "value": 33.48,
+        "n_above": 75,
         "n_valid": 224
       }
     ],
     "breadth_series_200": [
-      {
-        "date": "2025-01-23",
-        "value": 43.11,
-        "n_above": 97,
-        "n_valid": 225
-      },
       {
         "date": "2025-01-24",
         "value": 42.22,
@@ -17956,14 +17950,20 @@
       },
       {
         "date": "2026-04-01",
-        "value": 72.77,
-        "n_above": 163,
+        "value": 72.89,
+        "n_above": 164,
+        "n_valid": 225
+      },
+      {
+        "date": "2026-04-02",
+        "value": 70.98,
+        "n_above": 159,
         "n_valid": 224
       }
     ],
     "validation": {
       "market": "nikkei225",
-      "computed_200": 72.77,
+      "computed_200": 70.98,
       "n_valid": 224,
       "n_total": 226,
       "official_200": null,
@@ -17973,35 +17973,35 @@
     "price_basis": "split-adjusted, dividend-unadjusted",
     "icc_estimate": 0.1,
     "estimated_icc": 0.1,
-    "logit_z_50": -1.167,
-    "logit_z_200": 0.127,
-    "percentile_50": 12.3,
-    "percentile_200": 41.7,
-    "composite_50": -0.96,
-    "composite_200": -0.02,
+    "logit_z_50": -1.475,
+    "logit_z_200": 0.021,
+    "percentile_50": 9.9,
+    "percentile_200": 38.5,
+    "composite_50": -1.138,
+    "composite_200": -0.105,
     "coverage_pct": 100.0,
     "symbols_requested": 226,
     "symbols_downloaded": 226,
     "failed_symbols": [],
     "ex_div_flag": false,
-    "pwds_50": -1.41,
-    "pwds_200": 13.54
+    "pwds_50": 0.33,
+    "pwds_200": 10.01
   },
   "kospi200": {
     "status": "ok",
-    "as_of_date": "2026-04-01",
+    "as_of_date": "2026-04-02",
     "series_valid": true,
     "metrics_valid": true,
     "error_code": null,
     "error_message": null,
     "market": "KOSPI 200",
     "market_id": "kospi200",
-    "breadth_50": 40.2,
-    "breadth_200": 67.68,
-    "n_above_50": 80,
-    "n_above_200": 134,
-    "count_above_50": 80,
-    "count_above_200": 134,
+    "breadth_50": 23.12,
+    "breadth_200": 62.12,
+    "n_above_50": 46,
+    "n_above_200": 123,
+    "count_above_50": 46,
+    "count_above_200": 123,
     "n_valid_50": 199,
     "n_valid_200": 198,
     "n_total": 200,
@@ -18010,8 +18010,8 @@
     "n_excluded_50": 1,
     "n_excluded_200": 2,
     "ci_50": {
-      "lower": 8.52,
-      "upper": 75.51,
+      "lower": 3.19,
+      "upper": 65.09,
       "deff": 24.76,
       "n_eff": 8.0
     },
@@ -18021,8 +18021,8 @@
       "deff": 24.64,
       "n_eff": 8.0
     },
-    "ci_lower_50": 8.52,
-    "ci_upper_50": 75.51,
+    "ci_lower_50": 3.19,
+    "ci_upper_50": 65.09,
     "ci_lower_200": 24.49,
     "ci_upper_200": 91.48,
     "deff_50": 24.76,
@@ -18031,12 +18031,6 @@
     "n_eff_200": 8.0,
     "timeseries_50": [
       {
-        "date": "2024-06-14",
-        "value": 50.26,
-        "n_above": 98,
-        "n_valid": 195
-      },
-      {
         "date": "2024-06-17",
         "value": 49.74,
         "n_above": 97,
@@ -19886,8 +19880,8 @@
       },
       {
         "date": "2025-09-19",
-        "value": 58.79,
-        "n_above": 117,
+        "value": 59.3,
+        "n_above": 118,
         "n_valid": 199
       },
       {
@@ -20048,8 +20042,8 @@
       },
       {
         "date": "2025-11-04",
-        "value": 61.11,
-        "n_above": 121,
+        "value": 61.62,
+        "n_above": 122,
         "n_valid": 198
       },
       {
@@ -20644,17 +20638,17 @@
         "date": "2026-04-01",
         "value": 40.2,
         "n_above": 80,
+        "n_valid": 199
+      },
+      {
+        "date": "2026-04-02",
+        "value": 23.12,
+        "n_above": 46,
         "n_valid": 199
       }
     ],
     "timeseries_200": [
       {
-        "date": "2025-01-24",
-        "value": 43.3,
-        "n_above": 84,
-        "n_valid": 194
-      },
-      {
         "date": "2025-01-31",
         "value": 41.24,
         "n_above": 80,
@@ -22360,18 +22354,18 @@
       },
       {
         "date": "2026-04-01",
-        "value": 67.68,
-        "n_above": 134,
+        "value": 68.18,
+        "n_above": 135,
+        "n_valid": 198
+      },
+      {
+        "date": "2026-04-02",
+        "value": 62.12,
+        "n_above": 123,
         "n_valid": 198
       }
     ],
     "breadth_series_50": [
-      {
-        "date": "2024-06-14",
-        "value": 50.26,
-        "n_above": 98,
-        "n_valid": 195
-      },
       {
         "date": "2024-06-17",
         "value": 49.74,
@@ -24222,8 +24216,8 @@
       },
       {
         "date": "2025-09-19",
-        "value": 58.79,
-        "n_above": 117,
+        "value": 59.3,
+        "n_above": 118,
         "n_valid": 199
       },
       {
@@ -24384,8 +24378,8 @@
       },
       {
         "date": "2025-11-04",
-        "value": 61.11,
-        "n_above": 121,
+        "value": 61.62,
+        "n_above": 122,
         "n_valid": 198
       },
       {
@@ -24981,15 +24975,15 @@
         "value": 40.2,
         "n_above": 80,
         "n_valid": 199
+      },
+      {
+        "date": "2026-04-02",
+        "value": 23.12,
+        "n_above": 46,
+        "n_valid": 199
       }
     ],
     "breadth_series_200": [
-      {
-        "date": "2025-01-24",
-        "value": 43.3,
-        "n_above": 84,
-        "n_valid": 194
-      },
       {
         "date": "2025-01-31",
         "value": 41.24,
@@ -26696,8 +26690,14 @@
       },
       {
         "date": "2026-04-01",
-        "value": 67.68,
-        "n_above": 134,
+        "value": 68.18,
+        "n_above": 135,
+        "n_valid": 198
+      },
+      {
+        "date": "2026-04-02",
+        "value": 62.12,
+        "n_above": 123,
         "n_valid": 198
       }
     ],
@@ -26709,18 +26709,18 @@
     "price_basis": "split-adjusted, dividend-unadjusted",
     "icc_estimate": 0.12,
     "estimated_icc": 0.12,
-    "logit_z_50": -0.959,
-    "logit_z_200": -0.422,
-    "percentile_50": 15.9,
-    "percentile_200": 24.6,
-    "composite_50": -0.821,
-    "composite_200": -0.465,
+    "logit_z_50": -1.787,
+    "logit_z_200": -0.776,
+    "percentile_50": 1.2,
+    "percentile_200": 19.0,
+    "composite_50": -1.382,
+    "composite_200": -0.697,
     "coverage_pct": 100.0,
     "symbols_requested": 200,
     "symbols_downloaded": 200,
     "failed_symbols": [],
     "ex_div_flag": false,
-    "ex_top5_spread_50": -0.51,
-    "ex_top5_spread_200": -0.32
+    "ex_top5_spread_50": -0.44,
+    "ex_top5_spread_200": -0.46
   }
 }
