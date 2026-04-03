@@ -3,10 +3,20 @@
 이 문서는 `api.jstockinsight.kr`를 Cloudflare 멀티앱 허브로 실제 전환할 때 필요한 설정 순서와 cutover 체크리스트를 정리합니다.
 
 기준 시점:
-- 작성 기준일: `2026-04-01`
+- 작성 기준일: `2026-04-04`
 - 운영 목표:
   - `blog.jstockinsight.kr`: Blogger 유지
   - `api.jstockinsight.kr`: Cloudflare Pages + Worker + R2 기반 앱 허브
+
+현재 운영 반영 상태:
+- Pages 프로젝트: `market-breadth`
+- Pages custom domain: `api.jstockinsight.kr` active
+- API Worker: `jstockinsight-api`
+- API route:
+  - `api.jstockinsight.kr/breadth/api/*`
+  - `api.jstockinsight.kr/fear-greed/api/*`
+  - `api.jstockinsight.kr/exchange/api/*`
+- legacy Worker `ancient-field-05d1`는 운영 route에 연결되지 않으며 삭제 후보
 
 ## 1. 목표 상태
 
@@ -129,7 +139,10 @@ scripts/cloudflare_deploy_workers.sh breadth
 
 핵심 값:
 - Worker 이름: `jstockinsight-api`
-- Route: `api.jstockinsight.kr/*`
+- Route:
+  - `api.jstockinsight.kr/breadth/api/*`
+  - `api.jstockinsight.kr/fear-greed/api/*`
+  - `api.jstockinsight.kr/exchange/api/*`
 - R2 binding: `APP_DATA`
 
 Worker 역할:
@@ -152,7 +165,7 @@ Worker 역할:
 Pages 프로젝트는 Git integration 기준으로 생성합니다.
 
 권장 값:
-- Project name: `jstockinsight-apps`
+- Project name: `market-breadth`
 - Production branch: `master`
 - Build command:
   ```bash
@@ -188,7 +201,8 @@ Pages에서 서빙되는 주요 경로:
 
 운영 원칙:
 1. Pages custom domain은 `api.jstockinsight.kr`
-2. Worker는 `/breadth/api/*`, `/fear-greed/api/*`, `/exchange/api/*`만 가로챔
+2. `jstockinsight-api`에는 `api.jstockinsight.kr` Worker custom domain을 붙이지 않음
+3. Worker는 `/breadth/api/*`, `/fear-greed/api/*`, `/exchange/api/*`만 가로챔
 
 대안:
 - Worker를 Pages Functions로 흡수하는 방식도 가능하지만, 현재 저장소 스캐폴딩은 별도 Worker 방식을 전제로 합니다.
@@ -201,8 +215,8 @@ Pages에서 서빙되는 주요 경로:
 - [cloudflare/producers/breadth/wrangler.toml](/Users/dean/Dev/#Git/market-breadth/cloudflare/producers/breadth/wrangler.toml)
 
 Cron:
-- `30 6 * * 1-5`
-- `0 8 * * 1-5`
+- `30 6 * * 2-6`
+- `0 8 * * 2-6`
 
 현재 현실적인 운영 단계:
 - 1단계: Python 파이프라인으로 JSON 생성
