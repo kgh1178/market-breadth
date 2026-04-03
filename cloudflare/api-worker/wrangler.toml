@@ -1,0 +1,13 @@
+name = "jstockinsight-api"
+main = "src/index.ts"
+compatibility_date = "2026-03-31"
+
+routes = [
+  { pattern = "api.jstockinsight.kr/breadth/api/*", zone_name = "jstockinsight.kr" },
+  { pattern = "api.jstockinsight.kr/fear-greed/api/*", zone_name = "jstockinsight.kr" },
+  { pattern = "api.jstockinsight.kr/exchange/api/*", zone_name = "jstockinsight.kr" }
+]
+
+[[r2_buckets]]
+binding = "APP_DATA"
+bucket_name = "jstockinsight-app-data"

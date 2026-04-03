@@ -2,6 +2,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 .env
+.env.local
+.env.secrets
+.wrangler/
 .venv
 venv/
 ENV/

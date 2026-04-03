@@ -1,0 +1,2 @@
+/widget.html /breadth 301
+/api/* /breadth/api/:splat 301

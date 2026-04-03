@@ -108,5 +108,6 @@ MARKETS = {
 # ─────────────────────────────────────────────
 # 출력 경로
 # ─────────────────────────────────────────────
-OUTPUT_DIR = "docs/api"
-GITHUB_PAGES_BASE = "https://{username}.github.io/market-breadth/api"
+OUTPUT_DIR = "docs/breadth/api"
+PUBLIC_APP_BASE = "https://api.jstockinsight.kr/breadth"
+PUBLIC_API_BASE = f"{PUBLIC_APP_BASE}/api"

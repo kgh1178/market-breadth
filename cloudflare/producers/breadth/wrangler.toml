@@ -1,0 +1,10 @@
+name = "breadth-producer"
+main = "src/index.ts"
+compatibility_date = "2026-03-31"
+
+[triggers]
+crons = ["30 6 * * 2-6", "0 8 * * 2-6"]
+
+[[r2_buckets]]
+binding = "APP_DATA"
+bucket_name = "jstockinsight-app-data"

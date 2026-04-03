@@ -11,6 +11,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = REPO_ROOT / "docs"
+BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_static_apps.py"
 PWCLI = Path.home() / ".codex" / "skills" / "playwright" / "scripts" / "playwright_cli.sh"
 
 
@@ -37,6 +38,15 @@ def _wait_for_server(url: str, timeout: float = 10.0) -> None:
 @pytest.mark.skipif(not shutil.which("npx"), reason="npx is required for Playwright CLI")
 @pytest.mark.skipif(not PWCLI.exists(), reason="Playwright CLI wrapper is unavailable")
 def test_full_dashboard_browser_smoke(tmp_path: Path):
+    subprocess.run(
+        ["python3", str(BUILD_SCRIPT)],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+
     try:
         port = _free_port()
     except RuntimeError:
@@ -53,10 +63,43 @@ def test_full_dashboard_browser_smoke(tmp_path: Path):
         env = os.environ.copy()
         env["CODEX_HOME"] = env.get("CODEX_HOME", str(Path.home() / ".codex"))
         env["PLAYWRIGHT_CLI_SESSION"] = "mbdashsmoke"
-        url = f"http://127.0.0.1:{port}/?lang=en"
+        hub_url = f"http://127.0.0.1:{port}/?lang=en"
 
         subprocess.run(
-            [str(PWCLI), "open", url],
+            [str(PWCLI), "open", hub_url],
+            cwd=tmp_path,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+
+        rendered = ""
+        deadline = time.time() + 30
+        while time.time() < deadline:
+            result = subprocess.run(
+                [str(PWCLI), "eval", "document.body.innerText"],
+                cwd=tmp_path,
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            rendered = result.stdout
+            if all(token in rendered for token in ["J Stock Insight Applications", "Market Breadth", "Fear & Greed", "Exchange"]):
+                break
+            time.sleep(1)
+
+        assert "J Stock Insight Applications" in rendered
+        assert "Market Breadth" in rendered
+        assert "Fear & Greed" in rendered
+        assert "Exchange" in rendered
+
+        dashboard_url = f"http://127.0.0.1:{port}/breadth/dashboard/?lang=en"
+        subprocess.run(
+            [str(PWCLI), "open", dashboard_url],
             cwd=tmp_path,
             env=env,
             check=True,

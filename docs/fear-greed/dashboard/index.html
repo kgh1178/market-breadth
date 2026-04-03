@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fear &amp; Greed Dashboard</title>
+  <style>
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:#f6f7f9;color:#1f2328}
+    .wrap{max-width:920px;margin:0 auto;padding:32px 18px 52px}
+    .panel{background:#fff;border:1px solid #e5e7eb;border-radius:26px;padding:26px;box-shadow:0 18px 36px rgba(15,23,42,.06)}
+    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#66707a;font-weight:700}
+    h1{margin:10px 0 12px;font-size:38px;letter-spacing:-.03em}
+    p{margin:0;color:#66707a;line-height:1.7}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    a{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:10px 14px;text-decoration:none;font-weight:700;font-size:13px}
+    .primary{background:#b26a00;color:#fff}
+    .ghost{border:1px solid #b26a00;color:#b26a00}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <div class="eyebrow" id="eyebrow">Placeholder Dashboard</div>
+      <h1 id="title">Fear &amp; Greed Dashboard</h1>
+      <p id="copy">This dashboard route is in place so future apps can ship under the same Pages and Worker prefix model without changing the platform layout.</p>
+      <div class="actions">
+        <a class="primary" href="/fear-greed" id="widgetLink">Widget</a>
+        <a class="ghost" href="/" id="homeLink">App Hub</a>
+      </div>
+    </div>
+  </div>
+<script>
+const I18N={en:{eyebrow:'Placeholder Dashboard',title:'Fear & Greed Dashboard',copy:'This dashboard route is in place so future apps can ship under the same Pages and Worker prefix model without changing the platform layout.',widget:'Widget',home:'App Hub'},ko:{eyebrow:'플레이스홀더 대시보드',title:'공포·탐욕 지수 대시보드',copy:'향후 앱도 플랫폼 구조를 바꾸지 않고 같은 Pages/Worker prefix 아래에서 배포할 수 있도록 이 대시보드 경로를 미리 마련해 두었습니다.',widget:'위젯',home:'앱 허브'},ja:{eyebrow:'プレースホルダーダッシュボード',title:'恐怖・貪欲指数ダッシュボード',copy:'今後のアプリもプラットフォーム構造を変えずに同じ Pages / Worker prefix 配下で公開できるよう、このダッシュボード経路を先に用意しています。',widget:'ウィジェット',home:'アプリハブ'}};
+const param=new URLSearchParams(window.location.search).get('lang');
+const langs=[...(navigator.languages||[]),navigator.language].filter(Boolean).map(v=>String(v).toLowerCase());
+const lang=param&&['ko','ja','en'].includes(param)?param:langs.some(v=>v.startsWith('ko'))?'ko':langs.some(v=>v.startsWith('ja'))?'ja':'en';
+const t=I18N[lang];
+document.documentElement.lang=lang;
+document.getElementById('eyebrow').textContent=t.eyebrow;
+document.getElementById('title').textContent=t.title;
+document.getElementById('copy').textContent=t.copy;
+document.getElementById('widgetLink').textContent=t.widget;
+document.getElementById('homeLink').textContent=t.home;
+</script>
+</body>
+</html>

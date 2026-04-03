@@ -1,0 +1,7 @@
+name = "exchange-producer"
+main = "src/index.ts"
+compatibility_date = "2026-03-31"
+
+[[r2_buckets]]
+binding = "APP_DATA"
+bucket_name = "jstockinsight-app-data"
