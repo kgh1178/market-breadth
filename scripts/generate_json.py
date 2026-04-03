@@ -60,10 +60,50 @@ def _structured_market_entry(
         "metrics_valid": metrics_valid,
         "error_code": error_code,
         "error_message": error_message,
+        "thresholds": _empty_thresholds(),
     }
     if extra:
         entry.update(extra)
     return entry
+
+
+def _empty_threshold_state() -> dict:
+    return {
+        "lt20": False,
+        "lt10": False,
+        "entered_lt20_today": False,
+        "entered_lt10_today": False,
+    }
+
+
+def _empty_thresholds() -> dict:
+    return {
+        "breadth_50": _empty_threshold_state(),
+        "breadth_200": _empty_threshold_state(),
+    }
+
+
+def _threshold_state_from_series(series_records: list[dict]) -> dict:
+    values = [point["value"] for point in series_records if point.get("value") is not None]
+    if not values:
+        return _empty_threshold_state()
+
+    current = float(values[-1])
+    previous = float(values[-2]) if len(values) > 1 else None
+
+    return {
+        "lt20": current < 20.0,
+        "lt10": current < 10.0,
+        "entered_lt20_today": previous is not None and previous >= 20.0 and current < 20.0,
+        "entered_lt10_today": previous is not None and previous >= 10.0 and current < 10.0,
+    }
+
+
+def _thresholds_from_market_series(ts_50: list[dict], ts_200: list[dict]) -> dict:
+    return {
+        "breadth_50": _threshold_state_from_series(ts_50),
+        "breadth_200": _threshold_state_from_series(ts_200),
+    }
 
 
 def _remove_stale_series(market_id: str) -> None:
@@ -243,6 +283,7 @@ def process_market(market_id: str) -> dict:
         "symbols_downloaded": len(downloaded),
         "failed_symbols": failed_symbols[:10],
         "ex_div_flag": False,
+        "thresholds": _thresholds_from_market_series(ts_50, ts_200),
     }
 
     if "pwds" in cfg.special_metrics:

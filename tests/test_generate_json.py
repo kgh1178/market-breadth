@@ -40,6 +40,68 @@ def test_structured_market_entry_keeps_required_fields():
     assert entry["error_code"] is None
     assert entry["error_message"] is None
     assert entry["breadth_50"] == 44.0
+    assert entry["thresholds"] == {
+        "breadth_50": {
+            "lt20": False,
+            "lt10": False,
+            "entered_lt20_today": False,
+            "entered_lt10_today": False,
+        },
+        "breadth_200": {
+            "lt20": False,
+            "lt10": False,
+            "entered_lt20_today": False,
+            "entered_lt10_today": False,
+        },
+    }
+
+
+def test_threshold_state_marks_entry_into_lt20():
+    state = generate_json._threshold_state_from_series(
+        [
+            {"date": "2026-03-31", "value": 21.0},
+            {"date": "2026-04-01", "value": 19.0},
+        ]
+    )
+
+    assert state == {
+        "lt20": True,
+        "lt10": False,
+        "entered_lt20_today": True,
+        "entered_lt10_today": False,
+    }
+
+
+def test_threshold_state_marks_entry_into_lt10():
+    state = generate_json._threshold_state_from_series(
+        [
+            {"date": "2026-03-31", "value": 11.0},
+            {"date": "2026-04-01", "value": 9.0},
+        ]
+    )
+
+    assert state == {
+        "lt20": True,
+        "lt10": True,
+        "entered_lt20_today": False,
+        "entered_lt10_today": True,
+    }
+
+
+def test_threshold_state_inside_band_without_new_entry():
+    state = generate_json._threshold_state_from_series(
+        [
+            {"date": "2026-03-31", "value": 9.5},
+            {"date": "2026-04-01", "value": 8.2},
+        ]
+    )
+
+    assert state == {
+        "lt20": True,
+        "lt10": True,
+        "entered_lt20_today": False,
+        "entered_lt10_today": False,
+    }
 
 
 def test_remove_stale_series_deletes_existing_file(tmp_path, monkeypatch):
@@ -109,6 +171,7 @@ def test_run_marks_low_coverage_market_partial_and_removes_series(tmp_path, monk
     assert latest["sp500"]["series_valid"] is False
     assert latest["sp500"]["metrics_valid"] is False
     assert latest["sp500"]["error_code"] == "coverage_below_threshold"
+    assert latest["sp500"]["thresholds"]["breadth_50"]["entered_lt20_today"] is False
     assert not stale_series.exists()
     assert metadata["markets"]["sp500"]["status"] == "partial"
 
@@ -147,5 +210,8 @@ def test_run_writes_structured_ok_market_with_as_of_date(tmp_path, monkeypatch):
     assert latest["sp500"]["series_valid"] is True
     assert latest["sp500"]["metrics_valid"] is True
     assert latest["sp500"]["price_basis"] == "split-adjusted, dividend-unadjusted"
+    assert "thresholds" in latest["sp500"]
+    assert "breadth_50" in latest["sp500"]["thresholds"]
+    assert "entered_lt20_today" in latest["sp500"]["thresholds"]["breadth_50"]
     assert "breadth_50" in series
     assert metadata["price_column"] == "Close"

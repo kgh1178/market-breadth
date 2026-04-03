@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Market Breadth Dashboard</title>
+  <style>
+    :root{
+      --us:#0f766e;
+      --us-soft:#67b8b1;
+      --jp:#1a73e8;
+      --jp-soft:#7baaf7;
+      --kr:#ea4335;
+      --kr-soft:#f28b82;
+      --ink:#1f2328;
+      --muted:#66707a;
+      --line:#e5e7eb;
+      --panel:#ffffff;
+      --panel-soft:#f8f9fb;
+      --panel-strong:#f2f4f7;
+      --bg:#f6f7f9;
+      --shadow:0 16px 40px rgba(15, 23, 42, .06);
+      --good:#137333;
+      --bad:#b42318;
+      --partial:#b26a00;
+      --link:#1a73e8;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(15,118,110,.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(26,115,232,.08), transparent 30%),
+        linear-gradient(180deg,#fafbfc 0%,#f4f6f8 100%);
+      color:var(--ink);
+    }
+    .wrap{max-width:1240px;margin:0 auto;padding:28px 18px 56px}
+    .hero{
+      display:grid;grid-template-columns:1.45fr .95fr;gap:18px;margin-bottom:18px
+    }
+    .hero-main,.hero-side{
+      background:var(--panel);
+      border:1px solid rgba(229,231,235,.9);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+    }
+    .hero-main{
+      padding:26px 24px 22px;
+      background:
+        linear-gradient(135deg, rgba(15,118,110,.09) 0%, rgba(15,118,110,0) 35%),
+        linear-gradient(225deg, rgba(26,115,232,.08) 0%, rgba(26,115,232,0) 32%),
+        var(--panel);
+    }
+    .hero-side{padding:18px}
+    .eyebrow{
+      font-size:11px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:700;
+    }
+    h1{
+      margin:10px 0 12px;
+      font-size:38px;
+      line-height:1.02;
+      letter-spacing:-.03em;
+    }
+    .hero-copy{
+      margin:0;
+      font-size:15px;
+      line-height:1.6;
+      color:var(--muted);
+      max-width:56ch;
+    }
+    .hero-meta{
+      margin-top:18px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:var(--panel-soft);
+      border:1px solid #eceff3;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:600;
+    }
+    .chip strong{color:var(--ink)}
+    .hero-side h2,.chart-head h2,.side h2,.market-panel h2{
+      margin:0;
+      font-size:17px;
+      letter-spacing:-.01em;
+    }
+    .stamp{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:center;
+      margin-bottom:14px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    .overview-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+    .overview-card{
+      background:var(--panel-soft);
+      border:1px solid #edf0f3;
+      border-radius:18px;
+      padding:14px;
+    }
+    .overview-card .k{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .overview-card .v{
+      margin-top:8px;
+      font-size:24px;
+      font-weight:800;
+      line-height:1;
+      color:var(--ink);
+    }
+    .overview-card .s{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+      margin-bottom:18px;
+    }
+    .panel{
+      background:var(--panel);
+      border:1px solid rgba(229,231,235,.95);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+    }
+    .summary-card{
+      position:relative;
+      overflow:hidden;
+      padding:18px 18px 16px;
+      background:
+        linear-gradient(180deg, rgba(248,249,251,.96), rgba(255,255,255,.98));
+    }
+    .summary-card.t20{
+      background:
+        linear-gradient(180deg, rgba(255,247,237,.95), rgba(255,255,255,.98));
+      box-shadow:0 18px 40px rgba(245,158,11,.14);
+    }
+    .summary-card.t10{
+      background:
+        linear-gradient(180deg, rgba(255,241,242,.96), rgba(255,255,255,.98));
+      box-shadow:0 20px 44px rgba(220,38,38,.16);
+    }
+    .summary-card::before{
+      content:'';
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:5px;
+      background:var(--accent,#999);
+    }
+    .summary-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+    }
+    .label{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.11em;
+      font-weight:700;
+    }
+    .status-tag{
+      border-radius:999px;
+      padding:5px 10px;
+      font-size:11px;
+      font-weight:700;
+      background:#eef2f7;
+      color:#4b5563;
+    }
+    .status-tag.ok{background:#e6f4ea;color:var(--good)}
+    .status-tag.error{background:#fdecec;color:var(--bad)}
+    .status-tag.partial{background:#fef7e0;color:var(--partial)}
+    .market-name{
+      margin:8px 0 12px;
+      font-size:21px;
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
+    .big{
+      font-size:38px;
+      line-height:1;
+      font-weight:800;
+      color:var(--accent,#202124);
+      letter-spacing:-.03em;
+    }
+    .summary-metrics{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+    .metric{
+      padding:12px 12px 10px;
+      border-radius:16px;
+      background:rgba(255,255,255,.9);
+      border:1px solid #eef0f2;
+    }
+    .metric .k{
+      font-size:11px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .metric .v{
+      margin-top:6px;
+      font-size:20px;
+      font-weight:800;
+      color:var(--ink);
+    }
+    .metric .s{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .basis{
+      margin-top:12px;
+      font-size:11px;
+      color:#8b9095;
+    }
+    .threshold-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin:10px 0 4px;
+    }
+    .threshold-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:700;
+      line-height:1;
+    }
+    .threshold-badge.enter20{background:#f59e0b;color:#fff}
+    .threshold-badge.enter10{background:#dc2626;color:#fff}
+    .threshold-badge.below20{background:#fff7ed;color:#c2410c;border:1px solid #fdba74}
+    .threshold-badge.below10{background:#fff1f2;color:#be123c;border:1px solid #fda4af}
+    .unavailable{
+      margin-top:12px;
+      padding:12px 13px;
+      border-radius:14px;
+      background:#fdecec;
+      color:var(--bad);
+      font-size:13px;
+      line-height:1.45;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns:1.7fr .95fr;
+      gap:18px;
+      margin-bottom:18px;
+    }
+    .chart-panel{padding:18px}
+    .chart-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    .chart-sub{
+      margin-top:4px;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .switch{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .switch button{
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--muted);
+      border-radius:999px;
+      padding:8px 13px;
+      font-size:12px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+    .switch button.on{
+      background:var(--ink);
+      color:#fff;
+      border-color:var(--ink);
+      box-shadow:0 8px 18px rgba(31,35,40,.15);
+    }
+    .legend{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .legend span{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:var(--panel-soft);
+      border:1px solid #edf0f3;
+    }
+    .legend i{display:inline-block;width:28px;height:0;border-top-style:solid}
+    .legend .us{border-top-width:4px;border-top-color:var(--us)}
+    .legend .jp{border-top-width:3px;border-top-color:var(--jp)}
+    .legend .kr{border-top-width:2px;border-top-color:var(--kr)}
+    .chart{
+      height:392px;
+      border-radius:18px;
+      background:
+        linear-gradient(180deg, rgba(248,249,251,.7), rgba(255,255,255,.96));
+      border:1px solid #edf0f3;
+      overflow:hidden;
+    }
+    .chart-fallback{
+      min-height:180px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      text-align:center;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:13px;
+    }
+    .side{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .side .panel{padding:18px}
+    .status-list{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:14px;
+    }
+    .status-item{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:12px;
+      align-items:center;
+      padding:12px;
+      border-radius:16px;
+      background:var(--panel-soft);
+      border:1px solid #edf0f3;
+    }
+    .swatch{
+      width:11px;
+      height:11px;
+      border-radius:999px;
+      background:var(--accent,#999);
+    }
+    .status-title{font-size:14px;font-weight:700}
+    .status-meta{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
+    .status-pill{
+      font-size:11px;
+      border-radius:999px;
+      padding:5px 10px;
+      background:#eef2f7;
+      color:#4b5563;
+      font-weight:700;
+      text-transform:uppercase;
+    }
+    .status-pill.ok{background:#e7f6ec;color:var(--good)}
+    .status-pill.error{background:#fdecec;color:var(--bad)}
+    .status-pill.partial{background:#fef7e0;color:var(--partial)}
+    .signals{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+    .badge{
+      display:inline-block;
+      padding:6px 11px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.01em;
+    }
+    .b-long{background:#e6f4ea;color:#0d904f}
+    .b-short{background:#fce8e6;color:#d93025}
+    .b-neut{background:#fef7e0;color:#b26a00}
+    .b-off{background:#f1f3f4;color:#5f6368}
+    .market-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:18px;
+    }
+    .market-panel{
+      padding:18px;
+      background:
+        linear-gradient(180deg, rgba(248,249,251,.94), rgba(255,255,255,.98));
+    }
+    .market-panel.t20{
+      background:
+        linear-gradient(180deg, rgba(255,247,237,.94), rgba(255,255,255,.98));
+      box-shadow:0 18px 40px rgba(245,158,11,.12);
+    }
+    .market-panel.t10{
+      background:
+        linear-gradient(180deg, rgba(255,241,242,.96), rgba(255,255,255,.98));
+      box-shadow:0 18px 42px rgba(220,38,38,.14);
+    }
+    .market-panel h2{
+      margin:8px 0 2px;
+      font-size:24px;
+      line-height:1.05;
+      letter-spacing:-.03em;
+    }
+    .market-panel .sub{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .market-header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .market-value{
+      margin-top:12px;
+      font-size:32px;
+      font-weight:800;
+      letter-spacing:-.03em;
+    }
+    .market-value small{
+      display:block;
+      margin-top:6px;
+      font-size:13px;
+      font-weight:600;
+      color:var(--muted);
+      letter-spacing:0;
+    }
+    .metrics{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:14px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .metrics .tile{
+      padding:12px;
+      border-radius:16px;
+      background:rgba(255,255,255,.92);
+      border:1px solid #edf0f3;
+    }
+    .metrics b{
+      display:block;
+      color:var(--ink);
+      font-size:18px;
+      margin-top:6px;
+    }
+    .mini-chart{
+      height:230px;
+      margin-top:14px;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid #edf0f3;
+      background:var(--panel-soft);
+    }
+    .foot{
+      margin-top:28px;
+      padding-top:16px;
+      border-top:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      font-size:12px;
+      color:#8b9095;
+    }
+    .foot a{color:var(--link);text-decoration:none}
+    .foot a:hover{text-decoration:underline}
+    @media (max-width:1120px){
+      .hero,.layout,.market-grid,.summary{grid-template-columns:1fr}
+      .hero-main{padding-bottom:24px}
+    }
+    @media (max-width:720px){
+      .wrap{padding:18px 14px 44px}
+      h1{font-size:30px}
+      .overview-grid,.metrics,.summary-metrics{grid-template-columns:1fr}
+      .chart{height:320px}
+      .market-value{font-size:28px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <article class="hero-main">
+        <div class="eyebrow" id="eyebrow">Cross-Market Monitor</div>
+        <h1 id="heroTitle">Market Breadth Dashboard</h1>
+        <p class="hero-copy" id="heroCopy">
+          Global breadth monitor with market-level status, live breadth series,
+          and strategy overlays. The dashboard respects structured market status
+          metadata, so stale or invalid markets are shown explicitly instead of
+          being rendered as fresh.
+        </p>
+        <div class="hero-meta">
+          <span class="chip" id="chipUs"><strong>United States</strong> teal, thick line</span>
+          <span class="chip" id="chipJp"><strong>Japan</strong> blue, medium line</span>
+          <span class="chip" id="chipKr"><strong>Korea</strong> red, thin line</span>
+          <span class="chip" id="chipPrice"><strong>Price Basis</strong> split-adj, div-unadj</span>
+        </div>
+      </article>
+
+      <aside class="hero-side panel">
+        <div class="stamp">
+          <strong id="overviewTitle">Overview</strong>
+          <span id="stamp">Loading...</span>
+        </div>
+        <div class="overview-grid" id="overviewGrid">
+          <div class="overview-card">
+            <div class="k" id="overviewKey">Markets Online</div>
+            <div class="v">-</div>
+            <div class="s" id="overviewWaiting">Waiting for latest snapshot.</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="summary" id="summary"></section>
+
+    <section class="layout">
+      <article class="panel chart-panel">
+        <div class="chart-head">
+          <div>
+            <h2 id="globalTitle">Global Breadth</h2>
+            <div class="chart-sub" id="globalSub">
+              Compare 50-day and 200-day breadth across the three markets with
+              market-specific color and line thickness cues.
+            </div>
+          </div>
+          <div class="switch">
+            <button id="btn50" class="on" type="button">50-Day</button>
+            <button id="btn200" type="button">200-Day</button>
+          </div>
+        </div>
+        <div class="legend">
+          <span id="legendUs"><i class="us"></i>S&amp;P 500</span>
+          <span id="legendJp"><i class="jp"></i>Nikkei 225</span>
+          <span id="legendKr"><i class="kr"></i>KOSPI 200</span>
+        </div>
+        <div class="chart" id="globalChart"></div>
+      </article>
+
+      <aside class="side">
+        <section class="panel">
+          <h2 id="statusHeading">Market Status</h2>
+          <div class="status-list" id="statusList"></div>
+        </section>
+        <section class="panel">
+          <h2 id="signalsHeading">Signals</h2>
+          <div class="signals" id="signals"></div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="market-grid" id="marketGrid"></section>
+
+    <footer class="foot">
+      <span id="footerMeta">Data: yfinance+pykrx | Engine: market_breadth v3.1</span>
+      <span>
+        <a id="footerWidgetLink" href="/breadth">Widget View</a> |
+        <a id="footerApiLink" href="/breadth/api/latest.json">Latest API</a>
+      </span>
+    </footer>
+  </div>
+
+<script type="module">
+const TRANSLATIONS={
+  en:{
+    page_title:'Market Breadth Dashboard',
+    eyebrow:'Cross-Market Monitor',
+    hero_title:'Market Breadth Dashboard',
+    hero_copy:'Global breadth monitor with market-level status, live breadth series, and strategy overlays. The dashboard respects structured market status metadata, so stale or invalid markets are shown explicitly instead of being rendered as fresh.',
+    chip_us:'<strong>United States</strong> teal, thick line',
+    chip_jp:'<strong>Japan</strong> blue, medium line',
+    chip_kr:'<strong>Korea</strong> red, thin line',
+    chip_price:'<strong>Price Basis</strong> split-adj, div-unadj',
+    overview_title:'Overview',
+    loading:'Loading...',
+    overview_key:'Markets Online',
+    overview_waiting:'Waiting for latest snapshot.',
+    global_title:'Global Breadth',
+    global_sub:'Compare 50-day and 200-day breadth across the three markets with market-specific color and line thickness cues.',
+    button_50:'50-Day',
+    button_200:'200-Day',
+    footer_meta:'Data: yfinance+pykrx | Engine: market_breadth v3.1',
+    footer_widget:'Widget View',
+    footer_api:'Latest API',
+    market_sp500:'S&P 500',
+    market_nikkei225:'Nikkei 225',
+    market_kospi200:'KOSPI 200',
+    status_heading:'Market Status',
+    signals_heading:'Signals',
+    markets_online:'Markets Online',
+    all_markets_loaded:'All available markets loaded from the latest snapshot.',
+    partial_markets:'{count} market flagged partial.',
+    signal_mode:'Signal Mode',
+    signal_mode_complete:'Complete',
+    signal_mode_partial:'Partial',
+    signal_inputs_missing:'Some signal inputs are unavailable.',
+    signal_inputs_complete:'All required markets are available for current signals.',
+    pipeline_date:'Pipeline Date',
+    structured_metadata_note:'Rendered from structured market metadata.',
+    price_basis:'Price Basis',
+    close_price:'Close',
+    price_basis_desc:'Split-adjusted, dividend-unadjusted series.',
+    unavailable:'Unavailable',
+    latest_update_failed:'Latest update failed.',
+    label_50_day:'50-Day',
+    label_200_day:'200-Day',
+    as_of:'as of',
+    no_data:'No data',
+    no_active_signals:'No active signals',
+    partial_data:'Partial data',
+    threshold_entered_20:'Entered <20%',
+    threshold_entered_10:'Entered <10%',
+    threshold_below_20:'Below 20%',
+    threshold_below_10:'Below 10%',
+    global_chart_fallback:'Global chart unavailable because the chart library could not be loaded. Summary panels and market status remain live.',
+    market_chart_fallback:'{market} chart unavailable because the chart library could not be loaded.',
+    section_unavailable_sub:'Structured status blocks stale rendering for this market.',
+    section_live_sub:'Live market section with 50-day and 200-day breadth overlays.',
+    section_value_sub:'50-day now · 200-day {value}%',
+    breadth_50_tile:'50d breadth',
+    breadth_200_tile:'200d breadth',
+    dashboard_data_error:'Dashboard data could not be loaded.',
+    updated:'Updated: {date}',
+    error_prefix:'Error: {message}',
+    status_ok:'OK',
+    status_partial:'PARTIAL',
+    status_error:'ERROR',
+    signal_asia_us_lead:'Asia U.S. Lead',
+    signal_tri_market_deviation:'Tri-Market Deviation',
+    signal_regime_overlay:'Regime Overlay',
+    direction_LONG:'LONG',
+    direction_SHORT:'SHORT',
+    direction_NEUTRAL:'NEUTRAL'
+  },
+  ko:{
+    page_title:'마켓 브레드스 대시보드',
+    eyebrow:'크로스 마켓 모니터',
+    hero_title:'마켓 브레드스 대시보드',
+    hero_copy:'시장별 상태, 실시간 브레드스 시계열, 전략 오버레이를 함께 보는 글로벌 브레드스 모니터입니다. 구조화된 시장 상태 메타데이터를 기준으로 stale 또는 invalid 시장을 최신 데이터처럼 그리지 않습니다.',
+    chip_us:'<strong>미국</strong> 청록색 굵은 선',
+    chip_jp:'<strong>일본</strong> 파란색 중간 선',
+    chip_kr:'<strong>한국</strong> 빨간색 얇은 선',
+    chip_price:'<strong>가격 기준</strong> 분할조정, 배당비조정',
+    overview_title:'개요',
+    loading:'불러오는 중...',
+    overview_key:'정상 시장 수',
+    overview_waiting:'최신 스냅샷을 기다리는 중입니다.',
+    global_title:'글로벌 브레드스',
+    global_sub:'세 시장의 50일 및 200일 브레드스를 색상과 선 두께 기준으로 비교합니다.',
+    button_50:'50일',
+    button_200:'200일',
+    footer_meta:'데이터: yfinance+pykrx | 엔진: market_breadth v3.1',
+    footer_widget:'위젯 보기',
+    footer_api:'최신 API',
+    market_sp500:'S&P 500',
+    market_nikkei225:'니케이 225',
+    market_kospi200:'코스피 200',
+    status_heading:'시장 상태',
+    signals_heading:'시그널',
+    markets_online:'정상 시장 수',
+    all_markets_loaded:'최신 스냅샷 기준으로 모든 사용 가능 시장을 불러왔습니다.',
+    partial_markets:'{count}개 시장이 부분 상태로 표시됩니다.',
+    signal_mode:'시그널 모드',
+    signal_mode_complete:'완전',
+    signal_mode_partial:'부분',
+    signal_inputs_missing:'일부 시그널 입력 시장이 비어 있습니다.',
+    signal_inputs_complete:'현재 시그널에 필요한 시장 데이터가 모두 있습니다.',
+    pipeline_date:'파이프라인 날짜',
+    structured_metadata_note:'구조화된 시장 메타데이터를 기준으로 렌더링했습니다.',
+    price_basis:'가격 기준',
+    close_price:'종가',
+    price_basis_desc:'분할조정, 배당비조정 시계열입니다.',
+    unavailable:'이용 불가',
+    latest_update_failed:'최신 업데이트에 실패했습니다.',
+    label_50_day:'50일',
+    label_200_day:'200일',
+    as_of:'기준일',
+    no_data:'데이터 없음',
+    no_active_signals:'활성 시그널 없음',
+    partial_data:'부분 데이터',
+    threshold_entered_20:'20% 하향 진입',
+    threshold_entered_10:'10% 하향 진입',
+    threshold_below_20:'20% 미만',
+    threshold_below_10:'10% 미만',
+    global_chart_fallback:'차트 라이브러리를 불러오지 못해 글로벌 차트를 표시할 수 없습니다. 요약 패널과 시장 상태는 계속 표시됩니다.',
+    market_chart_fallback:'차트 라이브러리를 불러오지 못해 {market} 차트를 표시할 수 없습니다.',
+    section_unavailable_sub:'구조화된 상태 정보가 이 시장의 stale 렌더링을 차단합니다.',
+    section_live_sub:'50일 및 200일 브레드스 오버레이를 함께 보여주는 시장 섹션입니다.',
+    section_value_sub:'현재 50일 · 200일 {value}%',
+    breadth_50_tile:'50일 브레드스',
+    breadth_200_tile:'200일 브레드스',
+    dashboard_data_error:'대시보드 데이터를 불러오지 못했습니다.',
+    updated:'업데이트: {date}',
+    error_prefix:'오류: {message}',
+    status_ok:'정상',
+    status_partial:'부분',
+    status_error:'오류',
+    signal_asia_us_lead:'아시아-미국 리드',
+    signal_tri_market_deviation:'3시장 괴리',
+    signal_regime_overlay:'레짐 오버레이',
+    direction_LONG:'매수',
+    direction_SHORT:'매도',
+    direction_NEUTRAL:'중립'
+  },
+  ja:{
+    page_title:'マーケットブレッドス・ダッシュボード',
+    eyebrow:'クロスマーケット監視',
+    hero_title:'マーケットブレッドス・ダッシュボード',
+    hero_copy:'市場ごとの状態、ライブのブレッドス時系列、戦略オーバーレイをまとめて見るためのグローバルモニターです。構造化された市場ステータスメタデータを基準にし、古い市場データを最新のようには描画しません。',
+    chip_us:'<strong>米国</strong> ティールの太線',
+    chip_jp:'<strong>日本</strong> 青の中線',
+    chip_kr:'<strong>韓国</strong> 赤の細線',
+    chip_price:'<strong>価格基準</strong> 分割調整・配当未調整',
+    overview_title:'概要',
+    loading:'読み込み中...',
+    overview_key:'稼働市場数',
+    overview_waiting:'最新スナップショットを待機しています。',
+    global_title:'グローバルブレッドス',
+    global_sub:'3市場の50日・200日ブレッドスを、色と線の太さで見分けながら比較します。',
+    button_50:'50日',
+    button_200:'200日',
+    footer_meta:'データ: yfinance+pykrx | エンジン: market_breadth v3.1',
+    footer_widget:'ウィジェット表示',
+    footer_api:'最新API',
+    market_sp500:'S&P 500',
+    market_nikkei225:'日経225',
+    market_kospi200:'KOSPI 200',
+    status_heading:'市場ステータス',
+    signals_heading:'シグナル',
+    markets_online:'稼働市場数',
+    all_markets_loaded:'最新スナップショットで利用可能な市場をすべて読み込みました。',
+    partial_markets:'{count}市場が部分状態として判定されています。',
+    signal_mode:'シグナルモード',
+    signal_mode_complete:'完全',
+    signal_mode_partial:'部分',
+    signal_inputs_missing:'一部のシグナル入力市場が不足しています。',
+    signal_inputs_complete:'現在のシグナルに必要な市場データはすべて揃っています。',
+    pipeline_date:'パイプライン日付',
+    structured_metadata_note:'構造化された市場メタデータを基準に描画しています。',
+    price_basis:'価格基準',
+    close_price:'終値',
+    price_basis_desc:'分割調整・配当未調整の系列です。',
+    unavailable:'利用不可',
+    latest_update_failed:'最新更新に失敗しました。',
+    label_50_day:'50日',
+    label_200_day:'200日',
+    as_of:'基準日',
+    no_data:'データなし',
+    no_active_signals:'有効なシグナルなし',
+    partial_data:'部分データ',
+    threshold_entered_20:'20%割れ入り',
+    threshold_entered_10:'10%割れ入り',
+    threshold_below_20:'20%未満',
+    threshold_below_10:'10%未満',
+    global_chart_fallback:'チャートライブラリを読み込めないためグローバルチャートを表示できません。要約パネルと市場ステータスは表示を続けます。',
+    market_chart_fallback:'チャートライブラリを読み込めないため{market}のチャートを表示できません。',
+    section_unavailable_sub:'構造化されたステータスにより、この市場の古い描画はブロックされています。',
+    section_live_sub:'50日と200日のブレッドスを重ねて見る市場セクションです。',
+    section_value_sub:'現在の50日 · 200日 {value}%',
+    breadth_50_tile:'50日ブレッドス',
+    breadth_200_tile:'200日ブレッドス',
+    dashboard_data_error:'ダッシュボードデータを読み込めませんでした。',
+    updated:'更新: {date}',
+    error_prefix:'エラー: {message}',
+    status_ok:'正常',
+    status_partial:'一部',
+    status_error:'エラー',
+    signal_asia_us_lead:'アジア・米国リード',
+    signal_tri_market_deviation:'3市場乖離',
+    signal_regime_overlay:'レジームオーバーレイ',
+    direction_LONG:'ロング',
+    direction_SHORT:'ショート',
+    direction_NEUTRAL:'中立'
+  }
+};
+
+function detectLocale(){
+  const param=new URLSearchParams(window.location.search).get('lang');
+  if(param && ['ko','ja','en'].includes(param)) return param;
+  const langs=[...(navigator.languages||[]), navigator.language].filter(Boolean).map(x=>String(x).toLowerCase());
+  if(langs.some(x=>x.startsWith('ko'))) return 'ko';
+  if(langs.some(x=>x.startsWith('ja'))) return 'ja';
+  return 'en';
+}
+
+const LOCALE=detectLocale();
+
+function t(key, vars={}){
+  const dict=TRANSLATIONS[LOCALE] || TRANSLATIONS.en;
+  let text=dict[key] ?? TRANSLATIONS.en[key] ?? key;
+  Object.entries(vars).forEach(([name,val])=>{
+    text=text.replaceAll(`{${name}}`, String(val));
+  });
+  return text;
+}
+
+document.documentElement.lang=LOCALE;
+document.title=t('page_title');
+
+const API_DEFAULT='https://api.jstockinsight.kr/breadth/api';
+const API_LOCAL=`${window.location.origin}/breadth/api`;
+const API_PARAM=new URLSearchParams(window.location.search).get('api_base');
+const API=API_PARAM||(window.location.hostname==='127.0.0.1'||window.location.hostname==='localhost'
+  ?API_LOCAL
+  :API_DEFAULT);
+
+const MARKETS = [
+  {id:'sp500', color:'#0f766e', soft:'#67b8b1', width:4},
+  {id:'nikkei225', color:'#1a73e8', soft:'#7baaf7', width:3},
+  {id:'kospi200', color:'#ea4335', soft:'#f28b82', width:2},
+];
+
+const state = {
+  latest: null,
+  signals: null,
+  seriesMap: {},
+  activeWindow: '50',
+  chartFactory: null,
+  globalChart: null,
+  globalSeries: [],
+  miniCharts: [],
+};
+
+function marketLabel(market){
+  return t(`market_${market.id}`);
+}
+
+function signalLabel(key){
+  return t(`signal_${key}`);
+}
+
+function directionLabel(direction){
+  return t(`direction_${direction || 'NEUTRAL'}`);
+}
+
+function statusLabel(status){
+  return t(`status_${status || 'error'}`);
+}
+
+function applyStaticText(){
+  document.getElementById('eyebrow').textContent=t('eyebrow');
+  document.getElementById('heroTitle').textContent=t('hero_title');
+  document.getElementById('heroCopy').textContent=t('hero_copy');
+  document.getElementById('chipUs').innerHTML=t('chip_us');
+  document.getElementById('chipJp').innerHTML=t('chip_jp');
+  document.getElementById('chipKr').innerHTML=t('chip_kr');
+  document.getElementById('chipPrice').innerHTML=t('chip_price');
+  document.getElementById('overviewTitle').textContent=t('overview_title');
+  document.getElementById('stamp').textContent=t('loading');
+  document.getElementById('overviewKey').textContent=t('overview_key');
+  document.getElementById('overviewWaiting').textContent=t('overview_waiting');
+  document.getElementById('globalTitle').textContent=t('global_title');
+  document.getElementById('globalSub').textContent=t('global_sub');
+  document.getElementById('btn50').textContent=t('button_50');
+  document.getElementById('btn200').textContent=t('button_200');
+  document.getElementById('legendUs').innerHTML=`<i class="us"></i>${marketLabel(MARKETS[0])}`;
+  document.getElementById('legendJp').innerHTML=`<i class="jp"></i>${marketLabel(MARKETS[1])}`;
+  document.getElementById('legendKr').innerHTML=`<i class="kr"></i>${marketLabel(MARKETS[2])}`;
+  document.getElementById('statusHeading').textContent=t('status_heading');
+  document.getElementById('signalsHeading').textContent=t('signals_heading');
+  document.getElementById('footerMeta').textContent=t('footer_meta');
+  document.getElementById('footerWidgetLink').textContent=t('footer_widget');
+  document.getElementById('footerApiLink').textContent=t('footer_api');
+}
+
+function setStamp(text){
+  document.getElementById('stamp').textContent = text;
+}
+
+function statusClass(status){
+  if(status === 'ok') return 'ok';
+  if(status === 'partial') return 'partial';
+  return 'error';
+}
+
+function safeNumber(value){
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function thresholdPresentation(threshold, prefix=''){
+  const label = prefix ? `${prefix} ` : '';
+  if(!threshold){
+    return {cardClass:'', badgeHtml:''};
+  }
+  if(threshold.entered_lt10_today){
+    return {
+      cardClass:'t10',
+      badgeHtml:`<span class="threshold-badge enter10">${label}${t('threshold_entered_10')}</span>`
+    };
+  }
+  if(threshold.entered_lt20_today){
+    return {
+      cardClass:'t20',
+      badgeHtml:`<span class="threshold-badge enter20">${label}${t('threshold_entered_20')}</span>`
+    };
+  }
+  if(threshold.lt10){
+    return {
+      cardClass:'t10',
+      badgeHtml:`<span class="threshold-badge below10">${label}${t('threshold_below_10')}</span>`
+    };
+  }
+  if(threshold.lt20){
+    return {
+      cardClass:'t20',
+      badgeHtml:`<span class="threshold-badge below20">${label}${t('threshold_below_20')}</span>`
+    };
+  }
+  return {cardClass:'', badgeHtml:''};
+}
+
+function renderOverview(latest, signals){
+  const marketsOnline = MARKETS.filter(m=>latest[m.id]?.status === 'ok').length;
+  const partialCount = MARKETS.filter(m=>latest[m.id]?.status === 'partial').length;
+  const signalMode = signals.partial_data ? t('signal_mode_partial') : t('signal_mode_complete');
+  document.getElementById('overviewGrid').innerHTML = `
+    <div class="overview-card">
+      <div class="k">${t('markets_online')}</div>
+      <div class="v">${marketsOnline}/3</div>
+      <div class="s">${partialCount > 0 ? t('partial_markets',{count:partialCount}) : t('all_markets_loaded')}</div>
+    </div>
+    <div class="overview-card">
+      <div class="k">${t('signal_mode')}</div>
+      <div class="v">${signalMode}</div>
+      <div class="s">${signals.partial_data ? t('signal_inputs_missing') : t('signal_inputs_complete')}</div>
+    </div>
+    <div class="overview-card">
+      <div class="k">${t('pipeline_date')}</div>
+      <div class="v">${latest.pipeline_date || latest.date || '-'}</div>
+      <div class="s">${t('structured_metadata_note')}</div>
+    </div>
+    <div class="overview-card">
+      <div class="k">${t('price_basis')}</div>
+      <div class="v">${t('close_price')}</div>
+      <div class="s">${t('price_basis_desc')}</div>
+    </div>
+  `;
+}
+
+function makeSummaryCard(market, payload){
+  const status = payload.status || 'error';
+  if(status !== 'ok'){
+    return `
+      <article class="panel summary-card" style="--accent:${market.color}">
+        <div class="summary-top">
+          <div class="label">${marketLabel(market)}</div>
+          <div class="status-tag ${statusClass(status)}">${statusLabel(status)}</div>
+        </div>
+        <div class="market-name">${t('unavailable')}</div>
+        <div class="unavailable">${payload.error_message || t('latest_update_failed')}</div>
+      </article>
+    `;
+  }
+  const activeValue = payload[`breadth_${state.activeWindow}`];
+  const activeThreshold = thresholdPresentation(payload.thresholds?.[`breadth_${state.activeWindow}`]);
+  return `
+    <article class="panel summary-card ${activeThreshold.cardClass}" style="--accent:${market.color}">
+      <div class="summary-top">
+        <div class="label">${marketLabel(market)}</div>
+        <div class="status-tag ${statusClass(status)}">${statusLabel(status)}</div>
+      </div>
+      <div class="market-name">${marketLabel(market)}</div>
+      ${activeThreshold.badgeHtml ? `<div class="threshold-row">${activeThreshold.badgeHtml}</div>` : ''}
+      <div class="big">${safeNumber(activeValue)?.toFixed(2) || '-'}%</div>
+      <div class="summary-metrics">
+        <div class="metric">
+          <div class="k">${t('label_50_day')}</div>
+          <div class="v">${safeNumber(payload.breadth_50)?.toFixed(2) || '-'}%</div>
+          <div class="s">${payload.n_above_50 ?? payload.count_above_50}/${payload.n_valid_50 ?? '-'}</div>
+        </div>
+        <div class="metric">
+          <div class="k">${t('label_200_day')}</div>
+          <div class="v">${safeNumber(payload.breadth_200)?.toFixed(2) || '-'}%</div>
+          <div class="s">${payload.n_above_200 ?? payload.count_above_200}/${payload.n_valid_200 ?? '-'}</div>
+        </div>
+      </div>
+      <div class="basis">${t('as_of')} ${payload.as_of_date || '-'} · ${t('price_basis_desc')}</div>
+    </article>
+  `;
+}
+
+function renderSummary(latest){
+  document.getElementById('summary').innerHTML = MARKETS
+    .map(market => makeSummaryCard(market, latest[market.id] || {status:'error'}))
+    .join('');
+}
+
+function renderStatusList(latest){
+  document.getElementById('statusList').innerHTML = MARKETS.map(market=>{
+    const payload = latest[market.id] || {status:'error'};
+    return `
+      <div class="status-item">
+        <span class="swatch" style="background:${market.color}"></span>
+        <div>
+          <div class="status-title">${marketLabel(market)}</div>
+          <div class="status-meta">
+            ${payload.as_of_date || t('no_data')}
+            ${payload.status === 'ok' ? ` · ${safeNumber(payload.breadth_50)?.toFixed(2) || '-'}% / ${safeNumber(payload.breadth_200)?.toFixed(2) || '-'}%` : ''}
+          </div>
+        </div>
+        <span class="status-pill ${statusClass(payload.status)}">${statusLabel(payload.status)}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSignals(signals){
+  let html = '';
+  for(const [key, signal] of Object.entries(signals.signals || {})){
+    if(!signal.valid) continue;
+    const dir = signal.direction || 'NEUTRAL';
+    const cls = dir === 'LONG' ? 'b-long' : dir === 'SHORT' ? 'b-short' : 'b-neut';
+    html += `<span class="badge ${cls}">${signalLabel(key)}: ${directionLabel(dir)}</span>`;
+  }
+  if(signals.partial_data){
+    html += `<span class="badge b-off">${t('partial_data')}</span>`;
+  }
+  document.getElementById('signals').innerHTML = html || `<span class="badge b-off">${t('no_active_signals')}</span>`;
+}
+
+function renderChartFallback(el, message){
+  el.innerHTML = `<div class="chart-fallback">${message}</div>`;
+}
+
+async function ensureChartFactory(){
+  if(state.chartFactory !== null){
+    return state.chartFactory;
+  }
+  try{
+    const mod = await import('https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.mjs');
+    state.chartFactory = mod.createChart;
+  }catch(err){
+    console.warn('Chart library unavailable:', err);
+    state.chartFactory = false;
+  }
+  return state.chartFactory;
+}
+
+function clearGlobalSeries(){
+  if(!state.globalChart) return;
+  state.globalSeries.forEach(series=>state.globalChart.removeSeries(series));
+  state.globalSeries = [];
+}
+
+function clearMiniCharts(){
+  state.miniCharts.forEach(chart=>chart.remove());
+  state.miniCharts = [];
+}
+
+function renderMarketSections(latest){
+  document.getElementById('marketGrid').innerHTML = MARKETS.map(market=>{
+    const payload = latest[market.id] || {status:'error'};
+    if(payload.status !== 'ok'){
+      return `
+        <section class="panel market-panel">
+          <div class="market-header">
+            <div>
+              <div class="label">${marketLabel(market)}</div>
+              <h2>${t('unavailable')}</h2>
+              <div class="sub">${t('section_unavailable_sub')}</div>
+            </div>
+            <div class="status-tag ${statusClass(payload.status)}">${statusLabel(payload.status)}</div>
+          </div>
+          <div class="unavailable">${payload.error_message || t('latest_update_failed')}</div>
+        </section>
+      `;
+    }
+    const fiftyThreshold = thresholdPresentation(payload.thresholds?.breadth_50, t('label_50_day'));
+    const twoHundredThreshold = thresholdPresentation(payload.thresholds?.breadth_200, t('label_200_day'));
+    const thresholdBadges = [fiftyThreshold.badgeHtml, twoHundredThreshold.badgeHtml].filter(Boolean).join('');
+    const marketThresholdClass = [fiftyThreshold.cardClass, twoHundredThreshold.cardClass].includes('t10')
+      ? 't10'
+      : [fiftyThreshold.cardClass, twoHundredThreshold.cardClass].includes('t20')
+        ? 't20'
+        : '';
+    return `
+      <section class="panel market-panel ${marketThresholdClass}">
+        <div class="market-header">
+          <div>
+            <div class="label">${marketLabel(market)}</div>
+            <h2>${marketLabel(market)}</h2>
+            <div class="sub">${t('section_live_sub')}</div>
+          </div>
+          <div class="status-tag ok">${t('status_ok')}</div>
+        </div>
+        <div class="market-value" style="color:${market.color}">
+          ${safeNumber(payload.breadth_50)?.toFixed(2) || '-'}%
+          <small>${t('section_value_sub',{value:safeNumber(payload.breadth_200)?.toFixed(2) || '-'})}</small>
+        </div>
+        ${thresholdBadges ? `<div class="threshold-row">${thresholdBadges}</div>` : ''}
+        <div class="metrics">
+          <div class="tile">${t('breadth_50_tile')}<b>${payload.n_above_50 ?? payload.count_above_50}/${payload.n_valid_50 ?? '-'}</b></div>
+          <div class="tile">${t('breadth_200_tile')}<b>${payload.n_above_200 ?? payload.count_above_200}/${payload.n_valid_200 ?? '-'}</b></div>
+        </div>
+        <div class="basis">${t('as_of')} ${payload.as_of_date || '-'} · ${t('price_basis_desc')}</div>
+        <div class="mini-chart" id="chart-${market.id}"></div>
+      </section>
+    `;
+  }).join('');
+}
+
+async function renderGlobalChart(latest, seriesMap){
+  const chartRoot = document.getElementById('globalChart');
+  const createChart = await ensureChartFactory();
+  if(!createChart){
+    renderChartFallback(chartRoot, t('global_chart_fallback'));
+    return;
+  }
+  chartRoot.innerHTML = '';
+  if(!state.globalChart){
+    state.globalChart = createChart(chartRoot, {
+      width: chartRoot.clientWidth,
+      height: 392,
+      layout:{background:{color:'#ffffff'},textColor:'#4b5563',fontSize:11},
+      grid:{vertLines:{color:'#eceff1'},horzLines:{color:'#eceff1'}},
+      timeScale:{timeVisible:false},
+      rightPriceScale:{scaleMargins:{top:.08,bottom:.06}},
+      crosshair:{vertLine:{color:'#d0d7de'},horzLine:{color:'#d0d7de'}},
+    });
+  }else{
+    state.globalChart.applyOptions({width:chartRoot.clientWidth,height:392});
+    clearGlobalSeries();
+  }
+
+  MARKETS.filter(market => latest[market.id]?.status === 'ok').forEach(market=>{
+    const series = state.globalChart.addLineSeries({
+      color: state.activeWindow === '200' ? market.soft : market.color,
+      lineWidth: state.activeWindow === '200' ? Math.max(2, market.width - 1) : market.width,
+      title: marketLabel(market),
+    });
+    state.globalSeries.push(series);
+    series.setData((seriesMap[market.id]?.[`breadth_${state.activeWindow}`] || []).map(x=>({
+      time:x.date,
+      value:x.value
+    })));
+  });
+  state.globalChart.timeScale().fitContent();
+}
+
+async function renderMiniCharts(latest, seriesMap){
+  clearMiniCharts();
+  const createChart = await ensureChartFactory();
+  MARKETS.forEach(market=>{
+    const payload = latest[market.id];
+    if(!payload || payload.status !== 'ok') return;
+    const el = document.getElementById(`chart-${market.id}`);
+    if(!el) return;
+    if(!createChart){
+      renderChartFallback(el, t('market_chart_fallback',{market:marketLabel(market)}));
+      return;
+    }
+    el.innerHTML = '';
+    const chart = createChart(el, {
+      width: el.clientWidth,
+      height: 230,
+      layout:{background:{color:'#f8f9fb'},textColor:'#4b5563',fontSize:11},
+      grid:{vertLines:{color:'#eceff1'},horzLines:{color:'#eceff1'}},
+      timeScale:{timeVisible:false},
+      rightPriceScale:{scaleMargins:{top:.08,bottom:.06}},
+    });
+    state.miniCharts.push(chart);
+    const s50 = chart.addLineSeries({color:market.color,lineWidth:market.width,title:t('label_50_day')});
+    const s200 = chart.addLineSeries({color:market.soft,lineWidth:Math.max(2, market.width - 1),title:t('label_200_day')});
+    s50.setData((seriesMap[market.id]?.breadth_50 || []).map(x=>({time:x.date,value:x.value})));
+    s200.setData((seriesMap[market.id]?.breadth_200 || []).map(x=>({time:x.date,value:x.value})));
+    chart.timeScale().fitContent();
+  });
+}
+
+async function fetchState(){
+  const cb='?t='+Date.now();
+  const [latestRes, signalsRes] = await Promise.all([
+    fetch(`${API}/latest.json${cb}`),
+    fetch(`${API}/signals.json${cb}`)
+  ]);
+  const latest = await latestRes.json();
+  const signals = await signalsRes.json();
+
+  const okMarkets = MARKETS.filter(m=>latest[m.id]?.status === 'ok');
+  const seriesPairs = await Promise.all(okMarkets.map(async market => {
+    const res = await fetch(`${API}/${market.id}.json${cb}`);
+    return [market.id, await res.json()];
+  }));
+
+  state.latest = latest;
+  state.signals = signals;
+  state.seriesMap = Object.fromEntries(seriesPairs);
+}
+
+async function renderAll(){
+  const latest = state.latest;
+  const signals = state.signals;
+  setStamp(t('updated',{date:latest.date}));
+  renderOverview(latest, signals);
+  renderSummary(latest);
+  renderStatusList(latest);
+  renderSignals(signals);
+  renderMarketSections(latest);
+  await renderGlobalChart(latest, state.seriesMap);
+  await renderMiniCharts(latest, state.seriesMap);
+}
+
+async function refresh(){
+  try{
+    await fetchState();
+    await renderAll();
+  }catch(err){
+    setStamp(t('error_prefix',{message:err.message || err}));
+    console.error(err);
+    renderChartFallback(document.getElementById('globalChart'), t('dashboard_data_error'));
+  }
+}
+
+function setWindow(next){
+  state.activeWindow = next;
+  document.getElementById('btn50').classList.toggle('on', next === '50');
+  document.getElementById('btn200').classList.toggle('on', next === '200');
+  if(state.latest){
+    renderSummary(state.latest);
+    renderGlobalChart(state.latest, state.seriesMap).catch(err=>{
+      setStamp(t('error_prefix',{message:err.message || err}));
+      console.error(err);
+    });
+  }
+}
+
+document.getElementById('btn50').onclick = ()=>setWindow('50');
+document.getElementById('btn200').onclick = ()=>setWindow('200');
+
+new ResizeObserver(()=>{
+  if(state.globalChart){
+    state.globalChart.applyOptions({width:document.getElementById('globalChart').clientWidth});
+  }
+}).observe(document.getElementById('globalChart'));
+
+applyStaticText();
+refresh();
+</script>
+</body>
+</html>

@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
 
 jobs:
   update:
@@ -37,11 +36,14 @@ jobs:
         env:
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
 
+      - name: Build static app outputs
+        run: python scripts/build_static_apps.py
+
       - name: Validate JSON outputs
         run: |
           python -c "
           import json, sys, pathlib
-          api_dir = pathlib.Path('docs/api')
+          api_dir = pathlib.Path('docs/breadth/api')
           files = list(api_dir.glob('*.json'))
           print(f'Found {len(files)} JSON files')
           assert len(files) >= 3, f'Expected >=3 files, got {len(files)}'
@@ -59,7 +61,7 @@ jobs:
           required_markets = ['sp500', 'nikkei225', 'kospi200']
           required_market_fields = [
               'status', 'as_of_date', 'series_valid', 'metrics_valid',
-              'price_basis',
+              'price_basis', 'thresholds',
               'error_code', 'error_message'
           ]
           for market in required_markets:
@@ -67,6 +69,11 @@ jobs:
               payload = latest[market]
               for field in required_market_fields:
                   assert field in payload, f'{market} missing {field}'
+              assert 'breadth_50' in payload['thresholds'], f'{market} thresholds missing breadth_50'
+              assert 'breadth_200' in payload['thresholds'], f'{market} thresholds missing breadth_200'
+              for key in ['lt20', 'lt10', 'entered_lt20_today', 'entered_lt10_today']:
+                  assert key in payload['thresholds']['breadth_50'], f'{market} breadth_50 thresholds missing {key}'
+                  assert key in payload['thresholds']['breadth_200'], f'{market} breadth_200 thresholds missing {key}'
               series_path = api_dir / f'{market}.json'
               if payload['status'] == 'ok':
                   assert payload['series_valid'] is True, f'{market} should have valid series'
@@ -93,7 +100,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/api/
+          git add docs/
           git diff --staged --quiet || \
             git commit -m "data: $(date -u +%Y-%m-%d) breadth update"
           git push

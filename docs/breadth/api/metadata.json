@@ -1,0 +1,65 @@
+{
+  "date": "2026-04-03",
+  "pipeline_date": "2026-04-03",
+  "markets": {
+    "sp500": {
+      "status": "ok",
+      "as_of_date": "2026-04-02",
+      "symbols_requested": 503,
+      "symbols_downloaded": 503,
+      "coverage_pct": 100.0,
+      "failed_symbols": [],
+      "validation": {
+        "market": "sp500",
+        "computed_50": 28.63,
+        "computed_200": 48.21,
+        "n_valid": 503,
+        "n_total": 503,
+        "official_50": null,
+        "diff_50": null,
+        "pass_50": null,
+        "source": null,
+        "range_check_50d": true,
+        "range_check_200d": true
+      },
+      "price_basis": "split-adjusted, dividend-unadjusted"
+    },
+    "nikkei225": {
+      "status": "ok",
+      "as_of_date": "2026-04-03",
+      "symbols_requested": 226,
+      "symbols_downloaded": 226,
+      "coverage_pct": 100.0,
+      "failed_symbols": [],
+      "validation": {
+        "market": "nikkei225",
+        "computed_200": 72.32,
+        "n_valid": 224,
+        "n_total": 226,
+        "official_200": null,
+        "diff_200": null,
+        "pass_200": null
+      },
+      "price_basis": "split-adjusted, dividend-unadjusted"
+    },
+    "kospi200": {
+      "status": "ok",
+      "as_of_date": "2026-04-03",
+      "symbols_requested": 200,
+      "symbols_downloaded": 200,
+      "coverage_pct": 100.0,
+      "failed_symbols": [],
+      "validation": {
+        "breadth_50_range": true,
+        "breadth_200_range": true,
+        "short_term_stronger": false
+      },
+      "price_basis": "split-adjusted, dividend-unadjusted"
+    }
+  },
+  "errors": [],
+  "pipeline_duration_sec": 103.1,
+  "price_basis": "split-adjusted, dividend-unadjusted (Barchart S5FI compatible)",
+  "yfinance_auto_adjust": false,
+  "price_column": "Close"
+}
