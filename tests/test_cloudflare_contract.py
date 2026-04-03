@@ -8,6 +8,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = REPO_ROOT / "docs"
 BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_static_apps.py"
 API_DIR = DOCS_DIR / "breadth" / "api"
+FEAR_GREED_API_DIR = DOCS_DIR / "fear-greed" / "api"
+EXCHANGE_API_DIR = DOCS_DIR / "exchange" / "api"
 API_WORKER_WRANGLER = REPO_ROOT / "cloudflare" / "api-worker" / "wrangler.toml"
 API_WORKER_SOURCE = REPO_ROOT / "cloudflare" / "api-worker" / "src" / "index.ts"
 PRODUCERS_DIR = REPO_ROOT / "cloudflare" / "producers"
@@ -125,3 +127,28 @@ def test_cloudflare_redirects_preserve_legacy_widget_and_api_links():
     redirects = (DOCS_DIR / "_redirects").read_text().strip().splitlines()
     assert "/widget.html /breadth 301" in redirects
     assert "/api/* /breadth/api/:splat 301" in redirects
+
+
+def test_placeholder_apps_publish_latest_and_metadata_contracts():
+    _build_static_outputs()
+
+    for app_id, api_dir in [("fear-greed", FEAR_GREED_API_DIR), ("exchange", EXCHANGE_API_DIR)]:
+        latest = json.loads((api_dir / "latest.json").read_text())
+        metadata = json.loads((api_dir / "metadata.json").read_text())
+        schema = json.loads((api_dir / "schema.json").read_text())
+
+        assert latest["app_id"] == app_id
+        assert latest["status"] == "placeholder"
+        assert latest["series_valid"] is False
+        assert latest["metrics_valid"] is False
+        assert latest["error_code"] == "not_implemented"
+        assert latest["api_base"] == f"/{app_id}/api"
+
+        assert metadata["app_id"] == app_id
+        assert metadata["status_contract"]["status"] == "placeholder"
+        assert metadata["paths"]["widget"] == f"/{app_id}"
+        assert metadata["paths"]["dashboard"] == f"/{app_id}/dashboard"
+        assert schema["app_id"] == app_id
+        assert schema["version"] == "draft-2026-04-04"
+        assert schema["endpoints"]["latest"] == f"/{app_id}/api/latest.json"
+        assert schema["endpoints"]["metadata"] == f"/{app_id}/api/metadata.json"

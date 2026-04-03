@@ -21,6 +21,11 @@ STATIC_TARGETS = [
     (ROOT / "apps" / "exchange" / "dashboard.html", DOCS_DIR / "exchange" / "dashboard" / "index.html"),
 ]
 
+APP_API_TARGETS = [
+    (ROOT / "apps" / "fear-greed" / "api", DOCS_DIR / "fear-greed" / "api"),
+    (ROOT / "apps" / "exchange" / "api", DOCS_DIR / "exchange" / "api"),
+]
+
 WIDGET_REDIRECT = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,6 +54,11 @@ def build() -> None:
     for src, dest in STATIC_TARGETS:
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src, dest)
+
+    for src, dest in APP_API_TARGETS:
+        if dest.exists():
+            shutil.rmtree(dest)
+        shutil.copytree(src, dest)
 
     (DOCS_DIR / "widget.html").write_text(WIDGET_REDIRECT, encoding="utf-8")
     (DOCS_DIR / "_redirects").write_text(REDIRECTS, encoding="utf-8")

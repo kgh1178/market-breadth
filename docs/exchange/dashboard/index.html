@@ -12,6 +12,10 @@
     h1{margin:10px 0 12px;font-size:38px;letter-spacing:-.03em}
     p{margin:0;color:#66707a;line-height:1.7}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+    .status{margin-top:18px;padding:16px 18px;border-radius:18px;background:#eef5ff;border:1px solid #b9d4ff}
+    .status-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#1f5fbe}
+    .status-value{font-size:22px;font-weight:800;margin-top:6px}
+    .status-copy{margin-top:8px;font-size:14px}
     a{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:10px 14px;text-decoration:none;font-weight:700;font-size:13px}
     .primary{background:#1a73e8;color:#fff}
     .ghost{border:1px solid #1a73e8;color:#1a73e8}
@@ -23,14 +27,21 @@
       <div class="eyebrow" id="eyebrow">Placeholder Dashboard</div>
       <h1 id="title">Exchange Dashboard</h1>
       <p id="copy">This dashboard route is prepared so exchange tools can land under the same app-prefix architecture without changing the Cloudflare layout later.</p>
+      <div class="status">
+        <div class="status-label" id="statusLabel">API Contract</div>
+        <div class="status-value" id="statusValue">Loading…</div>
+        <p class="status-copy" id="statusCopy">Fetching the placeholder `/exchange/api/latest.json` contract.</p>
+      </div>
       <div class="actions">
         <a class="primary" href="/exchange" id="widgetLink">Widget</a>
+        <a class="ghost" href="/exchange/api/metadata.json" id="apiLink">API Metadata</a>
+        <a class="ghost" href="/exchange/api/schema.json" id="schemaLink">API Schema</a>
         <a class="ghost" href="/" id="homeLink">App Hub</a>
       </div>
     </div>
   </div>
 <script>
-const I18N={en:{eyebrow:'Placeholder Dashboard',title:'Exchange Dashboard',copy:'This dashboard route is prepared so exchange tools can land under the same app-prefix architecture without changing the Cloudflare layout later.',widget:'Widget',home:'App Hub'},ko:{eyebrow:'플레이스홀더 대시보드',title:'환율 대시보드',copy:'향후 환율 도구도 Cloudflare 레이아웃을 바꾸지 않고 같은 앱 prefix 구조 아래에서 붙일 수 있도록 이 대시보드 경로를 먼저 마련했습니다.',widget:'위젯',home:'앱 허브'},ja:{eyebrow:'プレースホルダーダッシュボード',title:'為替ダッシュボード',copy:'今後の為替ツールも Cloudflare レイアウトを変えずに同じアプリ prefix 構造の下へ追加できるよう、このダッシュボード経路を先に準備しています。',widget:'ウィジェット',home:'アプリハブ'}};
+const I18N={en:{eyebrow:'Placeholder Dashboard',title:'Exchange Dashboard',copy:'This dashboard route is prepared so exchange tools can land under the same app-prefix architecture without changing the Cloudflare layout later.',widget:'Widget',api:'API Metadata',schema:'API Schema',home:'App Hub',contract:'API Contract',loading:'Loading…',status_placeholder:'Placeholder',status_copy:'Fetching the placeholder `/exchange/api/latest.json` contract.',status_error:'Could not load placeholder API contract.'},ko:{eyebrow:'플레이스홀더 대시보드',title:'환율 대시보드',copy:'향후 환율 도구도 Cloudflare 레이아웃을 바꾸지 않고 같은 앱 prefix 구조 아래에서 붙일 수 있도록 이 대시보드 경로를 먼저 마련했습니다.',widget:'위젯',api:'API 메타데이터',schema:'API 스키마',home:'앱 허브',contract:'API 계약',loading:'불러오는 중…',status_placeholder:'플레이스홀더',status_copy:'`/exchange/api/latest.json` placeholder 계약을 불러오고 있습니다.',status_error:'플레이스홀더 API 계약을 불러오지 못했습니다.'},ja:{eyebrow:'プレースホルダーダッシュボード',title:'為替ダッシュボード',copy:'今後の為替ツールも Cloudflare レイアウトを変えずに同じアプリ prefix 構造の下へ追加できるよう、このダッシュボード経路を先に準備しています。',widget:'ウィジェット',api:'APIメタデータ',schema:'APIスキーマ',home:'アプリハブ',contract:'API契約',loading:'読み込み中…',status_placeholder:'プレースホルダー',status_copy:'`/exchange/api/latest.json` のプレースホルダー契約を読み込んでいます。',status_error:'プレースホルダーAPI契約を読み込めませんでした。'}};
 const param=new URLSearchParams(window.location.search).get('lang');
 const langs=[...(navigator.languages||[]),navigator.language].filter(Boolean).map(v=>String(v).toLowerCase());
 const lang=param&&['ko','ja','en'].includes(param)?param:langs.some(v=>v.startsWith('ko'))?'ko':langs.some(v=>v.startsWith('ja'))?'ja':'en';
@@ -40,7 +51,20 @@ document.getElementById('eyebrow').textContent=t.eyebrow;
 document.getElementById('title').textContent=t.title;
 document.getElementById('copy').textContent=t.copy;
 document.getElementById('widgetLink').textContent=t.widget;
+document.getElementById('apiLink').textContent=t.api;
+document.getElementById('schemaLink').textContent=t.schema;
 document.getElementById('homeLink').textContent=t.home;
+document.getElementById('statusLabel').textContent=t.contract;
+document.getElementById('statusValue').textContent=t.loading;
+document.getElementById('statusCopy').textContent=t.status_copy;
+
+fetch('/exchange/api/latest.json').then(r=>r.ok?r.json():Promise.reject(new Error('bad status'))).then(data=>{
+  document.getElementById('statusValue').textContent=t[`status_${data.status}`]||data.status||t.loading;
+  document.getElementById('statusCopy').textContent=data.error_message||t.status_copy;
+}).catch(()=>{
+  document.getElementById('statusValue').textContent=t.loading;
+  document.getElementById('statusCopy').textContent=t.status_error;
+});
 </script>
 </body>
 </html>

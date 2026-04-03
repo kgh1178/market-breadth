@@ -1,0 +1,17 @@
+{
+  "app_id": "exchange",
+  "app_name": "Exchange",
+  "status_contract": {
+    "status": "placeholder",
+    "as_of_date": null,
+    "series_valid": false,
+    "metrics_valid": false,
+    "error_code": "not_implemented",
+    "error_message": "Exchange app is scaffolded but not implemented yet."
+  },
+  "paths": {
+    "widget": "/exchange",
+    "dashboard": "/exchange/dashboard",
+    "api_base": "/exchange/api"
+  }
+}

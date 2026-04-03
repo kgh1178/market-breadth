@@ -39,6 +39,12 @@
   - `breadth/sp500.json`
   - `breadth/nikkei225.json`
   - `breadth/kospi200.json`
+  - `fear-greed/latest.json`
+  - `fear-greed/metadata.json`
+  - `fear-greed/schema.json`
+  - `exchange/latest.json`
+  - `exchange/metadata.json`
+  - `exchange/schema.json`
 - `Producer Workers`
   - 앱별 스케줄/산출물 생성 책임 분리
 

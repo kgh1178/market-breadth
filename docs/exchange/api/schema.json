@@ -1,0 +1,47 @@
+{
+  "app_id": "exchange",
+  "version": "draft-2026-04-04",
+  "endpoints": {
+    "latest": "/exchange/api/latest.json",
+    "metadata": "/exchange/api/metadata.json"
+  },
+  "latest_contract": {
+    "date": "YYYY-MM-DD",
+    "pipeline_date": "YYYY-MM-DD",
+    "app_id": "exchange",
+    "status": "ok | partial | error | placeholder",
+    "as_of_date": "YYYY-MM-DD | null",
+    "series_valid": "boolean",
+    "metrics_valid": "boolean",
+    "error_code": "string | null",
+    "error_message": "string | null",
+    "pairs": {
+      "USDKRW": {
+        "value": "number | null",
+        "daily_change_pct": "number | null",
+        "z_score_20d": "number | null"
+      },
+      "USDJPY": {
+        "value": "number | null",
+        "daily_change_pct": "number | null",
+        "z_score_20d": "number | null"
+      },
+      "EURUSD": {
+        "value": "number | null",
+        "daily_change_pct": "number | null",
+        "z_score_20d": "number | null"
+      }
+    },
+    "regime": {
+      "usd_strength": "strong | neutral | weak",
+      "asia_fx_pressure": "high | medium | low"
+    },
+    "signals": {
+      "krw_risk_alert": "boolean",
+      "yen_breakout_alert": "boolean"
+    },
+    "widget_path": "/exchange",
+    "dashboard_path": "/exchange/dashboard",
+    "api_base": "/exchange/api"
+  }
+}

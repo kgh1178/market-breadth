@@ -1,0 +1,14 @@
+{
+  "date": "2026-04-04",
+  "pipeline_date": "2026-04-04",
+  "app_id": "fear-greed",
+  "status": "placeholder",
+  "as_of_date": null,
+  "series_valid": false,
+  "metrics_valid": false,
+  "error_code": "not_implemented",
+  "error_message": "Fear & Greed app is scaffolded but not implemented yet.",
+  "widget_path": "/fear-greed",
+  "dashboard_path": "/fear-greed/dashboard",
+  "api_base": "/fear-greed/api"
+}

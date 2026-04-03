@@ -1,0 +1,17 @@
+{
+  "app_id": "fear-greed",
+  "app_name": "Fear & Greed",
+  "status_contract": {
+    "status": "placeholder",
+    "as_of_date": null,
+    "series_valid": false,
+    "metrics_valid": false,
+    "error_code": "not_implemented",
+    "error_message": "Fear & Greed app is scaffolded but not implemented yet."
+  },
+  "paths": {
+    "widget": "/fear-greed",
+    "dashboard": "/fear-greed/dashboard",
+    "api_base": "/fear-greed/api"
+  }
+}
