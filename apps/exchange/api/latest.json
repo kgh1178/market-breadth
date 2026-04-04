@@ -2,12 +2,46 @@
   "date": "2026-04-04",
   "pipeline_date": "2026-04-04",
   "app_id": "exchange",
-  "status": "placeholder",
-  "as_of_date": null,
-  "series_valid": false,
-  "metrics_valid": false,
-  "error_code": "not_implemented",
-  "error_message": "Exchange app is scaffolded but not implemented yet.",
+  "status": "ok",
+  "as_of_date": "2026-04-04",
+  "series_valid": true,
+  "metrics_valid": true,
+  "error_code": null,
+  "error_message": null,
+  "pairs": {
+    "USDKRW": {
+      "value": 1510.54,
+      "daily_change_pct": 0.0875,
+      "z_score_20d": 1.0065
+    },
+    "USDJPY": {
+      "value": 159.632,
+      "daily_change_pct": 0.5949,
+      "z_score_20d": 0.9317
+    },
+    "EURUSD": {
+      "value": 1.1522,
+      "daily_change_pct": -0.5911,
+      "z_score_20d": -0.3898
+    }
+  },
+  "regime": {
+    "usd_strength": "strong",
+    "asia_fx_pressure": "medium"
+  },
+  "signals": {
+    "krw_risk_alert": false,
+    "yen_breakout_alert": false
+  },
+  "data_source": {
+    "primary": "yfinance",
+    "tickers": {
+      "USDKRW": "USDKRW=X",
+      "USDJPY": "USDJPY=X",
+      "EURUSD": "EURUSD=X"
+    },
+    "period": "6mo"
+  },
   "widget_path": "/exchange",
   "dashboard_path": "/exchange/dashboard",
   "api_base": "/exchange/api"

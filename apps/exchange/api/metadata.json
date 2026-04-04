@@ -2,16 +2,46 @@
   "app_id": "exchange",
   "app_name": "Exchange",
   "status_contract": {
-    "status": "placeholder",
-    "as_of_date": null,
-    "series_valid": false,
-    "metrics_valid": false,
-    "error_code": "not_implemented",
-    "error_message": "Exchange app is scaffolded but not implemented yet."
+    "status": "ok",
+    "as_of_date": "2026-04-04",
+    "series_valid": true,
+    "metrics_valid": true,
+    "error_code": null,
+    "error_message": null
+  },
+  "pairs": {
+    "USDKRW": {
+      "ticker": "USDKRW=X",
+      "label": "USD/KRW",
+      "quote": "KRW"
+    },
+    "USDJPY": {
+      "ticker": "USDJPY=X",
+      "label": "USD/JPY",
+      "quote": "JPY"
+    },
+    "EURUSD": {
+      "ticker": "EURUSD=X",
+      "label": "EUR/USD",
+      "quote": "USD"
+    }
+  },
+  "signals_contract": {
+    "krw_risk_alert": "USDKRW stress indicator based on z-score or daily move.",
+    "yen_breakout_alert": "USDJPY breakout indicator based on z-score or daily move."
   },
   "paths": {
     "widget": "/exchange",
     "dashboard": "/exchange/dashboard",
     "api_base": "/exchange/api"
+  },
+  "data_source": {
+    "primary": "yfinance",
+    "tickers": {
+      "USDKRW": "USDKRW=X",
+      "USDJPY": "USDJPY=X",
+      "EURUSD": "EURUSD=X"
+    },
+    "period": "6mo"
   }
 }

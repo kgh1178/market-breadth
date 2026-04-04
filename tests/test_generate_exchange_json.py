@@ -72,3 +72,25 @@ def test_write_exchange_payload_writes_source_files(tmp_path, monkeypatch):
 
     assert (tmp_path / "latest.json").exists()
     assert (tmp_path / "metadata.json").exists()
+
+
+def test_fetch_exchange_prices_combines_sequential_downloads(monkeypatch):
+    dates = pd.bdate_range("2026-03-03", periods=3)
+    calls = []
+
+    def fake_download(*, tickers, **kwargs):
+        calls.append(tickers)
+        if tickers == "EURUSD=X":
+            raise RuntimeError("temporary failure")
+        data = {
+            "USDKRW=X": [1450.0, 1452.0, 1455.0],
+            "USDJPY=X": [151.0, 151.2, 151.5],
+        }[tickers]
+        return pd.DataFrame({"Close": data}, index=dates)
+
+    monkeypatch.setattr(generate_exchange_json.yf, "download", fake_download)
+
+    prices = generate_exchange_json.fetch_exchange_prices()
+
+    assert calls == ["USDKRW=X", "USDJPY=X", "EURUSD=X"]
+    assert list(prices.columns) == ["USDKRW=X", "USDJPY=X"]

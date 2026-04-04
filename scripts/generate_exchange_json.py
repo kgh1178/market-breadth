@@ -44,6 +44,7 @@ DOWNLOAD_PARAMS = {
     "interval": "1d",
     "auto_adjust": False,
     "progress": False,
+    "threads": False,
 }
 
 
@@ -73,11 +74,22 @@ def _extract_close_frame(raw: pd.DataFrame, tickers: list[str]) -> pd.DataFrame:
 
 
 def fetch_exchange_prices() -> pd.DataFrame:
-    tickers = [cfg["ticker"] for cfg in FX_TICKERS.values()]
-    raw = yf.download(tickers=tickers, **DOWNLOAD_PARAMS)
-    close = _extract_close_frame(raw, tickers)
-    logger.info("exchange download complete: %s", ", ".join(close.columns))
-    return close
+    frames: list[pd.DataFrame] = []
+    for cfg in FX_TICKERS.values():
+        ticker = cfg["ticker"]
+        try:
+            raw = yf.download(tickers=ticker, **DOWNLOAD_PARAMS)
+            close = _extract_close_frame(raw, [ticker])
+            frames.append(close)
+        except Exception as exc:
+            logger.warning("exchange download failed for %s: %s", ticker, exc)
+
+    if not frames:
+        raise RuntimeError("exchange prices download returned empty frame")
+
+    combined = pd.concat(frames, axis=1).sort_index()
+    logger.info("exchange download complete: %s", ", ".join(combined.columns))
+    return combined
 
 
 def _safe_float(value: float | int | np.floating | None) -> float | None:
