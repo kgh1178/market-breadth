@@ -1,8 +1,8 @@
 const I18N = {
   en: {
-    eyebrow: "Risk Pulse",
-    title: "Fear & Greed Dashboard",
-    copy: "A structured risk dashboard that blends momentum, volatility, credit, breadth, and safe-haven flow into a single Fear & Greed score.",
+    eyebrow: "Cross-Market Risk",
+    title: "Market Fear Index Dashboard",
+    copy: "Track fear conditions across the US, Korea, Japan, and crypto with structured per-market status metadata and comparable detail panels.",
     widget: "Widget",
     api: "API Metadata",
     schema: "API Schema",
@@ -11,17 +11,17 @@ const I18N = {
     status_ok: "Healthy",
     status_partial: "Partial",
     status_error: "Unavailable",
-    status_placeholder: "Placeholder",
     status_copy: "Fetching `/fear-greed/api/latest.json`.",
-    fetch_error: "Could not load Fear & Greed API data.",
+    fetch_error: "Could not load Market Fear Index data.",
     status_label: "Status",
     updated: "Pipeline date",
     as_of_prefix: "As of",
-    score_section_label: "Composite score",
-    score_section_title: "Fear & Greed score",
-    inputs: "Inputs",
-    signals: "Signals",
-    source: "Data source",
+    overview_label: "Markets",
+    overview_title: "Fear snapshots by market",
+    us: "United States",
+    kr: "Korea",
+    jp: "Japan",
+    crypto: "Crypto",
     score_extreme_fear: "Extreme fear",
     score_fear: "Fear",
     score_neutral: "Neutral",
@@ -32,6 +32,8 @@ const I18N = {
     credit: "Credit",
     breadth: "Breadth",
     safe_haven_flow: "Safe-haven flow",
+    fx_stress: "FX stress",
+    relative_strength: "Relative strength",
     contrarian_bias: "Contrarian bias",
     turning_point_alert: "Turning-point alert",
     risk_on: "Risk-on",
@@ -39,14 +41,17 @@ const I18N = {
     risk_off: "Risk-off",
     signal_on: "Active",
     signal_off: "Inactive",
-    primary_source: "Primary source",
-    period: "Lookback",
-    breadth_snapshot: "Breadth snapshot"
+    components: "Components",
+    signals: "Signals",
+    meta: "Status",
+    z_score: "Z-score",
+    as_of: "As of",
+    error: "Error"
   },
   ko: {
-    eyebrow: "리스크 펄스",
-    title: "공포·탐욕 대시보드",
-    copy: "모멘텀, 변동성, 크레딧, 브레드스, 안전자산 선호를 하나의 공포·탐욕 점수로 묶어 보여주는 구조화 리스크 대시보드입니다.",
+    eyebrow: "크로스마켓 리스크",
+    title: "시장별 공포지수 대시보드",
+    copy: "미국, 한국, 일본, 크립토 시장의 공포 상태를 구조화된 시장 메타데이터 기준으로 비교하는 대시보드입니다.",
     widget: "위젯",
     api: "API 메타데이터",
     schema: "API 스키마",
@@ -55,17 +60,17 @@ const I18N = {
     status_ok: "정상",
     status_partial: "부분",
     status_error: "사용 불가",
-    status_placeholder: "플레이스홀더",
     status_copy: "`/fear-greed/api/latest.json`을 불러오는 중입니다.",
-    fetch_error: "공포·탐욕 API 데이터를 불러오지 못했습니다.",
+    fetch_error: "시장별 공포지수 데이터를 불러오지 못했습니다.",
     status_label: "상태",
     updated: "파이프라인 날짜",
     as_of_prefix: "기준일",
-    score_section_label: "종합 점수",
-    score_section_title: "공포·탐욕 점수",
-    inputs: "입력값",
-    signals: "시그널",
-    source: "데이터 소스",
+    overview_label: "시장",
+    overview_title: "시장별 공포 스냅샷",
+    us: "미국",
+    kr: "한국",
+    jp: "일본",
+    crypto: "크립토",
     score_extreme_fear: "극단적 공포",
     score_fear: "공포",
     score_neutral: "중립",
@@ -76,6 +81,8 @@ const I18N = {
     credit: "크레딧",
     breadth: "브레드스",
     safe_haven_flow: "안전자산 선호",
+    fx_stress: "환율 스트레스",
+    relative_strength: "상대강도",
     contrarian_bias: "역발상 바이어스",
     turning_point_alert: "전환점 알림",
     risk_on: "리스크 온",
@@ -83,14 +90,17 @@ const I18N = {
     risk_off: "리스크 오프",
     signal_on: "활성",
     signal_off: "비활성",
-    primary_source: "기본 소스",
-    period: "조회 기간",
-    breadth_snapshot: "브레드스 스냅샷"
+    components: "컴포넌트",
+    signals: "시그널",
+    meta: "상태",
+    z_score: "Z점수",
+    as_of: "기준일",
+    error: "오류"
   },
   ja: {
-    eyebrow: "リスクパルス",
-    title: "恐怖・貪欲ダッシュボード",
-    copy: "モメンタム、ボラティリティ、クレジット、ブレッドス、安全資産選好を 1 つの恐怖・貪欲スコアにまとめて表示する構造化リスクダッシュボードです。",
+    eyebrow: "クロスマーケットリスク",
+    title: "市場別恐怖指数ダッシュボード",
+    copy: "米国、韓国、日本、暗号資産市場の恐怖状態を、構造化された市場メタデータ基準で比較するダッシュボードです。",
     widget: "ウィジェット",
     api: "APIメタデータ",
     schema: "APIスキーマ",
@@ -99,17 +109,17 @@ const I18N = {
     status_ok: "正常",
     status_partial: "部分",
     status_error: "利用不可",
-    status_placeholder: "プレースホルダー",
     status_copy: "`/fear-greed/api/latest.json` を読み込み中です。",
-    fetch_error: "恐怖・貪欲 API データを読み込めませんでした。",
+    fetch_error: "市場別恐怖指数データを読み込めませんでした。",
     status_label: "状態",
     updated: "パイプライン日付",
     as_of_prefix: "基準日",
-    score_section_label: "総合スコア",
-    score_section_title: "恐怖・貪欲スコア",
-    inputs: "入力値",
-    signals: "シグナル",
-    source: "データソース",
+    overview_label: "市場",
+    overview_title: "市場別恐怖スナップショット",
+    us: "米国",
+    kr: "韓国",
+    jp: "日本",
+    crypto: "暗号資産",
     score_extreme_fear: "極端な恐怖",
     score_fear: "恐怖",
     score_neutral: "中立",
@@ -120,6 +130,8 @@ const I18N = {
     credit: "クレジット",
     breadth: "ブレッドス",
     safe_haven_flow: "安全資産選好",
+    fx_stress: "為替ストレス",
+    relative_strength: "相対強度",
     contrarian_bias: "逆張りバイアス",
     turning_point_alert: "転換点アラート",
     risk_on: "リスクオン",
@@ -127,10 +139,20 @@ const I18N = {
     risk_off: "リスクオフ",
     signal_on: "有効",
     signal_off: "無効",
-    primary_source: "主要ソース",
-    period: "参照期間",
-    breadth_snapshot: "ブレッドススナップショット"
+    components: "コンポーネント",
+    signals: "シグナル",
+    meta: "状態",
+    z_score: "Zスコア",
+    as_of: "基準日",
+    error: "エラー"
   }
+};
+
+const MARKET_META = {
+  us: { accent: "#0f766e" },
+  kr: { accent: "#ef4444" },
+  jp: { accent: "#2563eb" },
+  crypto: { accent: "#c68000" }
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -147,31 +169,22 @@ const lang = preferred && ["ko", "ja", "en"].includes(preferred)
       : "en";
 const t = I18N[lang];
 
-function scoreTone(value) {
-  if (value == null) return "warn";
-  if (value < 20) return "alert";
-  if (value < 40) return "warn";
-  if (value < 60) return "good";
-  if (value < 80) return "warn";
-  return "alert";
-}
-
-function formatScore(value) {
-  return value == null || Number.isNaN(value) ? "-" : Number(value).toFixed(2);
-}
-
-function formatZ(value) {
-  if (value == null || Number.isNaN(value)) return "-";
-  const sign = value > 0 ? "+" : "";
-  return `${sign}${Number(value).toFixed(2)}`;
+function statusText(status) {
+  return t[`status_${status}`] || status || "-";
 }
 
 function labelText(label) {
   return t[`score_${label}`] || label || "-";
 }
 
-function detailRow(label, value) {
-  return `<div class="detail-row"><strong>${label}</strong><span>${value}</span></div>`;
+function formatScore(value) {
+  return value == null || Number.isNaN(value) ? "-" : `${Number(value).toFixed(2)}%`;
+}
+
+function formatZ(value) {
+  if (value == null || Number.isNaN(value)) return "-";
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${Number(value).toFixed(2)}`;
 }
 
 function badge(value, tone) {
@@ -182,52 +195,81 @@ function setText(id, value) {
   document.getElementById(id).textContent = value;
 }
 
-function renderInputs(data) {
-  const inputList = document.getElementById("inputList");
-  const inputs = data.inputs || {};
-  inputList.innerHTML = [
-    detailRow(t.momentum, formatScore(inputs.momentum)),
-    detailRow(t.volatility, formatScore(inputs.volatility)),
-    detailRow(t.credit, formatScore(inputs.credit)),
-    detailRow(t.breadth, formatScore(inputs.breadth)),
-    detailRow(t.safe_haven_flow, formatScore(inputs.safe_haven_flow))
-  ].join("");
+function detailRow(label, value) {
+  return `<div class="detail-row"><strong>${label}</strong><span>${value}</span></div>`;
 }
 
-function renderSignals(data) {
-  const signals = data.signals || {};
-  const bias = t[signals.contrarian_bias] || signals.contrarian_bias || "-";
-  const biasTone = signals.contrarian_bias === "neutral" ? "good" : "warn";
-  document.getElementById("signalList").innerHTML = [
+function componentRows(components) {
+  return Object.entries(components || {}).map(([key, value]) => detailRow(t[key] || key, formatScore(value))).join("");
+}
+
+function signalRows(signals) {
+  const bias = t[signals?.contrarian_bias] || signals?.contrarian_bias || "-";
+  const biasTone = signals?.contrarian_bias === "neutral" ? "good" : "warn";
+  return [
     detailRow(t.contrarian_bias, badge(bias, biasTone)),
     detailRow(
       t.turning_point_alert,
-      badge(signals.turning_point_alert ? t.signal_on : t.signal_off, signals.turning_point_alert ? "alert" : "good")
+      badge(signals?.turning_point_alert ? t.signal_on : t.signal_off, signals?.turning_point_alert ? "alert" : "good")
     )
   ].join("");
 }
 
-function renderSource(data) {
-  const source = data.data_source || {};
-  document.getElementById("sourceList").innerHTML = [
-    detailRow(t.primary_source, source.primary || "-"),
-    detailRow(t.period, source.period || "-"),
-    detailRow(t.breadth_snapshot, source.breadth_snapshot || "-")
+function metaRows(market) {
+  return [
+    detailRow(t.as_of, market.as_of_date || "-"),
+    detailRow(t.z_score, formatZ(market.score?.z_score)),
+    detailRow(t.error, market.error_message || "-")
   ].join("");
 }
 
-function renderScore(data) {
-  const score = data.score || {};
-  const tone = scoreTone(score.value);
-  const scoreValue = document.getElementById("scoreValue");
-  scoreValue.textContent = formatScore(score.value);
-  scoreValue.style.color = tone === "alert" ? "#d93025" : tone === "warn" ? "#c68000" : "#0f766e";
-  const scoreState = document.getElementById("scoreState");
-  scoreState.textContent = labelText(score.label);
-  scoreState.style.color = scoreValue.style.color;
-  setText("zValue", formatZ(score.z_score));
-  document.getElementById("scoreFill").style.width = `${Math.max(0, Math.min(100, Number(score.value || 0)))}%`;
-  setText("biasValue", t[data.signals?.contrarian_bias] || data.signals?.contrarian_bias || "-");
+function renderOverview(markets) {
+  document.getElementById("overviewGrid").innerHTML = ["us", "kr", "jp", "crypto"].map((marketId) => {
+    const market = markets[marketId] || {};
+    return `
+      <article class="mini-card" style="--accent:${MARKET_META[marketId].accent}">
+        <div class="mini-title">${t[marketId]}</div>
+        <div class="mini-score">${formatScore(market.score?.value)}</div>
+        <div class="mini-label">${labelText(market.score?.label)}</div>
+        <div class="mini-meta">${statusText(market.status)} · ${market.as_of_date || "-"}</div>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderDetails(markets) {
+  document.getElementById("detailGrid").innerHTML = ["us", "kr", "jp", "crypto"].map((marketId) => {
+    const market = markets[marketId] || {};
+    const okay = market.status === "ok" || market.status === "partial";
+    return `
+      <article class="detail-card" id="${marketId}" style="--accent:${MARKET_META[marketId].accent}">
+        <span class="section-kicker">${t[marketId]}</span>
+        <div class="detail-title-row">
+          <div class="detail-title">${t[marketId]}</div>
+          <span class="detail-status ${market.status || "error"}">${statusText(market.status)}</span>
+        </div>
+        <div class="detail-score">${formatScore(market.score?.value)}</div>
+        <div class="detail-score-label">${labelText(market.score?.label)}</div>
+        <div class="detail-z">${t.z_score}: ${formatZ(market.score?.z_score)}</div>
+        ${okay ? `
+          <div class="detail-columns">
+            <section class="detail-block">
+              <span class="section-kicker">${t.components}</span>
+              <div class="detail-list">${componentRows(market.components)}</div>
+            </section>
+            <section class="detail-block">
+              <span class="section-kicker">${t.signals}</span>
+              <div class="detail-list">${signalRows(market.signals)}</div>
+            </section>
+            <section class="detail-block">
+              <span class="section-kicker">${t.meta}</span>
+              <div class="detail-list">${metaRows(market)}</div>
+            </section>
+          </div>
+        ` : `<p class="error-copy">${market.error_message || statusText(market.status)}</p>`}
+      </article>
+    `;
+  }).join("");
 }
 
 document.documentElement.lang = lang;
@@ -242,26 +284,21 @@ setText("statusLabel", t.status_label);
 setText("updatedLabel", t.updated);
 setText("statusValue", t.loading);
 setText("statusCopy", t.status_copy);
-setText("scoreSectionLabel", t.score_section_label);
-setText("scoreSectionTitle", t.score_section_title);
-setText("inputsLabel", t.inputs);
-setText("signalLabel", t.signals);
-setText("sourceLabel", t.source);
+setText("overviewLabel", t.overview_label);
+setText("overviewTitle", t.overview_title);
 
 fetch("/fear-greed/api/latest.json")
   .then((response) => response.ok ? response.json() : Promise.reject(new Error("bad status")))
   .then((data) => {
-    const status = data.status || "placeholder";
+    const status = data.status || "error";
     const statusValue = document.getElementById("statusValue");
-    statusValue.textContent = t[`status_${status}`] || status;
-    statusValue.className = `overview-value ${status === "ok" ? "ok" : status === "partial" ? "partial" : status === "error" ? "error" : ""}`;
+    statusValue.textContent = statusText(status);
+    statusValue.className = `overview-value ${status}`;
     setText("statusCopy", data.error_message || t.status_copy);
-    setText("updatedValue", data.pipeline_date || data.date || "-");
+    setText("updatedValue", data.pipeline_date || "-");
     setText("asOfCopy", `${t.as_of_prefix} ${data.as_of_date || "-"}`);
-    renderScore(data);
-    renderInputs(data);
-    renderSignals(data);
-    renderSource(data);
+    renderOverview(data.markets || {});
+    renderDetails(data.markets || {});
   })
   .catch(() => {
     const statusValue = document.getElementById("statusValue");
@@ -270,12 +307,6 @@ fetch("/fear-greed/api/latest.json")
     setText("statusCopy", t.fetch_error);
     setText("updatedValue", "-");
     setText("asOfCopy", `${t.as_of_prefix} -`);
-    setText("scoreValue", "-");
-    setText("scoreState", "-");
-    setText("zValue", "-");
-    setText("biasValue", "-");
-    document.getElementById("scoreFill").style.width = "0%";
-    document.getElementById("inputList").innerHTML = detailRow(t.inputs, t.fetch_error);
-    document.getElementById("signalList").innerHTML = detailRow(t.signals, t.fetch_error);
-    document.getElementById("sourceList").innerHTML = detailRow(t.source, t.fetch_error);
+    document.getElementById("overviewGrid").innerHTML = "";
+    document.getElementById("detailGrid").innerHTML = "";
   });

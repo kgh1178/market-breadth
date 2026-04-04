@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Fear &amp; Greed Dashboard</title>
+  <title>Market Fear Index Dashboard</title>
   <link rel="stylesheet" href="/fear-greed/dashboard.css">
 </head>
 <body>
   <div class="wrap">
     <section class="hero">
       <div class="hero-main">
-        <div class="eyebrow" id="eyebrow">Risk Pulse</div>
-        <h1 id="title">Fear &amp; Greed Dashboard</h1>
-        <p id="copy">A structured risk dashboard that blends momentum, volatility, credit, breadth, and safe-haven flow into a single Fear &amp; Greed score.</p>
+        <div class="eyebrow" id="eyebrow">Cross-Market Risk</div>
+        <h1 id="title">Market Fear Index Dashboard</h1>
+        <p id="copy">Track fear conditions across the US, Korea, Japan, and crypto with structured per-market status metadata and comparable detail panels.</p>
         <div class="actions">
           <a class="primary" href="/fear-greed" id="widgetLink">Widget</a>
           <a class="ghost" href="/fear-greed/api/metadata.json" id="apiLink">API Metadata</a>
@@ -34,43 +34,17 @@
       </div>
     </section>
 
-    <section class="score-section">
+    <section class="market-overview">
       <div class="section-head">
         <div>
-          <div class="section-kicker" id="scoreSectionLabel">Composite score</div>
-          <h2 id="scoreSectionTitle">Fear &amp; Greed score</h2>
-        </div>
-        <div class="compact-meta" id="biasValue">-</div>
-      </div>
-      <div class="score-shell">
-        <div class="score-core">
-          <div class="score-value" id="scoreValue">-</div>
-          <div class="score-state" id="scoreState">-</div>
-          <div class="score-z" id="zValue">-</div>
-        </div>
-        <div class="score-bar">
-          <div class="score-fill" id="scoreFill"></div>
-        </div>
-        <div class="score-scale">
-          <span>0</span><span>Fear</span><span>50</span><span>Greed</span><span>100</span>
+          <div class="section-kicker" id="overviewLabel">Markets</div>
+          <h2 id="overviewTitle">Fear snapshots by market</h2>
         </div>
       </div>
+      <div class="overview-grid" id="overviewGrid"></div>
     </section>
 
-    <section class="detail-grid">
-      <article class="detail-card">
-        <div class="section-kicker" id="inputsLabel">Inputs</div>
-        <div class="detail-list" id="inputList"></div>
-      </article>
-      <article class="detail-card">
-        <div class="section-kicker" id="signalLabel">Signals</div>
-        <div class="detail-list" id="signalList"></div>
-      </article>
-      <article class="detail-card">
-        <div class="section-kicker" id="sourceLabel">Data source</div>
-        <div class="detail-list" id="sourceList"></div>
-      </article>
-    </section>
+    <section class="detail-grid" id="detailGrid"></section>
   </div>
   <script src="/fear-greed/dashboard.js"></script>
 </body>

@@ -156,7 +156,7 @@ def test_cloudflare_pages_headers_publish_security_baseline():
     assert "X-Frame-Options: DENY" in headers
 
 
-def test_fear_greed_placeholder_contract_is_published():
+def test_fear_greed_contract_matches_multi_market_api_shape():
     _build_static_outputs()
 
     app_id = "fear-greed"
@@ -165,18 +165,22 @@ def test_fear_greed_placeholder_contract_is_published():
     schema = json.loads((FEAR_GREED_API_DIR / "schema.json").read_text())
 
     assert latest["app_id"] == app_id
-    assert latest["status"] == "placeholder"
-    assert latest["series_valid"] is False
-    assert latest["metrics_valid"] is False
-    assert latest["error_code"] == "not_implemented"
+    assert latest["status"] in {"ok", "partial", "error"}
     assert latest["api_base"] == f"/{app_id}/api"
+    assert latest["default_market"] == "us"
+    assert set(latest["markets"].keys()) == {"us", "kr", "jp", "crypto"}
+    for market_id in ("us", "kr", "jp", "crypto"):
+        market = latest["markets"][market_id]
+        assert {"status", "as_of_date", "series_valid", "metrics_valid", "market", "market_id", "score", "components", "signals"}.issubset(market.keys())
+        assert market["market_id"] == market_id
 
     assert metadata["app_id"] == app_id
-    assert metadata["status_contract"]["status"] == "placeholder"
+    assert metadata["status_contract"]["status"] in {"ok", "partial", "error"}
     assert metadata["paths"]["widget"] == f"/{app_id}"
     assert metadata["paths"]["dashboard"] == f"/{app_id}/dashboard"
+    assert set(metadata["markets"].keys()) == {"us", "kr", "jp", "crypto"}
     assert schema["app_id"] == app_id
-    assert schema["version"] == "draft-2026-04-04"
+    assert schema["version"] == "draft-2026-04-04-market-split"
     assert schema["endpoints"]["latest"] == f"/{app_id}/api/latest.json"
     assert schema["endpoints"]["metadata"] == f"/{app_id}/api/metadata.json"
 

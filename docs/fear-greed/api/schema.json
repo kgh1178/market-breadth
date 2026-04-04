@@ -1,6 +1,6 @@
 {
   "app_id": "fear-greed",
-  "version": "draft-2026-04-04",
+  "version": "draft-2026-04-04-market-split",
   "endpoints": {
     "latest": "/fear-greed/api/latest.json",
     "metadata": "/fear-greed/api/metadata.json"
@@ -9,28 +9,40 @@
     "date": "YYYY-MM-DD",
     "pipeline_date": "YYYY-MM-DD",
     "app_id": "fear-greed",
-    "status": "ok | partial | error | placeholder",
+    "status": "ok | partial | error",
     "as_of_date": "YYYY-MM-DD | null",
     "series_valid": "boolean",
     "metrics_valid": "boolean",
     "error_code": "string | null",
     "error_message": "string | null",
-    "score": {
-      "value": "number 0-100",
-      "label": "extreme_fear | fear | neutral | greed | extreme_greed",
-      "z_score": "number | null"
+    "markets": {
+      "us": {
+        "status": "ok | partial | error",
+        "as_of_date": "YYYY-MM-DD | null",
+        "series_valid": "boolean",
+        "metrics_valid": "boolean",
+        "error_code": "string | null",
+        "error_message": "string | null",
+        "market": "United States",
+        "market_id": "us",
+        "score": {
+          "value": "number 0-100 | null",
+          "label": "extreme_fear | fear | neutral | greed | extreme_greed | null",
+          "z_score": "number | null"
+        },
+        "components": {
+          "component_name": "number | null"
+        },
+        "signals": {
+          "contrarian_bias": "risk_on | neutral | risk_off",
+          "turning_point_alert": "boolean"
+        }
+      },
+      "kr": "same shape as us",
+      "jp": "same shape as us",
+      "crypto": "same shape as us"
     },
-    "inputs": {
-      "momentum": "number | null",
-      "volatility": "number | null",
-      "credit": "number | null",
-      "breadth": "number | null",
-      "safe_haven_flow": "number | null"
-    },
-    "signals": {
-      "contrarian_bias": "risk_on | neutral | risk_off",
-      "turning_point_alert": "boolean"
-    },
+    "default_market": "us",
     "widget_path": "/fear-greed",
     "dashboard_path": "/fear-greed/dashboard",
     "api_base": "/fear-greed/api"

@@ -3,6 +3,7 @@ import importlib.util
 import json
 import sys
 
+import numpy as np
 import pandas as pd
 
 
@@ -25,14 +26,22 @@ generate_fear_greed_json = _load_module()
 
 
 def _sample_prices() -> pd.DataFrame:
-    dates = pd.bdate_range("2026-03-03", periods=24)
+    periods = 70
+    dates = pd.bdate_range("2026-01-02", periods=periods)
     return pd.DataFrame(
         {
-            "SPY": [580, 582, 581, 584, 586, 587, 589, 590, 588, 592, 594, 596, 595, 598, 600, 603, 604, 606, 608, 610, 612, 613, 615, 618],
-            "^VIX": [20.0, 19.6, 19.3, 19.1, 18.9, 18.7, 18.5, 18.2, 18.0, 17.8, 17.6, 17.3, 17.1, 16.9, 16.8, 16.7, 16.5, 16.2, 16.1, 15.9, 15.8, 15.6, 15.5, 15.4],
-            "HYG": [77.0, 77.1, 77.2, 77.3, 77.5, 77.6, 77.7, 77.8, 77.9, 78.0, 78.2, 78.3, 78.4, 78.5, 78.6, 78.7, 78.8, 78.9, 79.0, 79.1, 79.2, 79.3, 79.5, 79.7],
-            "LQD": [107.0, 106.9, 106.8, 106.8, 106.7, 106.6, 106.6, 106.5, 106.4, 106.4, 106.3, 106.2, 106.2, 106.1, 106.0, 106.0, 105.9, 105.8, 105.8, 105.7, 105.6, 105.6, 105.5, 105.4],
-            "TLT": [91.0, 90.8, 90.7, 90.6, 90.4, 90.3, 90.2, 90.0, 89.9, 89.8, 89.7, 89.5, 89.4, 89.3, 89.2, 89.1, 89.0, 88.9, 88.8, 88.7, 88.6, 88.5, 88.4, 88.3],
+            "SPY": np.linspace(580, 640, periods),
+            "^VIX": np.linspace(22.0, 14.0, periods),
+            "HYG": np.linspace(77.0, 80.5, periods),
+            "LQD": np.linspace(107.5, 104.5, periods),
+            "TLT": np.linspace(92.0, 88.0, periods),
+            "EWY": np.linspace(56.0, 61.5, periods),
+            "EWJ": np.linspace(74.0, 79.5, periods),
+            "USDKRW=X": np.linspace(1430, 1360, periods),
+            "USDJPY=X": np.linspace(149.5, 156.0, periods),
+            "BTC-USD": np.linspace(89000, 120000, periods),
+            "ETH-USD": np.linspace(3100, 4100, periods),
+            "GLD": np.linspace(266.0, 271.0, periods),
         },
         index=dates,
     )
@@ -40,7 +49,7 @@ def _sample_prices() -> pd.DataFrame:
 
 def _sample_breadth() -> dict:
     def mk_market(as_of: str, breadth_50: float, history: list[float]) -> dict:
-        dates = pd.bdate_range("2026-03-30", periods=len(history))
+        dates = pd.bdate_range("2026-04-01", periods=len(history))
         return {
             "status": "ok",
             "as_of_date": as_of,
@@ -54,30 +63,38 @@ def _sample_breadth() -> dict:
         }
 
     return {
-        "sp500": mk_market("2026-04-03", 28.63, [24.1, 26.3, 28.63]),
-        "nikkei225": mk_market("2026-04-03", 39.73, [35.0, 37.8, 39.73]),
-        "kospi200": mk_market("2026-04-03", 29.15, [27.2, 28.0, 29.15]),
+        "sp500": mk_market("2026-04-03", 24.06, [30.2, 27.4, 24.06]),
+        "nikkei225": mk_market("2026-04-03", 29.91, [33.0, 31.5, 29.91]),
+        "kospi200": mk_market("2026-04-03", 32.66, [36.8, 34.7, 32.66]),
     }
 
 
-def test_build_fear_greed_payload_produces_live_shape():
+def test_build_fear_greed_payload_produces_four_market_shape():
     latest, metadata = generate_fear_greed_json.build_fear_greed_payload(_sample_prices(), _sample_breadth())
 
     assert latest["app_id"] == "fear-greed"
+    assert latest["default_market"] == "us"
+    assert set(latest["markets"].keys()) == {"us", "kr", "jp", "crypto"}
     assert latest["status"] == "ok"
-    assert latest["series_valid"] is True
-    assert latest["metrics_valid"] is True
-    assert latest["score"]["value"] is not None
-    assert latest["score"]["label"] in {"extreme_fear", "fear", "neutral", "greed", "extreme_greed"}
-    assert latest["inputs"]["momentum"] is not None
-    assert latest["inputs"]["breadth"] is not None
-    assert latest["signals"]["contrarian_bias"] in {"risk_on", "neutral", "risk_off"}
-    assert metadata["data_source"]["primary"] == "yfinance+breadth"
+
+    for market_id in ("us", "kr", "jp", "crypto"):
+        market = latest["markets"][market_id]
+        assert {"status", "as_of_date", "series_valid", "metrics_valid", "market", "market_id", "score", "components", "signals"}.issubset(market.keys())
+        assert market["status"] == "ok"
+        assert market["market_id"] == market_id
+        assert market["score"]["value"] is not None
+        assert market["score"]["label"] in {"extreme_fear", "fear", "neutral", "greed", "extreme_greed"}
+        assert market["signals"]["contrarian_bias"] in {"risk_on", "neutral", "risk_off"}
+
+    assert metadata["app_name"] == "Market Fear Index"
+    assert set(metadata["markets"].keys()) == {"us", "kr", "jp", "crypto"}
 
 
-def test_build_fear_greed_payload_marks_partial_when_inputs_missing():
-    prices = _sample_prices().drop(columns=["TLT", "LQD"])
+def test_build_fear_greed_payload_marks_partial_when_some_markets_fail():
+    prices = _sample_prices().drop(columns=["EWY", "EWJ", "USDKRW=X", "USDJPY=X", "GLD"])
     breadth = _sample_breadth()
+    breadth["kospi200"]["status"] = "error"
+    breadth["kospi200"]["series_valid"] = False
     breadth["nikkei225"]["status"] = "error"
     breadth["nikkei225"]["series_valid"] = False
 
@@ -86,9 +103,42 @@ def test_build_fear_greed_payload_marks_partial_when_inputs_missing():
     assert latest["status"] == "partial"
     assert latest["series_valid"] is False
     assert latest["metrics_valid"] is True
-    assert latest["error_code"] == "partial_input_coverage"
-    assert latest["inputs"]["credit"] is None
+    assert latest["error_code"] == "partial_market_coverage"
+    assert latest["markets"]["us"]["status"] == "ok"
+    assert latest["markets"]["kr"]["status"] in {"partial", "error"}
+    assert latest["markets"]["jp"]["status"] == "error"
     assert metadata["status_contract"]["status"] == "partial"
+
+
+def test_build_fear_greed_payload_marks_error_when_all_markets_fail():
+    prices = _sample_prices()[["SPY"]].copy()
+    breadth = {
+        "sp500": {"status": "error", "series_valid": False},
+        "nikkei225": {"status": "error", "series_valid": False},
+        "kospi200": {"status": "error", "series_valid": False},
+    }
+
+    latest, _ = generate_fear_greed_json.build_fear_greed_payload(prices, breadth)
+
+    assert latest["status"] == "error"
+    assert latest["metrics_valid"] is False
+    assert latest["error_code"] == "no_market_coverage"
+    assert all(market["status"] == "error" for market in latest["markets"].values())
+
+
+def test_crypto_market_uses_btc_eth_composite():
+    latest, _ = generate_fear_greed_json.build_fear_greed_payload(_sample_prices(), _sample_breadth())
+    crypto = latest["markets"]["crypto"]
+
+    assert set(crypto["components"].keys()) == {
+        "momentum",
+        "volatility",
+        "breadth",
+        "relative_strength",
+        "safe_haven_flow",
+    }
+    assert crypto["components"]["momentum"] is not None
+    assert crypto["components"]["breadth"] is not None
 
 
 def test_write_fear_greed_payload_writes_source_files(tmp_path, monkeypatch):
@@ -107,4 +157,4 @@ def test_load_breadth_snapshot_reads_json(tmp_path):
 
     data = generate_fear_greed_json.load_breadth_snapshot(path)
 
-    assert data["sp500"]["breadth_50"] == 28.63
+    assert data["sp500"]["breadth_50"] == 24.06

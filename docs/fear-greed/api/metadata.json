@@ -1,9 +1,9 @@
 {
   "app_id": "fear-greed",
-  "app_name": "Fear & Greed",
+  "app_name": "Market Fear Index",
   "status_contract": {
     "status": "ok",
-    "as_of_date": "2026-04-03",
+    "as_of_date": "2026-04-04",
     "series_valid": true,
     "metrics_valid": true,
     "error_code": null,
@@ -14,12 +14,47 @@
     "dashboard": "/fear-greed/dashboard",
     "api_base": "/fear-greed/api"
   },
-  "inputs": {
-    "momentum": "SPY trend z-score normalized to 0-100.",
-    "volatility": "Inverted VIX z-score normalized to 0-100.",
-    "credit": "HYG/LQD relative-strength z-score normalized to 0-100.",
-    "breadth": "Average breadth_50 across tracked equity markets.",
-    "safe_haven_flow": "SPY/TLT ratio z-score normalized to 0-100."
+  "markets": {
+    "us": {
+      "market": "United States",
+      "components": {
+        "momentum": "SPY trend z-score normalized to 0-100.",
+        "volatility": "Inverted VIX z-score normalized to 0-100.",
+        "credit": "HYG/LQD relative-strength z-score normalized to 0-100.",
+        "breadth": "S&P 500 breadth_50 score.",
+        "safe_haven_flow": "SPY/TLT ratio z-score normalized to 0-100."
+      }
+    },
+    "kr": {
+      "market": "Korea",
+      "components": {
+        "momentum": "EWY trend z-score normalized to 0-100.",
+        "fx_stress": "Inverted USDKRW z-score normalized to 0-100.",
+        "breadth": "KOSPI 200 breadth_50 score.",
+        "relative_strength": "EWY/SPY z-score normalized to 0-100.",
+        "safe_haven_flow": "EWY/TLT ratio z-score normalized to 0-100."
+      }
+    },
+    "jp": {
+      "market": "Japan",
+      "components": {
+        "momentum": "EWJ trend z-score normalized to 0-100.",
+        "fx_stress": "USDJPY z-score using yen-strength-as-fear orientation.",
+        "breadth": "Nikkei 225 breadth_50 score.",
+        "relative_strength": "EWJ/SPY z-score normalized to 0-100.",
+        "safe_haven_flow": "EWJ/TLT ratio z-score normalized to 0-100."
+      }
+    },
+    "crypto": {
+      "market": "Crypto",
+      "components": {
+        "momentum": "Average of BTC and ETH trend z-scores normalized to 0-100.",
+        "volatility": "Inverted realized 20d volatility of BTC/ETH composite.",
+        "breadth": "Percent of BTC and ETH above 50d SMA.",
+        "relative_strength": "ETH/BTC z-score normalized to 0-100.",
+        "safe_haven_flow": "BTC/GLD ratio z-score normalized to 0-100."
+      }
+    }
   },
   "data_source": {
     "primary": "yfinance+breadth",
@@ -28,7 +63,14 @@
       "VIX": "^VIX",
       "HYG": "HYG",
       "LQD": "LQD",
-      "TLT": "TLT"
+      "TLT": "TLT",
+      "EWY": "EWY",
+      "EWJ": "EWJ",
+      "USDKRW": "USDKRW=X",
+      "USDJPY": "USDJPY=X",
+      "BTC": "BTC-USD",
+      "ETH": "ETH-USD",
+      "GLD": "GLD"
     },
     "period": "6mo",
     "breadth_snapshot": "docs/breadth/api/latest.json"

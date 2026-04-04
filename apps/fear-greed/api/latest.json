@@ -3,39 +3,118 @@
   "pipeline_date": "2026-04-04",
   "app_id": "fear-greed",
   "status": "ok",
-  "as_of_date": "2026-04-03",
+  "as_of_date": "2026-04-04",
   "series_valid": true,
   "metrics_valid": true,
   "error_code": null,
   "error_message": null,
-  "score": {
-    "value": 47.29,
-    "label": "neutral",
-    "z_score": -0.1807
-  },
-  "inputs": {
-    "momentum": 46.29,
-    "volatility": 64.71,
-    "credit": 46.16,
-    "breadth": 32.5,
-    "safe_haven_flow": 46.77
-  },
-  "signals": {
-    "contrarian_bias": "neutral",
-    "turning_point_alert": false
-  },
-  "data_source": {
-    "primary": "yfinance+breadth",
-    "tickers": {
-      "SPY": "SPY",
-      "VIX": "^VIX",
-      "HYG": "HYG",
-      "LQD": "LQD",
-      "TLT": "TLT"
+  "markets": {
+    "us": {
+      "status": "ok",
+      "as_of_date": "2026-04-02",
+      "series_valid": true,
+      "metrics_valid": true,
+      "error_code": null,
+      "error_message": null,
+      "market": "United States",
+      "market_id": "us",
+      "score": {
+        "value": 45.71,
+        "label": "neutral",
+        "z_score": -0.286
+      },
+      "components": {
+        "momentum": 53.4,
+        "volatility": 62.76,
+        "credit": 31.94,
+        "breadth": 28.63,
+        "safe_haven_flow": 51.83
+      },
+      "signals": {
+        "contrarian_bias": "neutral",
+        "turning_point_alert": false
+      }
     },
-    "period": "6mo",
-    "breadth_snapshot": "docs/breadth/api/latest.json"
+    "kr": {
+      "status": "ok",
+      "as_of_date": "2026-04-04",
+      "series_valid": true,
+      "metrics_valid": true,
+      "error_code": null,
+      "error_message": null,
+      "market": "Korea",
+      "market_id": "kr",
+      "score": {
+        "value": 33.85,
+        "label": "fear",
+        "z_score": -1.0767
+      },
+      "components": {
+        "momentum": 38.85,
+        "fx_stress": 31.03,
+        "breadth": 29.15,
+        "relative_strength": 32.91,
+        "safe_haven_flow": 37.31
+      },
+      "signals": {
+        "contrarian_bias": "risk_on",
+        "turning_point_alert": false
+      }
+    },
+    "jp": {
+      "status": "ok",
+      "as_of_date": "2026-04-03",
+      "series_valid": true,
+      "metrics_valid": true,
+      "error_code": null,
+      "error_message": null,
+      "market": "Japan",
+      "market_id": "jp",
+      "score": {
+        "value": 59.43,
+        "label": "neutral",
+        "z_score": 0.6287
+      },
+      "components": {
+        "momentum": 64.62,
+        "fx_stress": 61.0,
+        "breadth": 39.73,
+        "relative_strength": 66.86,
+        "safe_haven_flow": 64.93
+      },
+      "signals": {
+        "contrarian_bias": "neutral",
+        "turning_point_alert": false
+      }
+    },
+    "crypto": {
+      "status": "ok",
+      "as_of_date": "2026-04-04",
+      "series_valid": true,
+      "metrics_valid": true,
+      "error_code": null,
+      "error_message": null,
+      "market": "Crypto",
+      "market_id": "crypto",
+      "score": {
+        "value": 48.12,
+        "label": "neutral",
+        "z_score": -0.1253
+      },
+      "components": {
+        "momentum": 39.16,
+        "volatility": 67.61,
+        "breadth": 50.0,
+        "relative_strength": 53.38,
+        "safe_haven_flow": 30.45
+      },
+      "signals": {
+        "contrarian_bias": "neutral",
+        "turning_point_alert": false
+      }
+    }
   },
+  "default_market": "us",
   "widget_path": "/fear-greed",
   "dashboard_path": "/fear-greed/dashboard",
   "api_base": "/fear-greed/api"

@@ -3,80 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Fear &amp; Greed Monitor</title>
+  <title>Market Fear Index</title>
   <link rel="stylesheet" href="/fear-greed/widget.css">
 </head>
 <body>
   <div class="wrap">
     <section class="hero">
-      <div class="hero-top">
-        <div>
-          <div class="eyebrow" id="eyebrow">Risk Pulse</div>
-          <h1 id="title">Fear &amp; Greed Monitor</h1>
-        </div>
-        <div class="stamp">
-          <span class="stamp-label" id="updatedLabel">Updated</span>
-          <strong id="updatedValue">Loading…</strong>
-        </div>
+      <div>
+        <div class="eyebrow" id="eyebrow">Risk Snapshot</div>
+        <h1 id="title">Market Fear Index</h1>
+        <p class="copy" id="copy">Compare fear conditions across the US, Korea, Japan, and crypto in one compact widget.</p>
       </div>
-      <p class="hero-copy" id="copy">A compact risk pulse that turns structured market inputs into a single Fear &amp; Greed score without client-side heuristics.</p>
-      <div class="hero-meta">
-        <div class="status-pill" id="statusPill">Loading…</div>
-        <div class="hero-note" id="statusCopy">Fetching `/fear-greed/api/latest.json`.</div>
+      <div class="stamp">
+        <span id="updatedLabel">Updated</span>
+        <strong id="updatedValue">Loading…</strong>
       </div>
     </section>
 
-    <section class="score-card">
-      <div class="score-head">
-        <div>
-          <div class="score-label" id="scoreLabel">Score</div>
-          <div class="score-value" id="scoreValue">-</div>
-          <div class="score-state" id="scoreState">-</div>
-        </div>
-        <div class="score-z">
-          <span class="score-z-label" id="zLabel">Z-score</span>
-          <strong id="zValue">-</strong>
-        </div>
-      </div>
-      <div class="score-bar">
-        <div class="score-fill" id="scoreFill"></div>
-      </div>
-      <div class="score-scale" id="scoreScale">
-        <span>0</span><span>Fear</span><span>50</span><span>Greed</span><span>100</span>
-      </div>
+    <section class="status-row">
+      <span class="status-pill" id="statusPill">Loading…</span>
+      <span class="status-copy" id="statusCopy">Fetching `/fear-greed/api/latest.json`.</span>
     </section>
 
-    <section class="detail-grid">
-      <article class="panel">
-        <div class="panel-label" id="inputsLabel">Inputs</div>
-        <div class="input-grid" id="inputGrid"></div>
-      </article>
-      <article class="panel">
-        <div class="panel-label" id="signalLabel">Signals</div>
-        <div class="signal-list" id="signalList"></div>
-      </article>
-    </section>
+    <section class="market-grid" id="marketGrid" aria-live="polite"></section>
 
-    <section class="source-strip">
-      <div class="source-item">
-        <span class="source-label" id="sourceLabel">Source</span>
-        <strong id="sourceValue">-</strong>
-      </div>
-      <div class="source-item">
-        <span class="source-label" id="asOfLabel">As of</span>
-        <strong id="asOfValue">-</strong>
-      </div>
-      <div class="source-item">
-        <span class="source-label" id="biasLabel">Bias</span>
-        <strong id="biasValue">-</strong>
-      </div>
-    </section>
-
-    <div class="actions">
-      <a class="primary" href="/fear-greed/dashboard" id="dashboardLink">Dashboard</a>
-      <a class="ghost" href="/fear-greed/api/latest.json" id="apiLink">Latest API</a>
-      <a class="ghost" href="/fear-greed/api/schema.json" id="schemaLink">API Schema</a>
-      <a class="ghost" href="/" id="homeLink">App Hub</a>
+    <div class="footer-actions">
+      <a class="primary" href="/fear-greed/dashboard" id="dashboardLink">전체 대시보드</a>
     </div>
   </div>
   <script src="/fear-greed/widget.js"></script>
