@@ -67,6 +67,8 @@ h1{margin:10px 0 10px;font-size:42px;line-height:1;letter-spacing:-.05em}
   text-decoration:none;
   color:inherit;
   border-left:6px solid var(--accent);
+  background:
+    linear-gradient(180deg,var(--accent-soft) 0%, rgba(255,255,255,.98) 26%, #fff 100%);
 }
 .market-card:hover{transform:translateY(-1px)}
 .market-head{
@@ -75,7 +77,22 @@ h1{margin:10px 0 10px;font-size:42px;line-height:1;letter-spacing:-.05em}
   gap:12px;
   align-items:flex-start;
 }
+.market-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:42px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:var(--accent);
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
 .market-name{font-size:26px;font-weight:900;letter-spacing:-.04em}
+.market-head .market-name{margin-top:10px}
 .market-status{
   padding:7px 10px;border-radius:999px;font-size:12px;font-weight:800;
   background:#eef2f7;color:#55606c;
@@ -83,8 +100,28 @@ h1{margin:10px 0 10px;font-size:42px;line-height:1;letter-spacing:-.05em}
 .market-status.ok{background:#e8f8f3;color:#0f766e}
 .market-status.partial{background:#fff6e5;color:#b26a00}
 .market-status.error{background:#fff0f0;color:#c62828}
-.market-score{margin-top:18px;font-size:50px;font-weight:900;line-height:1;letter-spacing:-.05em;color:var(--accent)}
-.market-label{margin-top:8px;font-size:17px;font-weight:800;color:#4b5563}
+.market-score{
+  margin-top:18px;
+  font-size:50px;
+  font-weight:900;
+  line-height:1;
+  letter-spacing:-.05em;
+  color:var(--accent);
+  text-shadow:0 10px 26px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.market-label{
+  margin-top:8px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:color-mix(in srgb, var(--accent) 10%, #fff);
+  border:1px solid color-mix(in srgb, var(--accent) 18%, #dce3ec);
+  font-size:14px;
+  font-weight:900;
+  color:#39424d;
+}
 .market-meta{margin-top:14px;display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:13px}
 .footer-actions{display:flex;justify-content:flex-end;margin-top:18px}
 .primary{

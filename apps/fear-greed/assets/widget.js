@@ -71,10 +71,10 @@ const I18N = {
 };
 
 const MARKET_META = {
-  us: { accent: "#0f766e" },
-  kr: { accent: "#ef4444" },
-  jp: { accent: "#2563eb" },
-  crypto: { accent: "#c68000" }
+  us: { accent: "#0f766e", tint: "rgba(15,118,110,.12)", chip: "US" },
+  kr: { accent: "#ef4444", tint: "rgba(239,68,68,.12)", chip: "KR" },
+  jp: { accent: "#2563eb", tint: "rgba(37,99,235,.12)", chip: "JP" },
+  crypto: { accent: "#c68000", tint: "rgba(198,128,0,.14)", chip: "CR" }
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -110,9 +110,12 @@ function renderMarketCards(data) {
     const market = markets[marketId] || {};
     const score = market.score || {};
     return `
-      <a class="market-card" style="--accent:${MARKET_META[marketId].accent}" href="/fear-greed/dashboard#${marketId}">
+      <a class="market-card" style="--accent:${MARKET_META[marketId].accent};--accent-soft:${MARKET_META[marketId].tint}" href="/fear-greed/dashboard#${marketId}">
         <div class="market-head">
-          <div class="market-name">${t[marketId]}</div>
+          <div>
+            <div class="market-chip">${MARKET_META[marketId].chip}</div>
+            <div class="market-name">${t[marketId]}</div>
+          </div>
           <span class="market-status ${market.status || "error"}">${statusText(market.status)}</span>
         </div>
         <div class="market-score">${formatScore(score.value)}</div>

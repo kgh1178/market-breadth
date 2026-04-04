@@ -149,10 +149,10 @@ const I18N = {
 };
 
 const MARKET_META = {
-  us: { accent: "#0f766e" },
-  kr: { accent: "#ef4444" },
-  jp: { accent: "#2563eb" },
-  crypto: { accent: "#c68000" }
+  us: { accent: "#0f766e", tint: "rgba(15,118,110,.12)", chip: "US" },
+  kr: { accent: "#ef4444", tint: "rgba(239,68,68,.12)", chip: "KR" },
+  jp: { accent: "#2563eb", tint: "rgba(37,99,235,.12)", chip: "JP" },
+  crypto: { accent: "#c68000", tint: "rgba(198,128,0,.14)", chip: "CR" }
 };
 
 const params = new URLSearchParams(window.location.search);
@@ -227,7 +227,8 @@ function renderOverview(markets) {
   document.getElementById("overviewGrid").innerHTML = ["us", "kr", "jp", "crypto"].map((marketId) => {
     const market = markets[marketId] || {};
     return `
-      <article class="mini-card" style="--accent:${MARKET_META[marketId].accent}">
+      <article class="mini-card" style="--accent:${MARKET_META[marketId].accent};--accent-soft:${MARKET_META[marketId].tint}">
+        <div class="mini-chip">${MARKET_META[marketId].chip}</div>
         <div class="mini-title">${t[marketId]}</div>
         <div class="mini-score">${formatScore(market.score?.value)}</div>
         <div class="mini-label">${labelText(market.score?.label)}</div>
@@ -242,10 +243,13 @@ function renderDetails(markets) {
     const market = markets[marketId] || {};
     const okay = market.status === "ok" || market.status === "partial";
     return `
-      <article class="detail-card" id="${marketId}" style="--accent:${MARKET_META[marketId].accent}">
+      <article class="detail-card" id="${marketId}" style="--accent:${MARKET_META[marketId].accent};--accent-soft:${MARKET_META[marketId].tint}">
         <span class="section-kicker">${t[marketId]}</span>
         <div class="detail-title-row">
-          <div class="detail-title">${t[marketId]}</div>
+          <div>
+            <div class="detail-chip">${MARKET_META[marketId].chip}</div>
+            <div class="detail-title">${t[marketId]}</div>
+          </div>
           <span class="detail-status ${market.status || "error"}">${statusText(market.status)}</span>
         </div>
         <div class="detail-score">${formatScore(market.score?.value)}</div>
