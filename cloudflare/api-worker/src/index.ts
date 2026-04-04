@@ -5,6 +5,7 @@ export interface Env {
 
 const ALLOWED_APPS = new Set(["breadth", "fear-greed", "exchange"]);
 const LOTOPICK_PUBLIC_BASE = "/lotopick";
+const LOTOPICK_NEXT_ASSET_PREFIX = `${LOTOPICK_PUBLIC_BASE}/_next/`;
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "public, max-age=300",
@@ -43,7 +44,9 @@ function buildLotopickUpstreamUrl(request: Request, env: Env): URL | null {
   const requestUrl = new URL(request.url);
   const upstreamUrl = new URL(env.LOTOPICK_ORIGIN);
 
-  upstreamUrl.pathname = requestUrl.pathname;
+  upstreamUrl.pathname = requestUrl.pathname.startsWith(LOTOPICK_NEXT_ASSET_PREFIX)
+    ? requestUrl.pathname.replace(LOTOPICK_PUBLIC_BASE, "")
+    : requestUrl.pathname;
   upstreamUrl.search = requestUrl.search;
 
   return upstreamUrl;
