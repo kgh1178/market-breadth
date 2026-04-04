@@ -56,7 +56,15 @@ async function proxyLotopickRequest(request: Request, env: Env): Promise<Respons
     return serviceUnavailable("LotoPick origin is not configured");
   }
 
-  const upstreamResponse = await fetch(new Request(upstreamUrl.toString(), request));
+  const forwardedHeaders = new Headers(request.headers);
+  forwardedHeaders.set("x-lotopick-public-origin", new URL(request.url).origin);
+  const upstreamRequest = new Request(upstreamUrl.toString(), {
+    method: request.method,
+    headers: forwardedHeaders,
+    body: request.body,
+    redirect: request.redirect,
+  });
+  const upstreamResponse = await fetch(upstreamRequest);
   return new Response(upstreamResponse.body, {
     status: upstreamResponse.status,
     statusText: upstreamResponse.statusText,

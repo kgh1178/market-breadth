@@ -51,7 +51,9 @@ def test_cloudflare_api_worker_source_routes_app_api_paths_to_r2_prefix():
     assert 'LOTOPICK_ORIGIN?: string;' in source
     assert 'return pathname === LOTOPICK_PUBLIC_BASE || pathname.startsWith(`${LOTOPICK_PUBLIC_BASE}/`);' in source
     assert 'return serviceUnavailable("LotoPick origin is not configured");' in source
-    assert 'await fetch(new Request(upstreamUrl.toString(), request));' in source
+    assert 'forwardedHeaders.set("x-lotopick-public-origin", new URL(request.url).origin);' in source
+    assert 'const upstreamRequest = new Request(upstreamUrl.toString(), {' in source
+    assert 'const upstreamResponse = await fetch(upstreamRequest);' in source
     assert r"url.pathname.match(/^\/([^/]+)\/api\/(.+)$/)" in source
     assert 'const key = `${app}/${rest}`;' in source
     assert '"cache-control": "public, max-age=300"' in source
