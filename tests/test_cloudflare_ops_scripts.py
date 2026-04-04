@@ -7,6 +7,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SYNC_SCRIPT = REPO_ROOT / "scripts" / "cloudflare_sync_r2.sh"
 DEPLOY_SCRIPT = REPO_ROOT / "scripts" / "cloudflare_deploy_workers.sh"
 BUILD_SCRIPT = REPO_ROOT / "scripts" / "build_static_apps.py"
+REFRESH_SCRIPT = REPO_ROOT / "scripts" / "cloudflare_refresh_app.sh"
 
 
 def _build_static_outputs() -> None:
@@ -60,3 +61,24 @@ def test_cloudflare_deploy_workers_dry_run_lists_expected_targets():
     assert "fear-greed-producer" in stdout
     assert "exchange-producer" in stdout
     assert "npx wrangler deploy" in stdout
+
+
+def test_cloudflare_refresh_app_dry_run_lists_exchange_flow():
+    env = os.environ.copy()
+    env["DRY_RUN"] = "1"
+
+    result = subprocess.run(
+        ["/bin/zsh", str(REFRESH_SCRIPT), "exchange"],
+        cwd=REPO_ROOT,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+
+    stdout = result.stdout
+    assert "generating exchange payloads" in stdout
+    assert "python3 scripts/generate_exchange_json.py" in stdout
+    assert "python3 scripts/build_static_apps.py" in stdout
+    assert "scripts/cloudflare_sync_r2.sh --app exchange" in stdout

@@ -84,11 +84,22 @@ scripts/cloudflare_deploy_workers.sh api
 scripts/cloudflare_deploy_workers.sh breadth
 ```
 
+앱별 갱신 브리지:
+
+```bash
+scripts/cloudflare_refresh_app.sh breadth
+scripts/cloudflare_refresh_app.sh exchange
+```
+
 설명:
 - `cloudflare_preflight.sh`
   - breadth JSON 재생성
   - 정적 앱 빌드
   - 테스트 실행
+- `cloudflare_refresh_app.sh exchange`
+  - exchange JSON 재생성
+  - 정적 앱 빌드
+  - `exchange/*` API 산출물을 R2에 업로드
 - `cloudflare_sync_r2.sh`
   - `docs/breadth/api/*.json`를 `jstockinsight-app-data/breadth/*`로 업로드
 - `cloudflare_deploy_workers.sh`
@@ -190,6 +201,9 @@ Pages에서 서빙되는 주요 경로:
 - [docs/_redirects](/Users/dean/Dev/#Git/market-breadth/docs/_redirects)
   - `/widget.html -> /breadth`
   - `/api/* -> /breadth/api/*`
+- [docs/_headers](/Users/dean/Dev/#Git/market-breadth/docs/_headers)
+  - Cloudflare Pages에서 CSP, `nosniff`, `DENY` frame 정책, 기본 Permissions Policy를 적용
+  - 앱 CSS/JS는 모두 1st-party 정적 자산으로 배포되어 inline 허용이나 CDN 스크립트 의존 없이 동작
 
 주의:
 - Worker route는 Pages와 충돌하지 않도록 API 경로에만 걸려야 합니다.

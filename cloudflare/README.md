@@ -57,8 +57,22 @@
   - breadth는 현재 Python 파이프라인이 실제 생성기를 계속 담당하고, Cloudflare producer는 후속 재구현 대상
 - `scripts/`
   - `cloudflare_preflight.sh`: 생성 + 빌드 + 테스트
+  - `cloudflare_refresh_app.sh`: 앱별 생성기 + static build + R2 sync bridge
   - `cloudflare_sync_r2.sh`: `docs/breadth/api/*.json` -> R2 업로드
   - `cloudflare_deploy_workers.sh`: Worker / Producer `wrangler deploy`
+
+현재 `exchange`는 다음 브리지 경로로 운영 가능합니다.
+
+```bash
+scripts/cloudflare_refresh_app.sh exchange
+```
+
+이 명령은:
+- `scripts/generate_exchange_json.py`
+- `scripts/build_static_apps.py`
+- `scripts/cloudflare_sync_r2.sh --app exchange`
+
+를 순서대로 실행해 `exchange` 산출물을 R2까지 반영합니다.
 
 ## 운영 원칙
 

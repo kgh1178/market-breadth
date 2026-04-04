@@ -11,7 +11,8 @@ export default {
           worker: "exchange-producer",
           role: "scheduled-producer",
           status: "ok",
-          message: "This worker runs on cron triggers and is not a public app endpoint.",
+          message:
+            "This worker is reserved for cron-driven exchange refresh. Current bridge path is scripts/cloudflare_refresh_app.sh exchange.",
         },
         null,
         2,
@@ -20,6 +21,6 @@ export default {
     );
   },
   async scheduled(controller: ScheduledController): Promise<void> {
-    console.log("exchange-producer placeholder", controller.cron);
+    console.log("exchange-producer bridge pending native runtime implementation", controller.cron);
   },
 };
