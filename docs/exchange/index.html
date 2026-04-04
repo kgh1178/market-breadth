@@ -3,68 +3,64 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Exchange Widget</title>
-  <style>
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:#fafbfc;color:#1f2328}
-    .wrap{max-width:760px;margin:0 auto;padding:28px 18px 48px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:24px;padding:24px;box-shadow:0 18px 36px rgba(15,23,42,.06)}
-    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#66707a;font-weight:700}
-    h1{margin:10px 0 12px;font-size:34px;letter-spacing:-.03em}
-    p{margin:0;color:#66707a;line-height:1.65}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-    .status{margin-top:18px;padding:16px 18px;border-radius:18px;background:#eef5ff;border:1px solid #b9d4ff}
-    .status-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#1f5fbe}
-    .status-value{font-size:22px;font-weight:800;margin-top:6px}
-    .status-copy{margin-top:8px;font-size:14px}
-    a{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:10px 14px;text-decoration:none;font-weight:700;font-size:13px}
-    .primary{background:#1a73e8;color:#fff}
-    .ghost{border:1px solid #1a73e8;color:#1a73e8}
-  </style>
+  <title>Exchange Monitor</title>
+  <link rel="stylesheet" href="/exchange/widget.css">
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
-      <div class="eyebrow" id="eyebrow">Placeholder App</div>
-      <h1 id="title">Exchange Widget</h1>
-      <p id="copy">This route is reserved for the future exchange-rate widget and follows the same Cloudflare multi-app path pattern.</p>
-      <div class="status">
-        <div class="status-label" id="statusLabel">API Contract</div>
-        <div class="status-value" id="statusValue">Loading…</div>
-        <p class="status-copy" id="statusCopy">Fetching the placeholder `/exchange/api/latest.json` contract.</p>
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="eyebrow" id="eyebrow">Cross-Market FX</div>
+          <h1 id="title">Exchange Monitor</h1>
+        </div>
+        <div class="stamp">
+          <span class="stamp-label" id="updatedLabel">Updated</span>
+          <strong id="updatedValue">Loading…</strong>
+        </div>
       </div>
-      <div class="actions">
-        <a class="primary" href="/exchange/dashboard" id="dashboardLink">Dashboard</a>
-        <a class="ghost" href="/exchange/api/latest.json" id="apiLink">Latest API</a>
-        <a class="ghost" href="/exchange/api/schema.json" id="schemaLink">API Schema</a>
-        <a class="ghost" href="/" id="homeLink">App Hub</a>
+      <p class="hero-copy" id="copy">Live FX snapshot for core USD and Asia pairs, driven by structured status metadata instead of client-side guesses.</p>
+      <div class="hero-meta">
+        <div class="status-pill" id="statusPill">Loading…</div>
+        <div class="hero-note" id="statusCopy">Fetching `/exchange/api/latest.json`.</div>
       </div>
+    </section>
+
+    <section class="summary-grid" id="pairGrid" aria-live="polite"></section>
+
+    <section class="signal-grid">
+      <article class="panel">
+        <div class="panel-label" id="regimeLabel">Regime</div>
+        <div class="regime-items" id="regimeItems"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-label" id="signalLabel">Alerts</div>
+        <div class="signal-items" id="signalItems"></div>
+      </article>
+    </section>
+
+    <section class="source-strip">
+      <div class="source-item">
+        <span class="source-label" id="sourceLabel">Source</span>
+        <strong id="sourceValue">-</strong>
+      </div>
+      <div class="source-item">
+        <span class="source-label" id="basisLabel">As of</span>
+        <strong id="asOfValue">-</strong>
+      </div>
+      <div class="source-item">
+        <span class="source-label" id="coverageLabel">Pair coverage</span>
+        <strong id="coverageValue">-</strong>
+      </div>
+    </section>
+
+    <div class="actions">
+      <a class="primary" href="/exchange/dashboard" id="dashboardLink">Dashboard</a>
+      <a class="ghost" href="/exchange/api/latest.json" id="apiLink">Latest API</a>
+      <a class="ghost" href="/exchange/api/schema.json" id="schemaLink">API Schema</a>
+      <a class="ghost" href="/" id="homeLink">App Hub</a>
     </div>
   </div>
-<script>
-const I18N={en:{eyebrow:'Placeholder App',title:'Exchange Widget',copy:'This route is reserved for the future exchange-rate widget and follows the same Cloudflare multi-app path pattern.',dashboard:'Dashboard',api:'Latest API',schema:'API Schema',home:'App Hub',contract:'API Contract',loading:'Loading…',status_placeholder:'Placeholder',status_copy:'Fetching the placeholder `/exchange/api/latest.json` contract.',status_error:'Could not load placeholder API contract.'},ko:{eyebrow:'플레이스홀더 앱',title:'환율 위젯',copy:'이 경로는 향후 환율 위젯용으로 예약되어 있으며, 같은 Cloudflare 멀티앱 경로 규칙을 따릅니다.',dashboard:'대시보드',api:'최신 API',schema:'API 스키마',home:'앱 허브',contract:'API 계약',loading:'불러오는 중…',status_placeholder:'플레이스홀더',status_copy:'`/exchange/api/latest.json` placeholder 계약을 불러오고 있습니다.',status_error:'플레이스홀더 API 계약을 불러오지 못했습니다.'},ja:{eyebrow:'プレースホルダーアプリ',title:'為替ウィジェット',copy:'この経路は今後の為替ウィジェット用に予約されており、同じ Cloudflare マルチアプリ経路規約に従います。',dashboard:'ダッシュボード',api:'最新API',schema:'APIスキーマ',home:'アプリハブ',contract:'API契約',loading:'読み込み中…',status_placeholder:'プレースホルダー',status_copy:'`/exchange/api/latest.json` のプレースホルダー契約を読み込んでいます。',status_error:'プレースホルダーAPI契約を読み込めませんでした。'}};
-const param=new URLSearchParams(window.location.search).get('lang');
-const langs=[...(navigator.languages||[]),navigator.language].filter(Boolean).map(v=>String(v).toLowerCase());
-const lang=param&&['ko','ja','en'].includes(param)?param:langs.some(v=>v.startsWith('ko'))?'ko':langs.some(v=>v.startsWith('ja'))?'ja':'en';
-const t=I18N[lang];
-document.documentElement.lang=lang;
-document.getElementById('eyebrow').textContent=t.eyebrow;
-document.getElementById('title').textContent=t.title;
-document.getElementById('copy').textContent=t.copy;
-document.getElementById('dashboardLink').textContent=t.dashboard;
-document.getElementById('apiLink').textContent=t.api;
-document.getElementById('schemaLink').textContent=t.schema;
-document.getElementById('homeLink').textContent=t.home;
-document.getElementById('statusLabel').textContent=t.contract;
-document.getElementById('statusValue').textContent=t.loading;
-document.getElementById('statusCopy').textContent=t.status_copy;
-
-fetch('/exchange/api/latest.json').then(r=>r.ok?r.json():Promise.reject(new Error('bad status'))).then(data=>{
-  document.getElementById('statusValue').textContent=t[`status_${data.status}`]||data.status||t.loading;
-  document.getElementById('statusCopy').textContent=data.error_message||t.status_copy;
-}).catch(()=>{
-  document.getElementById('statusValue').textContent=t.loading;
-  document.getElementById('statusCopy').textContent=t.status_error;
-});
-</script>
+  <script src="/exchange/widget.js"></script>
 </body>
 </html>
