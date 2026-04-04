@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Build static multi-app outputs into docs/."""
 
+import hashlib
 from pathlib import Path
+import re
 import shutil
 
 
@@ -26,6 +28,27 @@ APP_API_TARGETS = [
     (ROOT / "apps" / "exchange" / "api", DOCS_DIR / "exchange" / "api"),
 ]
 
+APP_ASSET_TARGETS = [
+    (ROOT / "apps" / "breadth" / "vendor", DOCS_DIR / "breadth" / "vendor"),
+    (ROOT / "apps" / "hub" / "assets", DOCS_DIR / "assets" / "hub"),
+]
+
+APP_ASSET_FILES = [
+    (ROOT / "apps" / "hub" / "assets" / "index.css", DOCS_DIR / "assets" / "hub" / "index.css"),
+    (ROOT / "apps" / "breadth" / "assets" / "widget.js", DOCS_DIR / "breadth" / "widget.js"),
+    (ROOT / "apps" / "breadth" / "assets" / "widget.css", DOCS_DIR / "breadth" / "widget.css"),
+    (ROOT / "apps" / "breadth" / "assets" / "dashboard.js", DOCS_DIR / "breadth" / "dashboard.js"),
+    (ROOT / "apps" / "breadth" / "assets" / "dashboard.css", DOCS_DIR / "breadth" / "dashboard.css"),
+    (ROOT / "apps" / "fear-greed" / "assets" / "widget.js", DOCS_DIR / "fear-greed" / "widget.js"),
+    (ROOT / "apps" / "fear-greed" / "assets" / "widget.css", DOCS_DIR / "fear-greed" / "widget.css"),
+    (ROOT / "apps" / "fear-greed" / "assets" / "dashboard.js", DOCS_DIR / "fear-greed" / "dashboard.js"),
+    (ROOT / "apps" / "fear-greed" / "assets" / "dashboard.css", DOCS_DIR / "fear-greed" / "dashboard.css"),
+    (ROOT / "apps" / "exchange" / "assets" / "widget.js", DOCS_DIR / "exchange" / "widget.js"),
+    (ROOT / "apps" / "exchange" / "assets" / "widget.css", DOCS_DIR / "exchange" / "widget.css"),
+    (ROOT / "apps" / "exchange" / "assets" / "dashboard.js", DOCS_DIR / "exchange" / "dashboard.js"),
+    (ROOT / "apps" / "exchange" / "assets" / "dashboard.css", DOCS_DIR / "exchange" / "dashboard.css"),
+]
+
 WIDGET_REDIRECT = """<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,6 +67,67 @@ REDIRECTS = """/widget.html /breadth 301
 /api/* /breadth/api/:splat 301
 """
 
+BASE_HEADERS = """/*
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+*/
+"""
+
+DEFAULT_CSP = """default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'none'; img-src 'self' data:; connect-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests"""
+
+HTML_ROUTE_TARGETS = {
+    "index.html": ["/", "/index.html"],
+    "breadth/index.html": ["/breadth", "/breadth/index.html"],
+    "breadth/dashboard/index.html": ["/breadth/dashboard", "/breadth/dashboard/index.html"],
+    "fear-greed/index.html": ["/fear-greed", "/fear-greed/index.html"],
+    "fear-greed/dashboard/index.html": ["/fear-greed/dashboard", "/fear-greed/dashboard/index.html"],
+    "exchange/index.html": ["/exchange", "/exchange/index.html"],
+    "exchange/dashboard/index.html": ["/exchange/dashboard", "/exchange/dashboard/index.html"],
+    "widget.html": ["/widget.html"],
+}
+
+
+def _render_headers() -> str:
+    blocks = [BASE_HEADERS.strip()]
+    for relative_path, routes in HTML_ROUTE_TARGETS.items():
+        for route in routes:
+            blocks.append(f"{route}\n  Content-Security-Policy: {DEFAULT_CSP}")
+    return "\n\n".join(blocks) + "\n"
+
+
+def _asset_versions() -> dict[str, str]:
+    versions: dict[str, str] = {}
+    for dest in DOCS_DIR.rglob("*"):
+        if not dest.is_file() or dest.suffix not in {".js", ".css"}:
+            continue
+        content = dest.read_bytes()
+        digest = hashlib.md5(content).hexdigest()[:10]
+        web_path = "/" + dest.relative_to(DOCS_DIR).as_posix()
+        versions[web_path] = digest
+    return versions
+
+
+def _rewrite_html_asset_urls(versions: dict[str, str]) -> None:
+    html_targets = [dest for _, dest in STATIC_TARGETS]
+    html_targets.append(DOCS_DIR / "widget.html")
+    for html_path in html_targets:
+        if not html_path.exists():
+            continue
+        content = html_path.read_text(encoding="utf-8")
+        def replace_attr(match: re.Match[str]) -> str:
+            attr = match.group(1)
+            web_path = match.group(2)
+            digest = versions.get(web_path)
+            if not digest:
+                return match.group(0)
+            return f'{attr}="{web_path}?v={digest}"'
+
+        updated = re.sub(r'(href|src)="(/[^"?]+\.(?:css|js))"', replace_attr, content)
+        if updated != content:
+            html_path.write_text(updated, encoding="utf-8")
+
 
 def build() -> None:
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
@@ -60,8 +144,19 @@ def build() -> None:
             shutil.rmtree(dest)
         shutil.copytree(src, dest)
 
+    for src, dest in APP_ASSET_TARGETS:
+        if dest.exists():
+            shutil.rmtree(dest)
+        shutil.copytree(src, dest)
+
+    for src, dest in APP_ASSET_FILES:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src, dest)
+
     (DOCS_DIR / "widget.html").write_text(WIDGET_REDIRECT, encoding="utf-8")
+    _rewrite_html_asset_urls(_asset_versions())
     (DOCS_DIR / "_redirects").write_text(REDIRECTS, encoding="utf-8")
+    (DOCS_DIR / "_headers").write_text(_render_headers(), encoding="utf-8")
 
 
 if __name__ == "__main__":

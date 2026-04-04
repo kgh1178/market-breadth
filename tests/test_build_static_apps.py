@@ -50,18 +50,24 @@ def test_build_static_apps_generates_multi_app_routes():
     assert not (DOCS_DIR / "api").exists()
 
     assert "<style>" not in (DOCS_DIR / "index.html").read_text(encoding="utf-8")
-    assert 'rel="stylesheet" href="/assets/hub/index.css"' in (DOCS_DIR / "index.html").read_text(encoding="utf-8")
+    index_html = (DOCS_DIR / "index.html").read_text(encoding="utf-8")
+    assert 'rel="stylesheet" href="/assets/hub/index.css?v=' in index_html
+    assert 'src="/assets/hub/index.js?v=' in index_html
     assert "<style>" not in (DOCS_DIR / "breadth" / "index.html").read_text(encoding="utf-8")
-    assert 'rel="stylesheet" href="/breadth/widget.css"' in (DOCS_DIR / "breadth" / "index.html").read_text(encoding="utf-8")
+    assert 'rel="stylesheet" href="/breadth/widget.css?v=' in (DOCS_DIR / "breadth" / "index.html").read_text(encoding="utf-8")
     assert "<style>" not in (DOCS_DIR / "breadth" / "dashboard" / "index.html").read_text(encoding="utf-8")
-    assert 'rel="stylesheet" href="/breadth/dashboard.css"' in (DOCS_DIR / "breadth" / "dashboard" / "index.html").read_text(encoding="utf-8")
+    assert 'rel="stylesheet" href="/breadth/dashboard.css?v=' in (DOCS_DIR / "breadth" / "dashboard" / "index.html").read_text(encoding="utf-8")
     fear_widget = (DOCS_DIR / "fear-greed" / "index.html").read_text(encoding="utf-8")
     fear_dashboard = (DOCS_DIR / "fear-greed" / "dashboard" / "index.html").read_text(encoding="utf-8")
+    assert 'rel="stylesheet" href="/fear-greed/widget.css?v=' in fear_widget
+    assert 'src="/fear-greed/widget.js?v=' in fear_widget
     assert 'href="/fear-greed/dashboard"' in fear_widget
     assert 'href="/fear-greed/api/latest.json"' not in fear_widget
     assert 'href="/fear-greed/api/schema.json"' not in fear_widget
     assert 'href="/"' not in fear_widget
     assert 'id="marketGrid"' in fear_widget
+    assert 'rel="stylesheet" href="/fear-greed/dashboard.css?v=' in fear_dashboard
+    assert 'src="/fear-greed/dashboard.js?v=' in fear_dashboard
     assert 'href="/fear-greed/api/metadata.json"' in fear_dashboard
     assert 'href="/fear-greed/api/schema.json"' in fear_dashboard
     assert 'id="overviewGrid"' in fear_dashboard
