@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 BUCKET_NAME="${CLOUDFLARE_R2_BUCKET:-jstockinsight-app-data}"
 APP_NAME="${CLOUDFLARE_APP_NAME:-breadth}"
-API_DIR="${CLOUDFLARE_API_DIR:-$ROOT_DIR/docs/$APP_NAME/api}"
+API_DIR="${CLOUDFLARE_API_DIR:-}"
 DRY_RUN="${DRY_RUN:-0}"
 REMOTE="${REMOTE:-1}"
 
@@ -54,6 +54,10 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ -z "$API_DIR" ]]; then
+  API_DIR="$ROOT_DIR/docs/$APP_NAME/api"
+fi
 
 if [[ ! -d "$API_DIR" ]]; then
   echo "API directory not found: $API_DIR" >&2
