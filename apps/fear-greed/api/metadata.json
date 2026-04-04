@@ -2,16 +2,35 @@
   "app_id": "fear-greed",
   "app_name": "Fear & Greed",
   "status_contract": {
-    "status": "placeholder",
-    "as_of_date": null,
-    "series_valid": false,
-    "metrics_valid": false,
-    "error_code": "not_implemented",
-    "error_message": "Fear & Greed app is scaffolded but not implemented yet."
+    "status": "ok",
+    "as_of_date": "2026-04-03",
+    "series_valid": true,
+    "metrics_valid": true,
+    "error_code": null,
+    "error_message": null
   },
   "paths": {
     "widget": "/fear-greed",
     "dashboard": "/fear-greed/dashboard",
     "api_base": "/fear-greed/api"
+  },
+  "inputs": {
+    "momentum": "SPY trend z-score normalized to 0-100.",
+    "volatility": "Inverted VIX z-score normalized to 0-100.",
+    "credit": "HYG/LQD relative-strength z-score normalized to 0-100.",
+    "breadth": "Average breadth_50 across tracked equity markets.",
+    "safe_haven_flow": "SPY/TLT ratio z-score normalized to 0-100."
+  },
+  "data_source": {
+    "primary": "yfinance+breadth",
+    "tickers": {
+      "SPY": "SPY",
+      "VIX": "^VIX",
+      "HYG": "HYG",
+      "LQD": "LQD",
+      "TLT": "TLT"
+    },
+    "period": "6mo",
+    "breadth_snapshot": "docs/breadth/api/latest.json"
   }
 }

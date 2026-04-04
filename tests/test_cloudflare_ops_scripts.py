@@ -102,3 +102,25 @@ def test_cloudflare_refresh_app_dry_run_lists_exchange_flow():
     assert "/usr/local/bin/python3 scripts/generate_exchange_json.py" in stdout
     assert "/usr/local/bin/python3 scripts/build_static_apps.py" in stdout
     assert "scripts/cloudflare_sync_r2.sh --app exchange" in stdout
+
+
+def test_cloudflare_refresh_app_dry_run_lists_fear_greed_flow():
+    env = os.environ.copy()
+    env["DRY_RUN"] = "1"
+    env["PYTHON_BIN"] = "/usr/local/bin/python3"
+
+    result = subprocess.run(
+        ["/bin/zsh", str(REFRESH_SCRIPT), "fear-greed"],
+        cwd=REPO_ROOT,
+        env=env,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+
+    stdout = result.stdout
+    assert "generating fear-greed payloads" in stdout
+    assert "/usr/local/bin/python3 scripts/generate_fear_greed_json.py" in stdout
+    assert "/usr/local/bin/python3 scripts/build_static_apps.py" in stdout
+    assert "scripts/cloudflare_sync_r2.sh --app fear-greed" in stdout

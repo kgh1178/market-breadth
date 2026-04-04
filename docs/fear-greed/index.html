@@ -3,68 +3,82 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Fear &amp; Greed Widget</title>
-  <style>
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;background:#fafbfc;color:#1f2328}
-    .wrap{max-width:760px;margin:0 auto;padding:28px 18px 48px}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:24px;padding:24px;box-shadow:0 18px 36px rgba(15,23,42,.06)}
-    .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#66707a;font-weight:700}
-    h1{margin:10px 0 12px;font-size:34px;letter-spacing:-.03em}
-    p{margin:0;color:#66707a;line-height:1.65}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-    .status{margin-top:18px;padding:16px 18px;border-radius:18px;background:#fff8ef;border:1px solid #f0d6ae}
-    .status-label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#8f5805}
-    .status-value{font-size:22px;font-weight:800;margin-top:6px}
-    .status-copy{margin-top:8px;font-size:14px}
-    a{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:10px 14px;text-decoration:none;font-weight:700;font-size:13px}
-    .primary{background:#b26a00;color:#fff}
-    .ghost{border:1px solid #b26a00;color:#b26a00}
-  </style>
+  <title>Fear &amp; Greed Monitor</title>
+  <link rel="stylesheet" href="/fear-greed/widget.css">
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
-      <div class="eyebrow" id="eyebrow">Placeholder App</div>
-      <h1 id="title">Fear &amp; Greed Widget</h1>
-      <p id="copy">This route is reserved for the future fear-and-greed widget. It already follows the multi-app Cloudflare path convention.</p>
-      <div class="status">
-        <div class="status-label" id="statusLabel">API Contract</div>
-        <div class="status-value" id="statusValue">Loading…</div>
-        <p class="status-copy" id="statusCopy">Fetching the placeholder `/fear-greed/api/latest.json` contract.</p>
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="eyebrow" id="eyebrow">Risk Pulse</div>
+          <h1 id="title">Fear &amp; Greed Monitor</h1>
+        </div>
+        <div class="stamp">
+          <span class="stamp-label" id="updatedLabel">Updated</span>
+          <strong id="updatedValue">Loading…</strong>
+        </div>
       </div>
-      <div class="actions">
-        <a class="primary" href="/fear-greed/dashboard" id="dashboardLink">Dashboard</a>
-        <a class="ghost" href="/fear-greed/api/latest.json" id="apiLink">Latest API</a>
-        <a class="ghost" href="/fear-greed/api/schema.json" id="schemaLink">API Schema</a>
-        <a class="ghost" href="/" id="homeLink">App Hub</a>
+      <p class="hero-copy" id="copy">A compact risk pulse that turns structured market inputs into a single Fear &amp; Greed score without client-side heuristics.</p>
+      <div class="hero-meta">
+        <div class="status-pill" id="statusPill">Loading…</div>
+        <div class="hero-note" id="statusCopy">Fetching `/fear-greed/api/latest.json`.</div>
       </div>
+    </section>
+
+    <section class="score-card">
+      <div class="score-head">
+        <div>
+          <div class="score-label" id="scoreLabel">Score</div>
+          <div class="score-value" id="scoreValue">-</div>
+          <div class="score-state" id="scoreState">-</div>
+        </div>
+        <div class="score-z">
+          <span class="score-z-label" id="zLabel">Z-score</span>
+          <strong id="zValue">-</strong>
+        </div>
+      </div>
+      <div class="score-bar">
+        <div class="score-fill" id="scoreFill"></div>
+      </div>
+      <div class="score-scale" id="scoreScale">
+        <span>0</span><span>Fear</span><span>50</span><span>Greed</span><span>100</span>
+      </div>
+    </section>
+
+    <section class="detail-grid">
+      <article class="panel">
+        <div class="panel-label" id="inputsLabel">Inputs</div>
+        <div class="input-grid" id="inputGrid"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-label" id="signalLabel">Signals</div>
+        <div class="signal-list" id="signalList"></div>
+      </article>
+    </section>
+
+    <section class="source-strip">
+      <div class="source-item">
+        <span class="source-label" id="sourceLabel">Source</span>
+        <strong id="sourceValue">-</strong>
+      </div>
+      <div class="source-item">
+        <span class="source-label" id="asOfLabel">As of</span>
+        <strong id="asOfValue">-</strong>
+      </div>
+      <div class="source-item">
+        <span class="source-label" id="biasLabel">Bias</span>
+        <strong id="biasValue">-</strong>
+      </div>
+    </section>
+
+    <div class="actions">
+      <a class="primary" href="/fear-greed/dashboard" id="dashboardLink">Dashboard</a>
+      <a class="ghost" href="/fear-greed/api/latest.json" id="apiLink">Latest API</a>
+      <a class="ghost" href="/fear-greed/api/schema.json" id="schemaLink">API Schema</a>
+      <a class="ghost" href="/" id="homeLink">App Hub</a>
     </div>
   </div>
-<script>
-const I18N={en:{eyebrow:'Placeholder App',title:'Fear & Greed Widget',copy:'This route is reserved for the future fear-and-greed widget. It already follows the multi-app Cloudflare path convention.',dashboard:'Dashboard',api:'Latest API',schema:'API Schema',home:'App Hub',contract:'API Contract',loading:'Loading…',status_placeholder:'Placeholder',status_copy:'Fetching the placeholder `/fear-greed/api/latest.json` contract.',status_error:'Could not load placeholder API contract.'},ko:{eyebrow:'플레이스홀더 앱',title:'공포·탐욕 지수 위젯',copy:'이 경로는 향후 공포·탐욕 지수 위젯용으로 예약되어 있습니다. 멀티앱 Cloudflare 경로 규칙을 먼저 따르도록 만들어 두었습니다.',dashboard:'대시보드',api:'최신 API',schema:'API 스키마',home:'앱 허브',contract:'API 계약',loading:'불러오는 중…',status_placeholder:'플레이스홀더',status_copy:'`/fear-greed/api/latest.json` placeholder 계약을 불러오고 있습니다.',status_error:'플레이스홀더 API 계약을 불러오지 못했습니다.'},ja:{eyebrow:'プレースホルダーアプリ',title:'恐怖・貪欲指数ウィジェット',copy:'この経路は今後の恐怖・貪欲指数ウィジェット用に予約されています。マルチアプリ Cloudflare 経路規約に先に合わせています。',dashboard:'ダッシュボード',api:'最新API',schema:'APIスキーマ',home:'アプリハブ',contract:'API契約',loading:'読み込み中…',status_placeholder:'プレースホルダー',status_copy:'`/fear-greed/api/latest.json` のプレースホルダー契約を読み込んでいます。',status_error:'プレースホルダーAPI契約を読み込めませんでした。'}};
-const param=new URLSearchParams(window.location.search).get('lang');
-const langs=[...(navigator.languages||[]),navigator.language].filter(Boolean).map(v=>String(v).toLowerCase());
-const lang=param&&['ko','ja','en'].includes(param)?param:langs.some(v=>v.startsWith('ko'))?'ko':langs.some(v=>v.startsWith('ja'))?'ja':'en';
-const t=I18N[lang];
-document.documentElement.lang=lang;
-document.getElementById('eyebrow').textContent=t.eyebrow;
-document.getElementById('title').textContent=t.title;
-document.getElementById('copy').textContent=t.copy;
-document.getElementById('dashboardLink').textContent=t.dashboard;
-document.getElementById('apiLink').textContent=t.api;
-document.getElementById('schemaLink').textContent=t.schema;
-document.getElementById('homeLink').textContent=t.home;
-document.getElementById('statusLabel').textContent=t.contract;
-document.getElementById('statusValue').textContent=t.loading;
-document.getElementById('statusCopy').textContent=t.status_copy;
-
-fetch('/fear-greed/api/latest.json').then(r=>r.ok?r.json():Promise.reject(new Error('bad status'))).then(data=>{
-  document.getElementById('statusValue').textContent=t[`status_${data.status}`]||data.status||t.loading;
-  document.getElementById('statusCopy').textContent=data.error_message||t.status_copy;
-}).catch(()=>{
-  document.getElementById('statusValue').textContent=t.loading;
-  document.getElementById('statusCopy').textContent=t.status_error;
-});
-</script>
+  <script src="/fear-greed/widget.js"></script>
 </body>
 </html>

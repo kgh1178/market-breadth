@@ -16,6 +16,7 @@ payloads to Cloudflare R2.
 Examples:
   scripts/cloudflare_refresh_app.sh breadth
   scripts/cloudflare_refresh_app.sh exchange
+  scripts/cloudflare_refresh_app.sh fear-greed
   DRY_RUN=1 scripts/cloudflare_refresh_app.sh exchange
 EOF
 }
@@ -70,6 +71,10 @@ case "$APP_NAME" in
   breadth)
     echo "[cloudflare-refresh] generating breadth payloads"
     run_cmd "$PYTHON_BIN" scripts/generate_json.py
+    ;;
+  fear-greed)
+    echo "[cloudflare-refresh] generating fear-greed payloads"
+    run_cmd "$PYTHON_BIN" scripts/generate_fear_greed_json.py
     ;;
   exchange)
     echo "[cloudflare-refresh] generating exchange payloads"

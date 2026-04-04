@@ -11,7 +11,7 @@ export default {
           worker: "fear-greed-producer",
           role: "scheduled-producer",
           status: "ok",
-          message: "This worker runs on cron triggers and is not a public app endpoint.",
+          message: "This worker runs on cron triggers and refreshes fear-greed artifacts via scripts/cloudflare_refresh_app.sh fear-greed.",
         },
         null,
         2,
