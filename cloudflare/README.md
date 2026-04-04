@@ -12,10 +12,12 @@
   - 앱 허브 홈, `/breadth`, `/breadth/dashboard`를 정적 서빙
 - `jstockinsight-api`
   - Worker custom domain 없음
-  - 아래 API route만 담당
+  - 아래 route를 담당
     - `api.jstockinsight.kr/breadth/api/*`
     - `api.jstockinsight.kr/fear-greed/api/*`
     - `api.jstockinsight.kr/exchange/api/*`
+    - `api.jstockinsight.kr/lotopick`
+    - `api.jstockinsight.kr/lotopick/*`
 - `breadth-producer`
   - cron 전용 producer Worker로 배포됨
   - 공개 앱 엔드포인트가 아니라 상태 확인용 `fetch()`만 제공
@@ -32,6 +34,7 @@
   - `/fear-greed`, `/exchange` -> 후속 앱 placeholder
 - `API Worker`
   - `/:app/api/*` -> 앱별 R2 JSON 응답
+  - `/lotopick*` -> LotoPick origin reverse proxy
 - `R2`
   - `breadth/latest.json`
   - `breadth/metadata.json`
@@ -79,7 +82,7 @@ scripts/cloudflare_refresh_app.sh exchange
 - GitHub: 코드와 CI의 source of truth
 - Cloudflare: 운영 앱, 운영 API, 운영 스케줄의 source of truth
 - breadth 프런트는 구조화된 `latest.json` 메타데이터만 소비하고, UI에서 freshness/error를 추론하지 않음
-- Pages는 앱 페이지를 담당하고, Worker는 `/api/*` 경로만 담당한다
+- Pages는 정적 앱 페이지를 담당하고, Worker는 `/api/*` 및 LotoPick reverse proxy 경로를 담당한다
 
 ## 다음 문서
 
@@ -87,3 +90,10 @@ scripts/cloudflare_refresh_app.sh exchange
   - Pages / Worker / R2 실제 배포 순서
   - cutover 체크리스트
   - rollback 절차
+
+
+## LotoPick reverse proxy
+
+- `LOTOPICK_ORIGIN` 환경 변수를 실제 LotoPick 배포 origin으로 설정해야 합니다.
+- 예: `https://lotopick.example.pages.dev`
+- Worker는 `/lotopick` 와 `/lotopick/*` 요청을 이 origin으로 그대로 전달합니다.

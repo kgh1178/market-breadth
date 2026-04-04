@@ -16,6 +16,8 @@
   - `api.jstockinsight.kr/breadth/api/*`
   - `api.jstockinsight.kr/fear-greed/api/*`
   - `api.jstockinsight.kr/exchange/api/*`
+  - `api.jstockinsight.kr/lotopick`
+  - `api.jstockinsight.kr/lotopick/*`
 - legacy Worker `ancient-field-05d1`는 운영 route에 연결되지 않으며 삭제 후보
 
 ## 1. 목표 상태
@@ -37,6 +39,8 @@ Cloudflare Worker
   /breadth/api/*
   /fear-greed/api/*
   /exchange/api/*
+  /lotopick
+  /lotopick/*
 
 Cloudflare R2
   breadth/latest.json
@@ -346,3 +350,10 @@ Cron:
 
 - 이 계약은 UI가 stale/error를 추론하지 않기 위한 핵심입니다.
 - 이후 Cloudflare native breadth producer를 만들 때도 이 shape를 그대로 보존해야 합니다.
+
+
+## LotoPick reverse proxy
+
+- `LOTOPICK_ORIGIN` 환경 변수를 실제 LotoPick 배포 origin으로 설정해야 합니다.
+- 예: `https://lotopick.example.pages.dev`
+- Worker는 `/lotopick` 와 `/lotopick/*` 요청을 이 origin으로 그대로 전달합니다.

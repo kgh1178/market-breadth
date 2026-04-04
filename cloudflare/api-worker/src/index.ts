@@ -1,8 +1,10 @@
 export interface Env {
   APP_DATA: R2Bucket;
+  LOTOPICK_ORIGIN?: string;
 }
 
 const ALLOWED_APPS = new Set(["breadth", "fear-greed", "exchange"]);
+const LOTOPICK_PUBLIC_BASE = "/lotopick";
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "public, max-age=300",
@@ -19,9 +21,57 @@ function notFound(message: string): Response {
   return jsonResponse({ error: message }, 404);
 }
 
+function serviceUnavailable(message: string): Response {
+  return new Response(message, {
+    status: 503,
+    headers: {
+      "content-type": "text/plain; charset=utf-8",
+      "cache-control": "no-store",
+    },
+  });
+}
+
+function isLotopickPath(pathname: string): boolean {
+  return pathname === LOTOPICK_PUBLIC_BASE || pathname.startsWith(`${LOTOPICK_PUBLIC_BASE}/`);
+}
+
+function buildLotopickUpstreamUrl(request: Request, env: Env): URL | null {
+  if (!env.LOTOPICK_ORIGIN) {
+    return null;
+  }
+
+  const requestUrl = new URL(request.url);
+  const upstreamUrl = new URL(env.LOTOPICK_ORIGIN);
+
+  upstreamUrl.pathname = requestUrl.pathname;
+  upstreamUrl.search = requestUrl.search;
+
+  return upstreamUrl;
+}
+
+async function proxyLotopickRequest(request: Request, env: Env): Promise<Response> {
+  const upstreamUrl = buildLotopickUpstreamUrl(request, env);
+
+  if (upstreamUrl === null) {
+    return serviceUnavailable("LotoPick origin is not configured");
+  }
+
+  const upstreamResponse = await fetch(new Request(upstreamUrl.toString(), request));
+  return new Response(upstreamResponse.body, {
+    status: upstreamResponse.status,
+    statusText: upstreamResponse.statusText,
+    headers: new Headers(upstreamResponse.headers),
+  });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+    if (isLotopickPath(url.pathname)) {
+      return proxyLotopickRequest(request, env);
+    }
+
     const match = url.pathname.match(/^\/([^/]+)\/api\/(.+)$/);
     if (!match) {
       return notFound("API route not found");
